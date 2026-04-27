@@ -19,7 +19,9 @@ from typing import Callable, List, Optional
 
 from voxsplit.core import env as core_env
 from voxsplit.core import audio as core_audio
+from voxsplit.core import bundle as core_bundle
 from voxsplit.core.constants import (
+    BUNDLE_MODELS,
     GATED_WEIGHTS,
     HF_TOKEN_PATHS,
     VENV_PYTHON,
@@ -203,7 +205,48 @@ def check_ffmpeg() -> List[CheckResult]:
     return results
 
 
-# ── 6. lazy venv 与 pyannote.audio 版本 ────────────────────────
+# ── 6. 模型离线就绪（命中则跳过 HF token + gated 网络检查）─────
+def check_models_offline() -> CheckResult:
+    """检测 HF cache 中 4 个模型是否都齐全。
+
+    判定标准：每个模型目录都有
+      - ``refs/main`` 非空
+      - ``snapshots/<commit>/`` 至少一个文件存在
+    完整 → ✅；任一缺失 → 不阻断，由后续 gated 检查接力。
+    """
+    hub = core_bundle.hf_hub_cache_dir()
+    missing: List[str] = []
+    for spec in BUNDLE_MODELS:
+        repo_id = spec["repo_id"]
+        d = hub / core_bundle.repo_id_to_dirname(repo_id)
+        refs = d / "refs" / "main"
+        if not refs.is_file():
+            missing.append(repo_id)
+            continue
+        commit = refs.read_text().strip()
+        snap = d / "snapshots" / commit
+        if not snap.is_dir() or not any(snap.iterdir()):
+            missing.append(repo_id)
+
+    if missing:
+        return CheckResult(
+            "模型离线就绪", False,
+            f"缺 {len(missing)} 个：{', '.join(repo_id_short(r) for r in missing)}",
+            fix="voxsplit fetch-bundle  （或先跑 diarize 触发 HF 下载）",
+            severity="warn", category="hf",
+        )
+    return CheckResult(
+        "模型离线就绪", True,
+        f"4 个模型齐全 ({hub})",
+        category="hf",
+    )
+
+
+def repo_id_short(repo_id: str) -> str:
+    return repo_id.split("/", 1)[-1]
+
+
+# ── 7. lazy venv 与 pyannote.audio 版本 ────────────────────────
 def check_venv() -> CheckResult:
     if not _LAZY_VENV_PY.is_file():
         return CheckResult(
@@ -243,17 +286,25 @@ def _print_result(r: CheckResult) -> None:
 
 
 def run() -> int:
-    """跑全部 6 类检查并打印；返回 exit code。"""
+    """跑全部检查并打印；返回 exit code。
+
+    模型离线就绪时，HF token + 4 个 gated HEAD 都视为非必要（降级为 info），
+    因为 pyannote 在 cache 命中时不发起任何网络请求。
+    """
+    # 先做离线检查决定后续模式
+    offline = check_models_offline()
+    offline_ready = offline.ok
+
     all_checks: List[Callable[[], object]] = [
         check_uv,
         check_python,
-        check_hf_token,
-        check_gated_repos,
-        check_ffmpeg,
-        check_venv,
     ]
+    # 离线就绪 → 跳过 HF token + gated repo（保留为 info 不阻断）
+    if not offline_ready:
+        all_checks += [check_hf_token, check_gated_repos]
+    all_checks += [check_ffmpeg, check_venv]
 
-    results: List[CheckResult] = []
+    results: List[CheckResult] = [offline]
     for fn in all_checks:
         out = fn()
         if isinstance(out, list):
@@ -280,12 +331,14 @@ def run() -> int:
         print(f"\n❌ {len(failed)} 项失败")
         return ExitCode.GENERIC_FAIL
     if warned:
-        print(f"\n⚠️  全部关键项通过；{len(warned)} 项警告（不阻断 diarize）")
+        mode = "离线" if offline_ready else "在线"
+        print(f"\n⚠️  全部关键项通过（{mode}模式）；{len(warned)} 项警告（不阻断 diarize）")
         return ExitCode.OK
-    print("\n✅ 全绿。")
+    mode = "离线" if offline_ready else "在线"
+    print(f"\n✅ 全绿（{mode}模式）。")
     return ExitCode.OK
 
 
 __all__ = ["run", "check_uv", "check_python", "check_hf_token",
            "check_gated_repos", "check_ffmpeg", "check_venv",
-           "CheckResult"]
+           "check_models_offline", "CheckResult"]

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "voxsplit"
-version = "0.1.0"
+version = "0.2.0"
 description = "Standalone speaker diarization CLI built around pyannote.audio"
 requires-python = ">=3.10"
 authors = [{ name = "xsharp" }]

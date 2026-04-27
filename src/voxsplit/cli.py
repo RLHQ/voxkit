@@ -79,6 +79,11 @@ def _build_parser() -> argparse.ArgumentParser:
         default="ranked",
     )
 
+    # ── build-bundle / fetch-bundle（模型自托管）─────────────
+    from voxsplit.commands import build_bundle, fetch_bundle
+    build_bundle.add_subparser(sub)
+    fetch_bundle.add_subparser(sub)
+
     return parser
 
 
@@ -99,6 +104,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.cmd == "align":
         from voxsplit.commands.align import run as run_align
         return run_align(args)
+    if args.cmd == "build-bundle":
+        from voxsplit.commands.build_bundle import run as run_build
+        return run_build(args)
+    if args.cmd == "fetch-bundle":
+        from voxsplit.commands.fetch_bundle import run as run_fetch
+        return run_fetch(args)
 
     parser.error(f"未知子命令: {args.cmd}")
     return 1  # unreachable

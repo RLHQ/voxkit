@@ -30,6 +30,19 @@ GATED_WEIGHTS: list[tuple[str, str]] = [
      "https://huggingface.co/pyannote/wespeaker-voxceleb-resnet34-LM/resolve/main/pytorch_model.bin"),
 ]
 
+# bundle 必备的所有模型 repo（含 license，离线 attribution 用）
+BUNDLE_MODELS: list[dict] = [
+    {"repo_id": MODEL_ALIASES["sd-3.1"],            "license": "mit"},
+    {"repo_id": "pyannote/segmentation-3.0",        "license": "mit"},
+    {"repo_id": MODEL_ALIASES["community-1"],       "license": "cc-by-4.0"},
+    {"repo_id": "pyannote/wespeaker-voxceleb-resnet34-LM", "license": "cc-by-4.0"},
+]
+
+# bundle 默认 GitHub Release（私有 repo，下载需 PAT 或 gh CLI auth）
+BUNDLE_GITHUB_REPO = "3Craft/voxsplit"
+BUNDLE_FILENAME = "voxsplit-models.tar.gz"
+BUNDLE_MANIFEST_FILENAME = "voxsplit-models.manifest.json"
+
 # ── HF token 路径（按优先级）──────────────────────────────
 HF_TOKEN_PATHS: list[Path] = [
     Path.home() / ".cache" / "huggingface" / "token",
@@ -61,6 +74,8 @@ class ExitCode(IntEnum):
 __all__ = [
     "MODEL_ALIASES", "MODEL_CHOICES", "DEFAULT_MODEL",
     "GATED_WEIGHTS",
+    "BUNDLE_MODELS", "BUNDLE_GITHUB_REPO",
+    "BUNDLE_FILENAME", "BUNDLE_MANIFEST_FILENAME",
     "HF_TOKEN_PATHS",
     "VENV_DIR", "VENV_PYTHON", "INSTALLED_MARKER",
     "PYANNOTE_VERSION_SPEC",
