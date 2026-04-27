@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "voxsplit"
+version = "0.1.0"
+description = "Standalone speaker diarization CLI built around pyannote.audio"
+requires-python = ">=3.10"
+authors = [{ name = "xsharp" }]
+license = { text = "MIT" }
+dependencies = [
+    "pydantic>=2",
+    # 主 CLI 仅依赖轻量库；pyannote/torch 走 [worker] extra，由 lazy_install 装到独立 venv
+]
+
+[project.optional-dependencies]
+worker = [
+    "pyannote.audio>=4.0.4,<5",
+    "torch>=2.2",
+    "torchaudio>=2.2",
+]
+dev = [
+    "pytest>=7",
+    "pytest-mock>=3",
+]
+
+[project.scripts]
+voxsplit = "voxsplit.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/voxsplit"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

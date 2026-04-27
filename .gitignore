@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# uv / pip
+.uv/
+.python-version.local
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 测试产物 / 本地缓存
+tests/fixtures/short.wav
+*.tmp.json
+/tmp/voxsplit-*
+
+# IDE
+.idea/
+.vscode/
+.DS_Store
+!.python-version
