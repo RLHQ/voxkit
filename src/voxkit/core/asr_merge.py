@@ -169,6 +169,46 @@ def validate_timeline_continuity(segments: list[TranscriptSegment]) -> list[Merg
 # ─────────────────────────────────────────────────────────────────────────────
 
 
+def _segment_signal(seg: TranscriptSegment) -> int:
+    """Quality signal — word count（首选）或 text 字符数（fallback）。
+
+    word_timestamps 模式下每个英文单词独立 entry，word count 直接反映 chunk
+    实际产出的"颗粒度"——whisper 早截断会让 word count 显著低。CJK 短语
+    模式下 ``words`` 为空，回落到 text 字符数（同样反映产出量）。
+    """
+    if seg.words:
+        return len(seg.words)
+    return len(seg.text.strip())
+
+
+def _overlap_score(
+    segs: list[TranscriptSegment], lo: float, hi: float
+) -> int:
+    """Sum of ``_segment_signal`` over segments overlapping ``[lo, hi)``."""
+    return sum(
+        _segment_signal(s)
+        for s in segs
+        if s.end > lo and s.start < hi
+    )
+
+
+def _append_with_tolerance(
+    merged: list[TranscriptSegment],
+    incoming: list[TranscriptSegment],
+    tolerance_secs: float,
+) -> None:
+    """Append ``incoming`` into ``merged`` in-place, skipping segments whose
+    start is before ``merged[-1].end - tolerance_secs`` (already covered).
+
+    Mutates ``merged``. 复用三处 merge-arbitration 分支共享的 last_end 守卫。
+    """
+    last_end = merged[-1].end if merged else float("-inf")
+    for seg in incoming:
+        if seg.start >= last_end - tolerance_secs:
+            merged.append(seg)
+            last_end = seg.end
+
+
 def _reid_sequential(segments: list[TranscriptSegment]) -> list[TranscriptSegment]:
     """Re-id segments to seg_001, seg_002, ... (zero-pad width 3)."""
     out: list[TranscriptSegment] = []
@@ -194,20 +234,32 @@ def merge_chunks(
 ) -> tuple[list[TranscriptSegment], list[MergeNote]]:
     """Merge per-chunk segments into a single global segment list.
 
-    Strategy: **prev-chunk-priority** — prev 产出的 segment 全部保留；chunk i
-    只补 ``seg.start >= prev_last_end - tolerance`` 之后的部分（即 prev 没
-    覆盖到的尾部）。
+    Strategy: **signal-aware overlap arbitration** — 在每个 chunk 接缝处，
+    把重叠区视作小区域，分别用 prev 和 chunk i 的产出打分（word count；
+    fallback 到 text 字符数）。**胜方占据整个 overlap 区**，败方拿 overlap
+    之外的部分。
+
+    Why signal-aware:
+      A/B 实验（tmp/synth/）显示两种简单策略都有缺陷：
+      - chunk-i-priority（旧）：chunk 0 末尾完整产出（如 "differentiation"）
+        被 dedup 误删——chunk i 暖机后跳过了同样的内容。
+      - prev-priority：保住 chunk 0 末尾长词，但失去 chunk i 同区间的标点 /
+        断句（chunk i 在中段处理，模型注意力更稳）。
+      smart 策略：拼前比较两边在 overlap 区的实际产出量——whisper 早截断的
+      一边 word count 必然低，胜方自然是产出更全的那边。"differentiation"
+      场景：prev 含 7 词，chunk i 在同区间含 3 词 → prev 赢，长词保住。
 
     Algorithm:
-      1. For each chunk: offset all its segments + words by chunk.chunk_start_secs.
-      2. For i = 1..N-1: walk chunk i 的 segments，append 那些 ``start >=
-         last_kept.end - tolerance`` 的（跳过已被 prev 覆盖的开头）。
-      3. Re-id sequentially: seg_001, seg_002, ...
-      4. Run validate_timeline_continuity for MergeNote list.
+      1. Offset 每 chunk 的 segments 到 absolute time。
+      2. For i = 1..N-1（chunk i 非空）：
+         a. overlap_lo = chunk_i.first_seg.start
+         b. overlap_hi = max(prev_last.end, overlap_lo)
+         c. 若 hi <= lo → 无真重叠，直接 append chunk_i。
+         d. 否则比 prev 与 chunk_i 在 [lo, hi) 内的 ``_segment_signal`` 总和。
+         e. 胜方占 overlap；败方仅保留 overlap 外的 segments。
+      3. Re-id + validate_timeline_continuity。
 
-    Returns (merged_segments, merge_notes). Both can be empty if no chunks.
-
-    Why prev-priority not chunk-i-priority:
+    Why prev-priority not chunk-i-priority (kept for context):
       原 Remixr 实现是 "chunk i 优先"——把 prev 末尾在 ``[chunk_start_i -
       tolerance, +∞)`` 内的 segments 全删让 chunk i 接管。这假设 chunk i
       会在 overlap 区重新产出同等质量的内容。A/B 实验（tmp/synth/）证伪了这
@@ -225,15 +277,35 @@ def merge_chunks(
         [offset_segment(s, ch.chunk_start_secs) for s in ch.segments] for ch in chunks
     ]
 
-    # Step 2: prev-priority append（不主动 pop prev；chunk i 只补尾部）
+    # Step 2: signal-aware overlap arbitration
     merged: list[TranscriptSegment] = list(offset_per_chunk[0])
 
     for i in range(1, len(chunks)):
-        last_end = merged[-1].end if merged else float("-inf")
-        for seg in offset_per_chunk[i]:
-            if seg.start >= last_end - overlap_tolerance_secs:
-                merged.append(seg)
-                last_end = seg.end
+        chunk_i_segs = offset_per_chunk[i]
+        if not chunk_i_segs:
+            continue
+        if not merged:
+            merged.extend(chunk_i_segs)
+            continue
+
+        overlap_lo = chunk_i_segs[0].start
+        overlap_hi = max(merged[-1].end, overlap_lo)
+
+        # 三分支结构：先决定 prev overlap 区是否需要 trim，再统一调
+        # _append_with_tolerance 把 chunk_i 接上去（守卫 merged[-1].end）。
+        no_real_overlap = overlap_hi <= overlap_lo + 1e-6
+        if not no_real_overlap:
+            score_prev = _overlap_score(merged, overlap_lo, overlap_hi)
+            score_chunk_i = _overlap_score(chunk_i_segs, overlap_lo, overlap_hi)
+            if score_chunk_i > score_prev:
+                # chunk_i 信号更强：trim prev 在 overlap 区的 segments
+                merged[:] = [
+                    s for s in merged
+                    if s.start < overlap_lo - overlap_tolerance_secs
+                ]
+            # else: prev 信号 >= chunk_i（含并列）→ 不动 prev，由 last_end 守卫自然剪枝
+
+        _append_with_tolerance(merged, chunk_i_segs, overlap_tolerance_secs)
 
     # Step 3: re-id
     merged = _reid_sequential(merged)

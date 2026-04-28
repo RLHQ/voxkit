@@ -378,6 +378,103 @@ def test_merge_handles_empty_chunk_i():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# merge_chunks — signal-aware overlap arbitration (3 new branches)
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def test_merge_chunk_i_wins_overlap_when_signal_stronger():
+    """Smart overlap: chunk_i 在 overlap 区 word count > prev → chunk_i 接管，
+    prev overlap 区被 trim。
+
+    场景：chunk0 末尾 early-truncate（overlap 区只有 1 词 "weak"）；chunk1 在
+    同 overlap 区有 4 词 "strong full sentence here"。signal-aware 仲裁应判
+    chunk_i 赢，删掉 prev 的 "weak"，保留 chunk_i 的完整产出。
+    """
+    chunk0 = ChunkResult(
+        chunk_index=0,
+        segments=[
+            _seg("a0", 0.0, 50.0, "warmup", words=[_word("warmup", 0.0, 50.0)]),
+            _seg("a1", 55.0, 60.0, "weak", words=[_word("weak", 55.0, 60.0)]),
+        ],
+        chunk_start_secs=0.0,
+    )
+    chunk1 = ChunkResult(
+        chunk_index=1,
+        segments=[
+            # chunk-relative 0..5 → abs 55..60，4 词覆盖整个 overlap 区
+            _seg(
+                "b0", 0.0, 5.0, "strong full sentence here",
+                words=[
+                    _word("strong", 55.0, 56.0),
+                    _word("full", 56.0, 57.0),
+                    _word("sentence", 57.0, 58.0),
+                    _word("here", 58.0, 60.0),
+                ],
+            ),
+            _seg("b1", 5.0, 60.0, "rest", words=[_word("rest", 60.0, 115.0)]),
+        ],
+        chunk_start_secs=55.0,
+    )
+    merged, _ = merge_chunks([chunk0, chunk1])
+    texts = [s.text for s in merged]
+    assert "warmup" in texts, "prev overlap 区外的 segment 必须保留"
+    assert "weak" not in texts, (
+        "chunk_i 信号强 (4 words > 1 word) 时 prev overlap 区应被 trim"
+    )
+    assert "strong full sentence here" in texts, "chunk_i 应接管 overlap 区"
+    assert "rest" in texts
+
+
+def test_merge_prev_wins_overlap_when_scores_tied():
+    """Smart overlap: 信号并列 → prev 赢（保守 default），与旧 prev-priority 行为一致。
+
+    场景：chunk0 / chunk1 在 overlap 区 [55, 60) 各有 1 词。并列时不应该来回翻转，
+    而是稳定走 prev → chunk_i overlap 区被 last_end 守卫剪枝。
+    """
+    chunk0 = ChunkResult(
+        chunk_index=0,
+        segments=[
+            _seg("a0", 0.0, 50.0, "early"),
+            _seg("a1", 55.0, 60.0, "tail", words=[_word("tail", 55.0, 60.0)]),
+        ],
+        chunk_start_secs=0.0,
+    )
+    chunk1 = ChunkResult(
+        chunk_index=1,
+        segments=[
+            _seg("b0", 0.0, 5.0, "alt", words=[_word("alt", 55.0, 60.0)]),
+            _seg("b1", 5.0, 60.0, "rest"),
+        ],
+        chunk_start_secs=55.0,
+    )
+    merged, _ = merge_chunks([chunk0, chunk1])
+    texts = [s.text for s in merged]
+    assert "tail" in texts, "并列时 prev 必须保留"
+    assert "alt" not in texts, "并列时 chunk_i overlap 区应被 last_end 守卫跳过"
+    assert "rest" in texts
+
+
+def test_merge_no_overlap_appends_directly():
+    """Smart overlap: chunk_i.first_seg.start > prev.last.end → 无真重叠分支，
+    跳过 score 比较直接 append。等同旧 prev-priority append 行为。
+    """
+    chunk0 = ChunkResult(
+        chunk_index=0,
+        segments=[_seg("a0", 0.0, 50.0, "before")],
+        chunk_start_secs=0.0,
+    )
+    chunk1 = ChunkResult(
+        chunk_index=1,
+        # b0 chunk-relative 5..15 → abs 60..70，prev 末尾 50 < 60 → 无重叠
+        segments=[_seg("b0", 5.0, 15.0, "after")],
+        chunk_start_secs=55.0,
+    )
+    merged, _ = merge_chunks([chunk0, chunk1])
+    texts = [s.text for s in merged]
+    assert texts == ["before", "after"]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # write_merge_log
 # ─────────────────────────────────────────────────────────────────────────────
 
