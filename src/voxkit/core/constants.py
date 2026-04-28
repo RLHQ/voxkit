@@ -38,30 +38,46 @@ BUNDLE_MODELS: list[dict] = [
     {"repo_id": "pyannote/wespeaker-voxceleb-resnet34-LM", "license": "cc-by-4.0"},
 ]
 
+# ── whisper.cpp aux 文件路径（brew 自带 / voxkit 自有 cache）─────────
+# 集中所有"silero VAD 文件名 + brew 安装位置"硬编码，避免散在 constants /
+# whisper_exec / build_bundle / 测试里六处。
+SILERO_VAD_FILENAME = "ggml-silero-v5.1.2.bin"
+WHISPER_CPP_BREW_SHARE_APPLE = "/opt/homebrew/share/whisper-cpp"  # Apple Silicon brew
+WHISPER_CPP_BREW_SHARE_INTEL = "/usr/local/share/whisper-cpp"     # Intel mac / Linux brew
+
+# voxkit 自有 cache 目录（与 HF cache 解耦；fetch-bundle 用 ~ 形式存进 manifest，
+# 保证跨用户/跨机器可移植）
+VOXKIT_AUX_DIR_TILDE = "~/.cache/voxkit/aux"
+
+
 # 与 HF 模型一同打包的辅助文件（不是 HF repo，本身可以独立分发）。
 # 每条目语义：
 #   name              — bundle 内部稳定标识（不是文件名）
 #   filename          — bundle tar 内 aux/<filename> 与 manifest 中的文件名
 #   license           — 用于 ATTRIBUTION 渲染
 #   source_candidates — build-bundle 在开发者机器上按顺序探测，第一个存在的入选
-#   target            — fetch-bundle 解到用户机器的目标路径（支持 ~ 展开）
+#   target            — fetch-bundle 解到用户机器的目标路径（保留 ~ 形式）
 #
 # 当前唯一辅助文件：silero VAD（whisper.cpp 用，约 ~2MB），用于反幻觉。
 # whisper.cpp 模型本身因许可 + 体积留在 brew/HF；doctor 给用户安装提示。
 BUNDLE_AUX_FILES: list[dict] = [
     {
         "name": "silero-vad",
-        "filename": "ggml-silero-v5.1.2.bin",
+        "filename": SILERO_VAD_FILENAME,
         "license": "mit",
-        # 探测顺序：Apple Silicon brew → Intel/Linux brew
         "source_candidates": [
-            "/opt/homebrew/share/whisper-cpp/ggml-silero-v5.1.2.bin",
-            "/usr/local/share/whisper-cpp/ggml-silero-v5.1.2.bin",
+            f"{WHISPER_CPP_BREW_SHARE_APPLE}/{SILERO_VAD_FILENAME}",
+            f"{WHISPER_CPP_BREW_SHARE_INTEL}/{SILERO_VAD_FILENAME}",
         ],
-        # voxkit 自有 aux 目录；不踩 brew 命名空间
-        "target": "~/.cache/voxkit/aux/ggml-silero-v5.1.2.bin",
+        "target": f"{VOXKIT_AUX_DIR_TILDE}/{SILERO_VAD_FILENAME}",
     },
 ]
+
+
+# ── HF Hub 环境变量 ──────────────────────────────────────────────────
+# huggingface_hub 官方约定：设为 "1" → 完全跳过 HEAD 请求，纯走本地 cache。
+# patched_env() 在模型 cache 齐全时自动注入此变量。
+HF_HUB_OFFLINE_ENV = "HF_HUB_OFFLINE"
 
 # bundle 默认 GitHub Release（私有 repo，下载需 PAT 或 gh CLI auth）
 BUNDLE_GITHUB_REPO = "3Craft/voxkit"
@@ -105,6 +121,10 @@ __all__ = [
     "GATED_WEIGHTS",
     "BUNDLE_MODELS", "BUNDLE_AUX_FILES", "BUNDLE_GITHUB_REPO",
     "BUNDLE_FILENAME", "BUNDLE_MANIFEST_FILENAME",
+    "SILERO_VAD_FILENAME",
+    "WHISPER_CPP_BREW_SHARE_APPLE", "WHISPER_CPP_BREW_SHARE_INTEL",
+    "VOXKIT_AUX_DIR_TILDE",
+    "HF_HUB_OFFLINE_ENV",
     "HF_TOKEN_PATHS",
     "VENV_DIR", "VENV_PYTHON", "INSTALLED_MARKER",
     "PYANNOTE_VERSION_SPEC",

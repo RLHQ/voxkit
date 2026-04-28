@@ -1,10 +1,6 @@
 """voxkit.core.env — patched_env 行为测试。
 
-重点：
-- 模型 cache 齐全时自动注入 ``HF_HUB_OFFLINE=1``（Fix 1）
-- 用户已显式设 ``HF_HUB_OFFLINE`` → 不覆盖
-- ``extra`` dict 同名 key 优先于自动注入
-- macOS DYLD_LIBRARY_PATH prepend（保留原有行为）
+覆盖：cache 齐全自动注入 OFFLINE / 用户显式值优先 / extra 覆盖 / DYLD prepend。
 """
 
 from __future__ import annotations
@@ -14,6 +10,7 @@ from pathlib import Path
 import pytest
 
 from voxkit.core import env as core_env
+from voxkit.core.constants import HF_HUB_OFFLINE_ENV
 
 
 # ── helpers ───────────────────────────────────────────────────────────
@@ -27,7 +24,7 @@ def _stub_models_ready(monkeypatch, ready: bool) -> None:
 
 
 def _clear_hf_env(monkeypatch) -> None:
-    for k in ("HF_HUB_OFFLINE", "HF_HUB_CACHE", "HF_HOME"):
+    for k in (HF_HUB_OFFLINE_ENV, "HF_HUB_CACHE", "HF_HOME"):
         monkeypatch.delenv(k, raising=False)
 
 
@@ -38,7 +35,7 @@ def test_patched_env_injects_offline_when_cache_ready(monkeypatch):
     _stub_models_ready(monkeypatch, True)
 
     env = core_env.patched_env()
-    assert env.get("HF_HUB_OFFLINE") == "1"
+    assert env.get(HF_HUB_OFFLINE_ENV) == "1"
 
 
 def test_patched_env_no_offline_when_cache_missing(monkeypatch):
@@ -47,7 +44,7 @@ def test_patched_env_no_offline_when_cache_missing(monkeypatch):
     _stub_models_ready(monkeypatch, False)
 
     env = core_env.patched_env()
-    assert "HF_HUB_OFFLINE" not in env
+    assert HF_HUB_OFFLINE_ENV not in env
 
 
 def test_patched_env_respects_user_explicit_offline_zero(monkeypatch):
@@ -56,21 +53,21 @@ def test_patched_env_respects_user_explicit_offline_zero(monkeypatch):
     哪怕 cache 齐全，也尊重用户的逃生口（dev 想测在线行为）。
     """
     _clear_hf_env(monkeypatch)
-    monkeypatch.setenv("HF_HUB_OFFLINE", "0")
+    monkeypatch.setenv(HF_HUB_OFFLINE_ENV, "0")
     _stub_models_ready(monkeypatch, True)
 
     env = core_env.patched_env()
-    assert env.get("HF_HUB_OFFLINE") == "0", "用户的显式 0 必须保留"
+    assert env.get(HF_HUB_OFFLINE_ENV) == "0", "用户的显式 0 必须保留"
 
 
 def test_patched_env_respects_user_explicit_offline_one(monkeypatch):
     """用户显式设 HF_HUB_OFFLINE=1 + cache 不齐全 → 仍然保留 1（用户知道自己在干嘛）。"""
     _clear_hf_env(monkeypatch)
-    monkeypatch.setenv("HF_HUB_OFFLINE", "1")
+    monkeypatch.setenv(HF_HUB_OFFLINE_ENV, "1")
     _stub_models_ready(monkeypatch, False)
 
     env = core_env.patched_env()
-    assert env.get("HF_HUB_OFFLINE") == "1"
+    assert env.get(HF_HUB_OFFLINE_ENV) == "1"
 
 
 def test_patched_env_extra_overrides_auto_offline(monkeypatch):
@@ -78,8 +75,8 @@ def test_patched_env_extra_overrides_auto_offline(monkeypatch):
     _clear_hf_env(monkeypatch)
     _stub_models_ready(monkeypatch, True)
 
-    env = core_env.patched_env(extra={"HF_HUB_OFFLINE": "0"})
-    assert env.get("HF_HUB_OFFLINE") == "0"
+    env = core_env.patched_env(extra={HF_HUB_OFFLINE_ENV: "0"})
+    assert env.get(HF_HUB_OFFLINE_ENV) == "0"
 
 
 def test_patched_env_extra_passthrough(monkeypatch):
@@ -89,7 +86,7 @@ def test_patched_env_extra_passthrough(monkeypatch):
 
     env = core_env.patched_env(extra={"FOO": "bar"})
     assert env.get("FOO") == "bar"
-    assert env.get("HF_HUB_OFFLINE") == "1"
+    assert env.get(HF_HUB_OFFLINE_ENV) == "1"
 
 
 # ── DYLD_LIBRARY_PATH（保留原有行为）─────────────────────────────────

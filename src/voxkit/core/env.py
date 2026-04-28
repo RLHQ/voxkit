@@ -45,22 +45,14 @@ def find_ffmpeg_lib_dir() -> Optional[str]:
 def patched_env(extra: Optional[dict] = None) -> dict:
     """构造 spawn 子进程时使用的环境，做两件事：
 
-    1. macOS 上把 ffmpeg lib 目录 prepend 到 ``DYLD_LIBRARY_PATH``（torchcodec 修复）
-    2. 当本机 HF cache 中 4 个 voxkit 必需模型都齐全时，自动注入
-       ``HF_HUB_OFFLINE=1``——让 huggingface_hub 完全跳过 HEAD 请求：
-        - worker 启动 -15s（实测：18.5s → 3.7s）
-        - 消除 fetch-bundle 后 "unauthenticated requests to HF" 的吓人 warning
-        - 在彻底无网/captive portal 环境下 100% 可用
+    1. macOS 上把 ffmpeg lib 目录 prepend 到 ``DYLD_LIBRARY_PATH``（torchcodec dlopen 修复）
+    2. 模型 cache 齐全时自动注入 ``HF_HUB_OFFLINE=1``，让 huggingface_hub 跳过 HEAD 请求
 
-    尊重用户已经显式设的 ``HF_HUB_OFFLINE``：env 中已有任意值（包括空串）则不覆盖，
-    保留 dev 场景"我就要联网调试"的逃生口。``extra`` 里的同名 key 同样优先于自动注入。
-
-    用法：
-        env = patched_env()
-        subprocess.run([...], env=env)
+    尊重 ``os.environ`` 已有值（包括空串）；``extra`` 同名 key 优先级最高（dev 逃生口）。
     """
-    # lazy import：env 是低层，bundle 含 pydantic 较重；按需导入避免影响 cli 冷启动
+    # lazy import：bundle 顶部 import pydantic，按需引入避免拖累 CLI 冷启动
     from voxkit.core.bundle import models_offline_ready
+    from voxkit.core.constants import HF_HUB_OFFLINE_ENV
 
     env = os.environ.copy()
     lib_dir = find_ffmpeg_lib_dir()
@@ -68,9 +60,8 @@ def patched_env(extra: Optional[dict] = None) -> dict:
         existing = env.get("DYLD_LIBRARY_PATH", "")
         env["DYLD_LIBRARY_PATH"] = f"{lib_dir}:{existing}" if existing else lib_dir
 
-    # 自动 offline：仅当用户没显式设 + cache 齐全
-    if "HF_HUB_OFFLINE" not in env and models_offline_ready():
-        env["HF_HUB_OFFLINE"] = "1"
+    if HF_HUB_OFFLINE_ENV not in env and models_offline_ready():
+        env[HF_HUB_OFFLINE_ENV] = "1"
 
     if extra:
         env.update(extra)
