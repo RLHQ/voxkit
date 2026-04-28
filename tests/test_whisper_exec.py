@@ -756,6 +756,63 @@ def test_run_whisper_missing_json_after_zero_exit(tmp_path, monkeypatch):
         )
 
 
+def test_run_whisper_handles_invalid_utf8_in_token_text(tmp_path, monkeypatch):
+    """Regression: whisper.cpp ``--output-json-full`` splits CJK characters
+    at byte boundaries inside ``tokens[].text``, so the resulting JSON file
+    contains invalid UTF-8 byte sequences. Strict utf-8 decode crashed the
+    pipeline on Chinese audio. Decoding with ``errors="replace"`` lets json
+    parse normally; segment-level ``text`` (the only field voxkit consumes)
+    is well-formed and unaffected."""
+    out_json = tmp_path / "out.json"
+    json_path = tmp_path / "out.json"
+
+    # 手工构造：segment.text 是合法 UTF-8（"去做"），tokens[].text 含一个被
+    # 切到字节中间的 3 字节字符（\xe9\x80 是前 2 字节，\x89 是第 3 字节）。
+    bad_json = (
+        b'{\n'
+        b'  "transcription": [\n'
+        b'    {\n'
+        b'      "text": "\xe5\x8e\xbb\xe5\x81\x9a",\n'
+        b'      "offsets": {"from": 0, "to": 200},\n'
+        b'      "tokens": [\n'
+        b'        {"text": "\xe9\x80", "offsets": {"from": 0, "to": 100}},\n'
+        b'        {"text": "\x89", "offsets": {"from": 100, "to": 200}}\n'
+        b'      ]\n'
+        b'    }\n'
+        b'  ]\n'
+        b'}\n'
+    )
+    json_path.parent.mkdir(parents=True, exist_ok=True)
+    json_path.write_bytes(bad_json)
+
+    def fake_popen(argv, **kwargs):
+        # json_payload=None → _FakePopen 不会覆盖我们写好的 bad_json
+        return _FakePopen(
+            argv,
+            stderr_lines=[b"progress = 100%\n"],
+            returncode=0,
+            json_payload=None,
+            out_json_path=None,
+            **kwargs,
+        )
+
+    monkeypatch.setattr(W.subprocess, "Popen", fake_popen)
+
+    flags = _flags(language="zh", word_timestamps=False)
+    result = run_whisper(
+        audio=tmp_path / "a.wav",
+        out_json=out_json,
+        flags=flags,
+        whisper_bin=Path("/wc"),
+        timeout_secs=5.0,
+    )
+
+    # 不抛 UnicodeDecodeError；segment 级文本完好
+    assert isinstance(result, WhisperRunResult)
+    assert len(result.entries) == 1
+    assert result.entries[0].text == "去做"
+
+
 def test_run_whisper_progress_cb_exception_does_not_fail(tmp_path, monkeypatch):
     """progress_cb 抛异常不应中断转写。"""
     out_json = tmp_path / "out.json"

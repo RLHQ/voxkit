@@ -313,7 +313,9 @@ def _transcribe_chunk(
     elapsed = 0.0
     if req.resume and chunk_json.exists() and chunk_json.stat().st_size > 0:
         try:
-            with chunk_json.open("r", encoding="utf-8") as f:
+            # errors="replace": rationale in whisper_exec.run_whisper.
+            # Strict decode would force a cache miss on every CJK resume.
+            with chunk_json.open("r", encoding="utf-8", errors="replace") as f:
                 raw_dict = json.load(f)
             cached = True
         except (OSError, json.JSONDecodeError):

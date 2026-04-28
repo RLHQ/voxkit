@@ -447,6 +447,53 @@ def test_resume_skips_whisper_when_checkpoint_present(
     assert chunk_stats[0].cached is True
 
 
+def test_resume_handles_invalid_utf8_in_checkpoint(
+    tmp_path: Path, patched_pipeline: dict[str, Any]
+) -> None:
+    """Regression: chunk_NNN.json may contain invalid UTF-8 bytes inside
+    ``tokens[].text`` for CJK audio (whisper.cpp BPE token boundary cuts a
+    multi-byte char in half). Strict utf-8 decode would fall through to a
+    cache miss and re-run whisper — wasting work and breaking idempotence.
+    Resume must read with ``errors="replace"`` and treat the checkpoint as
+    valid since segment-level text is well-formed."""
+    ws = open_workspace(tmp_path / "ws")
+    seeded = ws.chunks / "chunk_000.json"
+    seeded.parent.mkdir(parents=True, exist_ok=True)
+    # Hand-crafted bytes mirror real whisper.cpp -ojf output for CJK audio:
+    # segment.text 合法（"去做"），tokens[].text 含 \xe9\x80（被切到字节中间）。
+    bad_bytes = (
+        b'{\n'
+        b'  "transcription": [\n'
+        b'    {\n'
+        b'      "text": "\xe5\x8e\xbb\xe5\x81\x9a",\n'
+        b'      "offsets": {"from": 0, "to": 200},\n'
+        b'      "no_speech_prob": 0.01,\n'
+        b'      "tokens": [\n'
+        b'        {"text": "\xe9\x80", "offsets": {"from": 0, "to": 100}}\n'
+        b'      ]\n'
+        b'    }\n'
+        b'  ]\n'
+        b'}\n'
+    )
+    seeded.write_bytes(bad_bytes)
+    ws.master_wav.parent.mkdir(parents=True, exist_ok=True)
+    ws.master_wav.write_bytes(b"\0")
+
+    req = _make_request(ws, resume=True)
+    result = run_pipeline(req)
+
+    # Cache hit: whisper-cli must NOT have been invoked.
+    assert patched_pipeline["whisper_calls"] == 0
+    chunk_stats = result.voxkit_output.per_chunk
+    assert len(chunk_stats) == 1
+    assert chunk_stats[0].cached is True
+    # Guard against silent-fail: cache hit must yield real segment text from
+    # the seeded JSON, not an empty/garbled result.
+    assert any(
+        "去做" in seg.text for seg in result.voxkit_output.segments
+    ), "seeded segment text 去做 should reach voxkit output via cache"
+
+
 def test_force_invalidates_checkpoint(
     tmp_path: Path, patched_pipeline: dict[str, Any]
 ) -> None:

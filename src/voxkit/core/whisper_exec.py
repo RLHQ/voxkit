@@ -498,8 +498,12 @@ def run_whisper(
             raise WhisperFailed(returncode=returncode, stderr_tail=tail)
 
         # 读 JSON
+        # whisper.cpp --output-json-full 在 CJK 场景下会把多字节字符切到字节
+        # 中间，写出 tokens[].text 含无效 UTF-8 序列。voxkit 只用 segment 级
+        # text（始终合法），token 级 text 不消费——errors="replace" 把损坏
+        # 字节兜底成 U+FFFD，json.load 正常解析。
         try:
-            with json_path.open("r", encoding="utf-8") as f:
+            with json_path.open("r", encoding="utf-8", errors="replace") as f:
                 raw = json.load(f)
         except FileNotFoundError as e:
             tail = b"".join(stderr_lines[-50:]).decode("utf-8", errors="replace")
