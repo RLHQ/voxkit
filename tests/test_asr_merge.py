@@ -204,12 +204,13 @@ def test_merge_single_chunk_with_offset():
 
 
 def test_merge_two_chunks_with_overlap_dedup():
-    """14. Two overlapping chunks: chunk1 takes over the overlap region.
+    """14. Two overlapping chunks: prev-priority — chunk 0 retained, chunk 1
+    appends only segments past prev's last_end.
 
-    chunk0: 0..600 abs, contains seg ending at 597 and seg ending at 600
-    chunk1: 595..1195 abs (chunk_start_secs=595), 4 segs spanning 0..600 relative
-    Expect: chunk0's segments whose start >= 594.5 are dropped, then chunk1
-    is appended.
+    chunk0: 0..600 abs, segments ending at 600 (a3 covers 597-600 = chunk1 区).
+    chunk1: 595..1195 abs, 4 segs each 100s.
+    Expected (prev-priority): a0, a1, a2, a3 全保留；chunk 1 first b0 abs=595
+    < a3.end=600 → 不 append；b1 abs=695 >= 600-0.5 → append；b2/b3 同理。
     """
     chunk0 = ChunkResult(
         chunk_index=0,
@@ -217,14 +218,14 @@ def test_merge_two_chunks_with_overlap_dedup():
             _seg("a0", 0.0, 200.0, "early"),
             _seg("a1", 200.0, 400.0, "middle"),
             _seg("a2", 400.0, 597.0, "late"),
-            _seg("a3", 597.0, 600.0, "tail"),  # falls in chunk1's territory
+            _seg("a3", 597.0, 600.0, "tail"),  # 在 prev-priority 下保留
         ],
         chunk_start_secs=0.0,
     )
     chunk1 = ChunkResult(
         chunk_index=1,
         segments=[
-            _seg("b0", 0.0, 100.0, "c1-first"),  # absolute 595..695
+            _seg("b0", 0.0, 100.0, "c1-first"),  # absolute 595..695，被 prev 覆盖
             _seg("b1", 100.0, 300.0, "c1-second"),
             _seg("b2", 300.0, 500.0, "c1-third"),
             _seg("b3", 500.0, 600.0, "c1-fourth"),
@@ -233,26 +234,16 @@ def test_merge_two_chunks_with_overlap_dedup():
     )
     merged, notes = merge_chunks([chunk0, chunk1])
 
-    # chunk0's tail (start=597) >= 595 - 0.5 → dropped.
-    # chunk0 retains a0/a1/a2 (3 segments) ending at 597.
-    # chunk1 first segment start=595 >= 597 - 0.5 = 596.5? No, 595 < 596.5,
-    # so b0 is dropped. b1 abs=695 >= 596.5 ✓
-    # Actually: lastEnd = 597 (a2.end). b0 abs.start=595 < 597 - 0.5 → dropped.
-    # b1 abs.start=695 >= 596.5 → kept. Then b2 abs.start=895 ≥ 795-0.5? yes. b3 too.
-    # Expected: a0, a1, a2, b1, b2, b3 = 6 segments
-    assert len(merged) == 6
-    assert [s.id for s in merged] == [
-        "seg_001",
-        "seg_002",
-        "seg_003",
-        "seg_004",
-        "seg_005",
-        "seg_006",
+    # Expected: a0, a1, a2, a3, b1, b2, b3 = 7 segments
+    assert len(merged) == 7
+    assert [s.text for s in merged] == [
+        "early", "middle", "late", "tail",
+        "c1-second", "c1-third", "c1-fourth",
     ]
-    # Verify chunk1 segments are absolute-offset
-    assert merged[3].start == 695.0  # b1 abs.start
-    assert merged[5].end == 1195.0  # b3 abs.end
-    # Timeline should be clean (no out_of_order / overlap notes)
+    # b1 abs.start = 595 + 100 = 695
+    assert merged[4].start == 695.0
+    assert merged[6].end == 1195.0
+    # No out-of-order: a3.end=600, b1.start=695 → clean
     assert notes == []
 
 
@@ -295,30 +286,95 @@ def test_merge_word_offset_across_merge():
     assert last.words[1].end == 605.0
 
 
-def test_merge_drops_chunk0_segments_inside_chunk1_territory():
-    """If a chunk0 segment starts inside chunk1's region, chunk1 wins.
+def test_merge_keeps_chunk0_overlap_segments_under_prev_priority():
+    """Prev-priority: chunk0 末尾的 overlap 区 segment 必须保留，chunk1 只补
+    chunk0 last_end 之后的内容。
 
-    Defends the dedup direction (chunk i is "primary" for [chunk_start_i, chunk_end_i)).
+    Background: A/B 实验证实 whisper.cpp 在 chunk 末尾经常完整产出（如
+    "differentiation" @ 595.28），chunk 1 暖机后从 chunk_start + 几百 ms 起，
+    跳过了 [chunk_start, chunk_1_first_seg.start] 区间。chunk-i-priority 下
+    这些内容会被 dedup 误删。
     """
     chunk0 = ChunkResult(
         chunk_index=0,
         segments=[
             _seg("a0", 0.0, 100.0, "before"),
-            _seg("a1", 596.0, 599.0, "tail-in-overlap"),  # start >= 595 → drop
+            _seg("a1", 596.0, 599.0, "tail-in-overlap"),  # prev-priority 保留
         ],
         chunk_start_secs=0.0,
     )
     chunk1 = ChunkResult(
         chunk_index=1,
-        segments=[_seg("b0", 0.0, 100.0, "primary")],
+        segments=[_seg("b0", 0.0, 100.0, "after-overlap")],  # abs 595..695
         chunk_start_secs=595.0,
     )
     merged, _ = merge_chunks([chunk0, chunk1])
-    # a0 kept, a1 dropped (>= 594.5), b0 kept (abs 595, lastEnd=100, 595>=99.5)
-    assert len(merged) == 2
-    assert merged[0].text == "before"
-    assert merged[1].text == "primary"
-    assert merged[1].start == 595.0
+    texts = [s.text for s in merged]
+    # a0 + a1 + b0 (b0.start=595 < a1.end=599 → 实际应被跳过；b0 实际 abs=595
+    # 在 a1.end=599 之内 → 不 append。这里换个能 append 的例子更清晰。)
+    # 此处 b0 abs.start=595 < a1.end=599 - 0.5=598.5 → 不 append
+    # 结果: [a0, a1] 两段
+    assert texts == ["before", "tail-in-overlap"]
+
+
+def test_merge_keeps_chunk0_tail_when_chunk1_warmup_loses_text():
+    """Regression: chunk 1 warmup-loss 时 chunk 0 末尾合理产出必须保留。
+
+    Background: A/B 实验证实 whisper.cpp 在 chunk 末尾 ~3-5s 经常 early-truncate，
+    chunk 1 开头同样可能暖机损失。旧 dedup 用 chunks[i].chunk_start_secs 作切点，
+    会把 chunk 0 在 [chunk_start - tol, chunk_end] 的合理产出删光，但 chunk 1
+    暖机后才开始产出 → 净损失。修复：用 chunk i 第一个实际产出的 segment.start
+    作切点，保留 chunk 0 直到 chunk 1 真正接管的位置。
+
+    场景：chunk 0 [0, 60) 在 abs 56-58 还有合理产出；chunk 1 [55, 115) 暖机后
+    从 abs 57.5 才开始产出。新逻辑应保留 chunk 0 的 56-58 segment。
+    """
+    chunk0 = ChunkResult(
+        chunk_index=0,
+        segments=[
+            _seg("a0", 0.0, 50.0, "early content"),
+            _seg("a1", 56.0, 58.0, "register differentiation"),  # chunk 末尾合理产出
+        ],
+        chunk_start_secs=0.0,
+    )
+    chunk1 = ChunkResult(
+        chunk_index=1,
+        segments=[
+            # chunk-relative 2.5 → abs 57.5（chunk 1 暖机损失了 [55, 57.5)）
+            _seg("b0", 2.5, 5.0, "and language change"),
+            _seg("b1", 5.0, 60.0, "rest of chunk one"),
+        ],
+        chunk_start_secs=55.0,
+    )
+    merged, _ = merge_chunks([chunk0, chunk1])
+    texts = [s.text for s in merged]
+    assert "early content" in texts
+    assert "register differentiation" in texts, (
+        "chunk 0 tail must survive when chunk 1 warmup-loses the overlap zone"
+    )
+    assert "and language change" in texts
+    assert "rest of chunk one" in texts
+
+
+def test_merge_handles_empty_chunk_i():
+    """Defensive: chunk i 完全没产出（极端 silence）时不挂掉，prev 保留。"""
+    chunk0 = ChunkResult(
+        chunk_index=0,
+        segments=[
+            _seg("a0", 0.0, 50.0, "speech"),
+            _seg("a1", 56.0, 58.0, "tail"),
+        ],
+        chunk_start_secs=0.0,
+    )
+    chunk1 = ChunkResult(
+        chunk_index=1,
+        segments=[],  # 空 chunk
+        chunk_start_secs=55.0,
+    )
+    merged, _ = merge_chunks([chunk0, chunk1])
+    texts = [s.text for s in merged]
+    # prev-priority：chunk0 全保留
+    assert texts == ["speech", "tail"]
 
 
 # ─────────────────────────────────────────────────────────────────────────────

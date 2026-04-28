@@ -148,6 +148,21 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
         dest="emit_vtt",
         help="输出 VTT（默认 on）",
     )
+    # ── Phase 2: with-diarization integration ──────────────────────
+    p.add_argument(
+        "--with-diarization",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        dest="with_diarization",
+        help="ASR 完成后跑 pyannote diarization 并把 speaker 标签写进 transcript.raw.json",
+    )
+    p.add_argument(
+        "--speaker-labels",
+        choices=["ranked", "raw"],
+        default="ranked",
+        dest="speaker_labels",
+        help="ranked = 按时长排名（Speaker 1/2/3）；raw = pyannote 原始标签（SPEAKER_00 等）",
+    )
 
 
 def run(args: argparse.Namespace) -> int:
@@ -216,6 +231,8 @@ def run(args: argparse.Namespace) -> int:
         resume=effective_resume,
         emit_srt=args.emit_srt,
         emit_vtt=args.emit_vtt,
+        with_diarization=args.with_diarization,
+        speaker_labels=args.speaker_labels,
     )
 
     try:

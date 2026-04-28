@@ -358,6 +358,119 @@ def test_e2e_resume_blocks_double_run(tmp_path: Path) -> None:
 
 @pipeline_required
 @pytest.mark.requires_whisper
+def test_e2e_transcribe_with_diarization(tmp_path: Path, monkeypatch) -> None:
+    """``with_diarization=True`` produces real speaker labels in raw.json + SRT.
+
+    The real pyannote worker is intentionally NOT invoked (it would require
+    the lazy venv install + model download — outside the unit test budget).
+    Instead we monkeypatch ``_run_diarization_pass`` to return a synthetic
+    :class:`DiarizationOutput` that covers the entire transcript timeline,
+    exercising the full integration codepath EXCEPT the worker subprocess.
+
+    Asserts:
+      - Every ``transcript.raw.json segments[].speaker`` matches ``Speaker N``
+        (not the v0.3.0 ``"Speaker A"`` placeholder).
+      - ``work/diarization.json`` audit artefact exists.
+      - ``manifest.json`` carries ``withDiarization=true``,
+        ``speakerLabels="ranked"``, and ``numSpeakers``.
+      - The SRT carries the real speaker prefix (not "Speaker A:").
+    """
+    from voxkit.core import transcribe_pipeline as TP
+    from voxkit.io.schema import (
+        AudioInfo as _AudioInfo,
+        DiarizationOutput as _DiarizationOutput,
+        Segment as _Segment,
+        SpeakerInfo as _SpeakerInfo,
+    )
+
+    # Synthetic single-speaker timeline that covers 0..120s — wide enough to
+    # overlap any plausible whisper segment from a 5s sine fixture.
+    fake_dia = _DiarizationOutput(
+        audio=_AudioInfo(path="/tmp/master.wav", duration_secs=120.0),
+        device="cpu",
+        model="pyannote/speaker-diarization-3.1",
+        rtf=0.05,
+        elapsed_secs=6.0,
+        num_speakers=1,
+        speakers=[
+            _SpeakerInfo(
+                id="Speaker 1", raw_id="SPEAKER_00", total_duration_secs=120.0
+            ),
+        ],
+        segments=[
+            _Segment(
+                start=0.0, end=120.0,
+                speaker="Speaker 1", raw_speaker="SPEAKER_00",
+            ),
+        ],
+    )
+
+    def _fake_diarize_pass(req, *, master_wav, duration_secs, em, forward_stderr):
+        return fake_dia, 6.0
+
+    monkeypatch.setattr(TP, "_run_diarization_pass", _fake_diarize_pass)
+
+    ws = open_workspace(tmp_path / "ws_diarize")
+    # Build a request with diarization on. The base helper doesn't expose the
+    # new fields so we construct a TranscribeRequest directly.
+    req = TranscribeRequest(  # type: ignore[name-defined]
+        input_path=SHORT_EN,
+        workspace=ws,
+        model="base",
+        language="en",
+        word_timestamps=True,
+        vad=False,
+        logprob_thold=-0.8,
+        source_id="test_dia",
+        keep_work=True,
+        json_events=False,
+        timeout_ms=120_000,
+        whisper_bin_override=None,
+        vad_model_override=None,
+        blocklist_path=None,
+        resume=True,
+        emit_srt=True,
+        emit_vtt=True,
+        with_diarization=True,
+        speaker_labels="ranked",
+    )
+
+    result = run_pipeline(req)
+    assert result is not None
+    _assert_artifacts_written(ws)
+
+    # 1. transcript.raw.json segments[].speaker is real, not the placeholder.
+    raw = _read_json(ws.raw_json_path)
+    segments = raw.get("segments", [])
+    assert len(segments) > 0, "expected at least one segment from whisper"
+    for seg in segments:
+        assert seg.get("speaker") == "Speaker 1", (
+            f"expected real speaker label, got {seg.get('speaker')!r}"
+        )
+        # The placeholder must NOT survive into the diarized output.
+        assert seg.get("speaker") != "Speaker A"
+
+    # 2. work/diarization.json audit artefact exists.
+    diarize_audit = ws.work / "diarization.json"
+    assert diarize_audit.exists()
+    audit = json.loads(diarize_audit.read_text(encoding="utf-8"))
+    assert audit.get("numSpeakers") == 1
+
+    # 3. manifest fields populated.
+    manifest = _read_json(ws.manifest_path)
+    assert manifest.get("withDiarization") is True
+    assert manifest.get("speakerLabels") == "ranked"
+    assert manifest.get("numSpeakers") == 1
+    assert manifest.get("diarizationModel") == "pyannote/speaker-diarization-3.1"
+
+    # 4. SRT carries the real speaker prefix.
+    srt_text = ws.srt_path.read_text(encoding="utf-8")
+    assert "Speaker 1:" in srt_text
+    assert "Speaker A:" not in srt_text
+
+
+@pipeline_required
+@pytest.mark.requires_whisper
 def test_e2e_force_overwrites_existing_raw(tmp_path: Path) -> None:
     """``--force`` (resume=False) is the explicit opt-out for the wx contract.
 

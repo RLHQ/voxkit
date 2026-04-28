@@ -24,9 +24,10 @@ import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, cast
 
-from voxkit.io.schema import DiarizationOutput, Segment
+from voxkit.core.align_speakers import SpeakerLabelMode, assign_speakers
+from voxkit.io.schema import DiarizationOutput, Segment, TranscriptSegment
 from voxkit.io.srt import format_srt_time
 
 
@@ -78,17 +79,40 @@ def _format_srt_time(ms: int) -> str:
 
 
 def _assign_speaker(seg: TranscriptSeg, dia_segments: List[Segment]) -> Optional[Segment]:
-    """重叠最大的 diarization 段；无重叠返回 None。"""
+    """重叠最大的 diarization 段；无重叠返回 None。
+
+    Thin wrapper that mirrors the legacy signature for any external caller —
+    internally delegates to :mod:`voxkit.core.align_speakers` for the overlap
+    math (single source of truth). Returns the matching ``Segment`` or
+    ``None``.
+    """
+    from voxkit.core.align_speakers import _best_diarization_match
+
     seg_s = seg.start_ms / 1000.0
     seg_e = seg.end_ms / 1000.0
-    best_overlap = 0.0
-    best: Optional[Segment] = None
-    for d in dia_segments:
-        overlap = max(0.0, min(seg_e, d.end) - max(seg_s, d.start))
-        if overlap > best_overlap:
-            best_overlap = overlap
-            best = d
-    return best
+    idx, _overlap = _best_diarization_match(seg_s, seg_e, dia_segments)
+    if idx is None:
+        return None
+    return dia_segments[idx]
+
+
+def _to_transcript_segments(transcript_segs: List[TranscriptSeg]) -> List[TranscriptSegment]:
+    """Promote the lightweight ``TranscriptSeg`` (ms-based, id-less) into
+    Pydantic :class:`TranscriptSegment` (sec-based, id-bearing) so we can call
+    :func:`assign_speakers`. ``id`` is a synthetic 1-indexed string — only used
+    as a key into the returned mapping; never serialised.
+    """
+    out: List[TranscriptSegment] = []
+    for i, w in enumerate(transcript_segs):
+        out.append(
+            TranscriptSegment(
+                id=str(i),
+                start=w.start_ms / 1000.0,
+                end=w.end_ms / 1000.0,
+                text=w.text,
+            )
+        )
+    return out
 
 
 def align_to_srt(
@@ -101,19 +125,36 @@ def align_to_srt(
     """主对齐函数：被 diarize 子命令和独立 align 子命令共用。
 
     返回写入的 SRT 路径。
+
+    Implementation note — overlap logic delegates to
+    :func:`voxkit.core.align_speakers.assign_speakers`. This module owns:
+
+    * transcript JSON parsing (Remixr / whisper.cpp formats)
+    * SRT emission
+    * the "Speaker ?" placeholder for unmatched segments
+
+    The pure overlap-math lives in ``align_speakers`` so the transcribe
+    pipeline can reuse it without touching this CLI handler.
     """
     transcript_segs = _parse_transcript(transcript_path)
+
+    # Promote to Pydantic shape and delegate overlap assignment.
+    pyd_segments = _to_transcript_segments(transcript_segs)
+    speaker_by_id, unmatched_ids = assign_speakers(
+        pyd_segments,
+        diarization,
+        speaker_labels=cast(SpeakerLabelMode, speaker_labels),
+    )
 
     out_srt.parent.mkdir(parents=True, exist_ok=True)
     lines: List[str] = []
     miss = 0
     for i, w in enumerate(transcript_segs, 1):
-        d = _assign_speaker(w, diarization.segments)
-        if d is None:
+        seg_id = str(i - 1)  # matches _to_transcript_segments's 0-indexed ids
+        label = speaker_by_id.get(seg_id)
+        if label is None:
             miss += 1
             label = "Speaker ?"
-        else:
-            label = d.speaker if speaker_labels == "ranked" else d.raw_speaker
 
         lines.append(str(i))
         lines.append(
@@ -121,6 +162,11 @@ def align_to_srt(
         )
         lines.append(f"{label}: {w.text}")
         lines.append("")
+
+    # Defensive: miss count should always equal len(unmatched_ids).
+    assert miss == len(unmatched_ids), (
+        f"miss={miss} != unmatched={len(unmatched_ids)} (alignment bug)"
+    )
 
     out_srt.write_text("\n".join(lines))
     print(

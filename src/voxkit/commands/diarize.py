@@ -14,7 +14,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import subprocess
 import sys
 from pathlib import Path
 
@@ -22,7 +21,12 @@ from voxkit.commands import align as align_cmd
 from voxkit.core import audio as core_audio
 from voxkit.core import env as core_env
 from voxkit.core import lazy_install
-from voxkit.core.constants import ExitCode, WORKER_JSON_SENTINEL
+from voxkit.core.constants import ExitCode
+from voxkit.core.diarize_runner import (
+    DiarizeFailed,
+    DiarizeTimeout,
+    run_diarize,
+)
 from voxkit.io.progress import ProgressEmitter
 from voxkit.io.schema import DiarizationOutput
 
@@ -36,63 +40,50 @@ def _run_worker(
     args: argparse.Namespace,
     progress: ProgressEmitter,
 ) -> DiarizationOutput:
-    """spawn worker；解析其 stdout 最后一行为 DiarizationOutput。"""
-    cmd = [
-        str(venv_python),
-        "-m", "voxkit.core.pipeline",
-        "--audio", str(audio_path),
-        "--audio-duration-secs", f"{duration_secs:.6f}",
-        "--model", args.model,
-        "--device", args.device,
-        "--speaker-labels", args.speaker_labels,
-    ]
-    if extracted_from:
-        cmd += ["--extracted-from", str(extracted_from)]
-    if args.num_speakers is not None:
-        cmd += ["--num-speakers", str(args.num_speakers)]
-    if args.min_speakers is not None:
-        cmd += ["--min-speakers", str(args.min_speakers)]
-    if args.max_speakers is not None:
-        cmd += ["--max-speakers", str(args.max_speakers)]
-    if args.json_events:
-        cmd += ["--json-events"]
+    """Thin CLI-side wrapper: build params from ``argparse.Namespace`` and
+    delegate to :func:`voxkit.core.diarize_runner.run_diarize`.
 
-    env = core_env.patched_env()
-
-    # stdout 收 JSON，stderr 直通用户终端（progress / warn / error）
-    proc = subprocess.run(
-        cmd,
-        env=env,
-        capture_output=True,
-        text=True,
-    )
-    # 把 worker stderr 透传给主进程 stderr（保持事件流连续）
-    if proc.stderr:
-        sys.stderr.write(proc.stderr)
-        sys.stderr.flush()
-
-    if proc.returncode != 0:
+    Maintains the original side-effect of forwarding worker stderr to the
+    parent terminal (the runner does that when ``forward_stderr=True``).
+    Maps runner exceptions to the existing ``progress.error`` + ``sys.exit``
+    contract so CLI behaviour is byte-identical to v0.3.0.
+    """
+    try:
+        return run_diarize(
+            audio_path,
+            duration_secs=duration_secs,
+            venv_python=venv_python,
+            num_speakers=args.num_speakers,
+            min_speakers=args.min_speakers,
+            max_speakers=args.max_speakers,
+            model=args.model,
+            device=args.device,
+            speaker_labels=args.speaker_labels,
+            extracted_from=extracted_from,
+            progress=None,  # CLI relies on stderr forwarding, not callback
+            env=core_env.patched_env(),
+            timeout_secs=None,
+            forward_stderr=True,
+            json_events=args.json_events,
+        )
+    except DiarizeFailed as exc:
         # worker 已 emit error 事件；这里仅给非 0 信号
         progress.error(
             "WORKER_EXIT",
-            f"worker 退出码 {proc.returncode}",
+            f"worker 退出码 {exc.returncode}",
             fix="查看上方 stderr 输出",
         )
-        sys.exit(proc.returncode)
-
-    # worker 用 sentinel 把单行 JSON 标记出来，避免 torch / pyannote 偶尔的 stdout 噪音干扰
-    json_line = next(
-        (ln[len(WORKER_JSON_SENTINEL):] for ln in proc.stdout.splitlines()
-         if ln.startswith(WORKER_JSON_SENTINEL)),
-        None,
-    )
-    if not json_line:
-        progress.error("WORKER_NO_OUTPUT", "worker stdout 中未找到 JSON sentinel 行")
+        sys.exit(exc.returncode)
+    except DiarizeTimeout as exc:
+        progress.error("WORKER_TIMEOUT", str(exc))
         sys.exit(int(ExitCode.WORKER_FAILED))
-    try:
-        return DiarizationOutput.model_validate_json(json_line)
-    except Exception as e:
-        progress.error("WORKER_BAD_JSON", f"解析失败: {e}\nline={json_line[:200]}")
+    except ValueError as exc:
+        # sentinel missing or bad JSON — both surface here
+        msg = str(exc)
+        if "sentinel" in msg:
+            progress.error("WORKER_NO_OUTPUT", msg)
+        else:
+            progress.error("WORKER_BAD_JSON", msg)
         sys.exit(int(ExitCode.WORKER_FAILED))
 
 

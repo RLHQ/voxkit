@@ -198,6 +198,13 @@ class WhisperFlags:
         vad_model_path: silero VAD 模型路径。``vad=True`` 但路径为 None 时
             两个 flag 都不会出现（防御性默认，由 caller 决定 warn-once）。
         logprob_thold: ``--logprob-thold``，plan 收紧到 -0.8（默认）。
+        no_speech_thold: ``--no-speech-thold``，no_speech token 概率超过此值
+            才视为静音并跳过该窗口。whisper-cli 默认 0.6，voxkit 调高到 0.85
+            抑制 chunk 末尾的 early-truncation：A/B 实验显示 chunk 末尾 ~5s
+            的 no_speech_prob 常飘到 0.6-0.85 区间（声学渐弱），导致整段被丢
+            （详见 tmp/synth/README.md）。提高阈值 → 模型必须高度确信是静音
+            才放弃，长发音词不再因为踩边界而消失。下游 hallucination_filter
+            可兜底真正的全静音误转。
         word_timestamps: 是否启用 word-level 时间戳。仅在非 CJK 语言下追加
             ``--max-len 1 --split-on-word``，CJK 强制单字符无意义。
         max_context_zero: 是否传 ``--max-context 0``（plan 默认 True，抑制
@@ -211,6 +218,7 @@ class WhisperFlags:
     vad: bool
     vad_model_path: Path | None
     logprob_thold: float = -0.8
+    no_speech_thold: float = 0.85
     word_timestamps: bool = True
     max_context_zero: bool = True
     threads: int | None = None
@@ -270,6 +278,9 @@ def build_argv(
 
     # 始终带 logprob-thold（plan 默认 -0.8）
     argv += ["--logprob-thold", str(flags.logprob_thold)]
+
+    # 始终带 no-speech-thold（默认 0.85，抑制 chunk 末尾 early-truncation）
+    argv += ["--no-speech-thold", str(flags.no_speech_thold)]
 
     if flags.word_timestamps and flags.language not in CJK_LANGUAGES:
         argv += ["--max-len", "1", "--split-on-word"]

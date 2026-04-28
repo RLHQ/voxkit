@@ -194,17 +194,28 @@ def merge_chunks(
 ) -> tuple[list[TranscriptSegment], list[MergeNote]]:
     """Merge per-chunk segments into a single global segment list.
 
+    Strategy: **prev-chunk-priority** — prev 产出的 segment 全部保留；chunk i
+    只补 ``seg.start >= prev_last_end - tolerance`` 之后的部分（即 prev 没
+    覆盖到的尾部）。
+
     Algorithm:
       1. For each chunk: offset all its segments + words by chunk.chunk_start_secs.
-      2. Iterate i = 1..N-1:
-         - chunk_start_abs = chunks[i].chunk_start_secs
-         - Drop tail of accumulated where seg.start >= chunk_start_abs - tolerance
-           (chunk i is the "primary" transcription for that region, prefer it)
-         - Append chunk i's segments where seg.start >= last_kept.end - tolerance
+      2. For i = 1..N-1: walk chunk i 的 segments，append 那些 ``start >=
+         last_kept.end - tolerance`` 的（跳过已被 prev 覆盖的开头）。
       3. Re-id sequentially: seg_001, seg_002, ...
       4. Run validate_timeline_continuity for MergeNote list.
 
     Returns (merged_segments, merge_notes). Both can be empty if no chunks.
+
+    Why prev-priority not chunk-i-priority:
+      原 Remixr 实现是 "chunk i 优先"——把 prev 末尾在 ``[chunk_start_i -
+      tolerance, +∞)`` 内的 segments 全删让 chunk i 接管。这假设 chunk i
+      会在 overlap 区重新产出同等质量的内容。A/B 实验（tmp/synth/）证伪了这
+      个假设：whisper.cpp 在 chunk 末尾 5s 实际上**完整产出**到边界（如
+      "differentiation" @ 595.28）；而 chunk i 第一个 segment 因为暖机往往
+      从 chunk_start + 几百 ms 起，跳过了边界附近的内容。chunk-i-priority
+      下 "differentiation" 整词消失。改用 prev-priority 后：prev 的 5s
+      overlap 产出全部保留，chunk i 只在 prev 真正用尽后接管，不再丢词。
     """
     if not chunks:
         return [], []
@@ -214,15 +225,10 @@ def merge_chunks(
         [offset_segment(s, ch.chunk_start_secs) for s in ch.segments] for ch in chunks
     ]
 
-    # Step 2: greedy merge along chunk boundary
+    # Step 2: prev-priority append（不主动 pop prev；chunk i 只补尾部）
     merged: list[TranscriptSegment] = list(offset_per_chunk[0])
 
     for i in range(1, len(chunks)):
-        chunk_start_abs = chunks[i].chunk_start_secs
-        # Drop tail of merged that falls in chunk i's territory
-        while merged and merged[-1].start >= chunk_start_abs - overlap_tolerance_secs:
-            merged.pop()
-
         last_end = merged[-1].end if merged else float("-inf")
         for seg in offset_per_chunk[i]:
             if seg.start >= last_end - overlap_tolerance_secs:

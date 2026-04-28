@@ -95,10 +95,17 @@ from voxkit.io.remixr_adapter import to_remixr_transcript, write_remixr_json
 from voxkit.io.schema import (
     AudioInfo,
     ChunkStat,
+    DiarizationOutput,
+    RemixrTranscript,
     TranscriptionOutput,
     TranscriptSegment,
 )
-from voxkit.io.srt import to_subtitles_srt, to_subtitles_vtt
+from voxkit.io.srt import (
+    format_srt_time,
+    format_vtt_time,
+    to_subtitles_srt,
+    to_subtitles_vtt,
+)
 
 __all__ = [
     "PipelineError",
@@ -118,6 +125,10 @@ class TranscribeRequest:
     Construct from the CLI ``argparse.Namespace`` in
     :mod:`voxkit.commands.transcribe`. Order of fields matches the
     ``add_subparser`` flag order for review-readability.
+
+    ``with_diarization`` / ``speaker_labels`` (Phase 2) are appended at the
+    end with sensible defaults so existing callers that omit them keep their
+    v0.3.0 behaviour byte-identical.
     """
 
     input_path: Path
@@ -137,6 +148,9 @@ class TranscribeRequest:
     resume: bool
     emit_srt: bool
     emit_vtt: bool
+    # ── Phase 2 — diarization integration ────────────────────────────
+    with_diarization: bool = False
+    speaker_labels: str = "ranked"
 
 
 @dataclass(frozen=True)
@@ -426,6 +440,134 @@ def _ensure_raw_json_writable(req: TranscribeRequest) -> None:
     raw_path.unlink()
 
 
+# ── Phase 2: diarization integration helpers ──────────────────────────────
+
+
+def _run_diarization_pass(
+    req: TranscribeRequest,
+    *,
+    master_wav: Path,
+    duration_secs: float,
+    em: EventMirror,
+    forward_stderr: bool,
+) -> tuple[DiarizationOutput, float]:
+    """Run pyannote diarization on the master wav. Returns
+    ``(DiarizationOutput, elapsed_secs)``.
+
+    The work is done by ``voxkit.core.diarize_runner.run_diarize`` which spawns
+    the pyannote worker inside the lazy-install venv. We always lazy-trigger
+    venv creation here; first run in a fresh environment will block on the
+    install (1-3 min) — caller decides whether that is acceptable.
+
+    Default model = ``"sd-3.1"`` and device = ``"auto"``. There is no CLI knob
+    for these in transcribe today; if needed we'd add ``--diarize-model`` /
+    ``--diarize-device`` later.
+    """
+    # Late imports keep ``transcribe_pipeline`` importable on machines without
+    # pyannote installed (the worker is a separate venv anyway).
+    from voxkit.core.diarize_runner import (
+        DiarizeFailed,
+        DiarizeTimeout,
+        run_diarize,
+    )
+    from voxkit.core.lazy_install import SetupError, ensure_venv
+
+    diarize_model = "sd-3.1"
+    diarize_device = "auto"
+
+    _emit_event(
+        em,
+        {
+            "event": "diarize.start",
+            "model": diarize_model,
+            "device": diarize_device,
+        },
+        forward_to_stderr=forward_stderr,
+    )
+
+    # 1. Ensure the lazy venv exists (pyannote + torch).
+    try:
+        venv_info = ensure_venv(verbose=not req.json_events)
+    except SetupError as exc:
+        raise PipelineError(
+            f"diarization venv setup failed: {exc}",
+            exit_code=int(ExitCode.GENERIC_FAIL),
+        ) from exc
+
+    # 2. Spawn the worker.
+    started_d = time.monotonic()
+    try:
+        diarization = run_diarize(
+            master_wav,
+            duration_secs=duration_secs,
+            venv_python=venv_info.venv_python,
+            model=diarize_model,
+            device=diarize_device,
+            speaker_labels=req.speaker_labels,
+            extracted_from=req.input_path
+            if req.input_path.suffix.lower() in _VIDEO_EXTS
+            else None,
+            env=core_env.patched_env(),
+            forward_stderr=True,
+            json_events=req.json_events,
+        )
+    except DiarizeFailed as exc:
+        raise PipelineError(
+            f"diarization worker failed (rc={exc.returncode}):\n{exc.stderr_tail}",
+            exit_code=int(ExitCode.WORKER_FAILED),
+        ) from exc
+    except DiarizeTimeout as exc:
+        raise PipelineError(
+            f"diarization worker timed out: {exc}",
+            exit_code=int(ExitCode.WORKER_FAILED),
+        ) from exc
+    except ValueError as exc:
+        # sentinel missing or invalid JSON
+        raise PipelineError(
+            f"diarization worker produced invalid output: {exc}",
+            exit_code=int(ExitCode.WORKER_FAILED),
+        ) from exc
+
+    elapsed_d = time.monotonic() - started_d
+    return diarization, elapsed_d
+
+
+def _render_remixr_srt(t: RemixrTranscript) -> str:
+    """Render an SRT document from a Remixr-shaped transcript.
+
+    Mirrors :func:`voxkit.io.srt.to_subtitles_srt` (which only accepts
+    voxkit-native ``TranscriptionOutput``) but reads ``speaker`` off each
+    :class:`RemixrSegment` so real speaker labels survive into the file.
+
+    One cue per segment, 1-indexed. ``speaker_prefix`` is implicit + always on
+    here — that is the whole point of the with-diarization codepath.
+    """
+    parts: list[str] = []
+    for i, seg in enumerate(t.segments, 1):
+        body = seg.text.strip()
+        line = f"{seg.speaker}: {body}" if seg.speaker else body
+        parts.append(str(i))
+        parts.append(f"{format_srt_time(seg.start)} --> {format_srt_time(seg.end)}")
+        parts.append(line)
+        parts.append("")
+    if not parts:
+        return ""
+    return "\n".join(parts) + "\n"
+
+
+def _render_remixr_vtt(t: RemixrTranscript) -> str:
+    """WebVTT counterpart of :func:`_render_remixr_srt`."""
+    parts: list[str] = ["WEBVTT", ""]
+    for i, seg in enumerate(t.segments, 1):
+        body = seg.text.strip()
+        line = f"{seg.speaker}: {body}" if seg.speaker else body
+        parts.append(str(i))
+        parts.append(f"{format_vtt_time(seg.start)} --> {format_vtt_time(seg.end)}")
+        parts.append(line)
+        parts.append("")
+    return "\n".join(parts) + "\n"
+
+
 # ── Main entry point ──────────────────────────────────────────────────────
 
 
@@ -654,7 +796,105 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                 warnings=warnings,
             )
 
-            # 7. Write transcript.voxkit.json (camelCase via aliases).
+            # 7. Map → Remixr (in-memory; speaker labels potentially injected
+            #    by the diarization pass below before we serialise both the
+            #    voxkit-native and Remixr transcripts).
+            #
+            #    Note: transcript.voxkit.json is written AFTER the diarization
+            #    pass so any unmatched-segment warning is captured. The Remixr
+            #    raw.json is also written after for the same reason.
+            remixr_t = to_remixr_transcript(voxkit_out, source_id=req.source_id)
+
+            # 8b. Phase 2 — optional diarization integration.
+            #     Runs AFTER ASR merging so we have the absolute timeline that
+            #     the speaker assignment needs.
+            diarization_output: DiarizationOutput | None = None
+            diarize_elapsed: float | None = None
+            unmatched_count = 0
+            num_speakers: int | None = None
+            if req.with_diarization:
+                diarization_output, diarize_elapsed = _run_diarization_pass(
+                    req,
+                    master_wav=master_wav,
+                    duration_secs=duration_secs,
+                    em=em,
+                    forward_stderr=forward_stderr,
+                )
+                num_speakers = diarization_output.num_speakers
+                _emit_event(
+                    em,
+                    {
+                        "event": "diarize.done",
+                        "speakers": num_speakers,
+                        "elapsed_secs": diarize_elapsed,
+                    },
+                    forward_to_stderr=forward_stderr,
+                )
+
+                # Audit artefact: the chunk-of-truth diarization JSON lives
+                # under work/ alongside whisper checkpoints.
+                diarization_audit_path = ws.work / "diarization.json"
+                diarization_audit_path.write_text(
+                    diarization_output.model_dump_json(by_alias=True, indent=2)
+                    + "\n",
+                    encoding="utf-8",
+                )
+
+                # Speaker assignment via the pure helper.
+                from voxkit.core.align_speakers import (
+                    SpeakerLabelMode,
+                    assign_speakers,
+                )
+                speaker_labels_mode: SpeakerLabelMode = (
+                    "raw" if req.speaker_labels == "raw" else "ranked"
+                )
+                speaker_by_id, unmatched_ids = assign_speakers(
+                    voxkit_out.segments,
+                    diarization_output,
+                    speaker_labels=speaker_labels_mode,
+                )
+                unmatched_count = len(unmatched_ids)
+                matched_count = len(voxkit_out.segments) - unmatched_count
+                _emit_event(
+                    em,
+                    {
+                        "event": "align.done",
+                        "matched": matched_count,
+                        "unmatched": unmatched_count,
+                    },
+                    forward_to_stderr=forward_stderr,
+                )
+
+                # Inject labels into the in-memory RemixrTranscript. The
+                # voxkit-native schema's ``TranscriptSegment`` deliberately has
+                # no ``speaker`` field; the Remixr-shaped output owns speaker
+                # identity. The id mapping uses the original
+                # ``voxkit_out.segments[i].id`` because
+                # ``to_remixr_transcript`` re-numbers on output and we built
+                # ``speaker_by_id`` against the voxkit-native ids — so we walk
+                # them in lockstep.
+                for vox_seg, remixr_seg in zip(
+                    voxkit_out.segments, remixr_t.segments
+                ):
+                    label = speaker_by_id.get(vox_seg.id)
+                    if label is not None:
+                        remixr_seg.speaker = label
+                    else:
+                        remixr_seg.speaker = "Speaker ?"
+
+                if unmatched_count > 0:
+                    note = (
+                        f"alignment: {unmatched_count} segments had no "
+                        f"diarization overlap"
+                    )
+                    warnings.append(note)
+                    # Pydantic v2 makes a copy of list inputs at validate-time,
+                    # so we need to mutate the model's own list to keep the
+                    # transcript.voxkit.json warnings field in sync with the
+                    # outer ``warnings`` list used by manifest + raw.json.
+                    voxkit_out.warnings.append(note)
+
+            # 8c. Write transcript.voxkit.json (camelCase via aliases).
             #
             # We attach ``sourceId`` to the on-disk dict (not the Pydantic
             # model) because the voxkit-native schema deliberately keeps
@@ -674,8 +914,8 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                 forward_to_stderr=forward_stderr,
             )
 
-            # 8. Map → Remixr; exclusive write
-            remixr_t = to_remixr_transcript(voxkit_out, source_id=req.source_id)
+            # 8d. Now write transcript.raw.json with whatever speaker labels
+            #     ended up on it (diarization-injected or "Speaker A" default).
             metadata = {
                 "voxkitVersion": __version__,
                 "asrBackend": "whisper-cpp",
@@ -687,6 +927,13 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                 "perChunk": chunk_stats_dump,
                 "warnings": warnings,
             }
+            if diarization_output is not None:
+                metadata["withDiarization"] = True
+                metadata["speakerLabels"] = req.speaker_labels
+                metadata["diarizationModel"] = diarization_output.model
+                metadata["diarizationDevice"] = diarization_output.device
+                metadata["diarizationElapsedSecs"] = diarize_elapsed
+                metadata["numSpeakers"] = num_speakers
             try:
                 write_remixr_json(remixr_t, ws.raw_json_path, metadata=metadata)
             except FileExistsError as exc:
@@ -702,17 +949,27 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                 forward_to_stderr=forward_stderr,
             )
 
-            # 9. Subtitles
+            # 9. Subtitles. With diarization we render straight from the
+            #    speaker-bearing RemixrTranscript so SRT/VTT carry real labels;
+            #    without diarization we fall back to the v0.3.0 path
+            #    (TranscriptionOutput → "Speaker A:" placeholder).
             artifacts: dict[str, Path] = {
                 "raw_json": ws.raw_json_path,
                 "voxkit_json": ws.voxkit_json_path,
                 "manifest": ws.manifest_path,
                 "events": ws.events_path,
             }
+            if diarization_output is not None:
+                artifacts["diarization_json"] = ws.work / "diarization.json"
             if req.emit_srt:
-                ws.srt_path.write_text(
-                    to_subtitles_srt(voxkit_out), encoding="utf-8"
-                )
+                if diarization_output is not None:
+                    ws.srt_path.write_text(
+                        _render_remixr_srt(remixr_t), encoding="utf-8"
+                    )
+                else:
+                    ws.srt_path.write_text(
+                        to_subtitles_srt(voxkit_out), encoding="utf-8"
+                    )
                 artifacts["srt"] = ws.srt_path
                 _emit_event(
                     em,
@@ -720,9 +977,14 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                     forward_to_stderr=forward_stderr,
                 )
             if req.emit_vtt:
-                ws.vtt_path.write_text(
-                    to_subtitles_vtt(voxkit_out), encoding="utf-8"
-                )
+                if diarization_output is not None:
+                    ws.vtt_path.write_text(
+                        _render_remixr_vtt(remixr_t), encoding="utf-8"
+                    )
+                else:
+                    ws.vtt_path.write_text(
+                        to_subtitles_vtt(voxkit_out), encoding="utf-8"
+                    )
                 artifacts["vtt"] = ws.vtt_path
                 _emit_event(
                     em,
@@ -765,6 +1027,17 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                 ],
                 "warnings": warnings,
                 "artifacts": {k: str(v) for k, v in artifacts.items()},
+                # ── Phase 2: diarization metadata ────────────────────
+                "withDiarization": req.with_diarization,
+                "speakerLabels": req.speaker_labels,
+                "diarizationModel": (
+                    diarization_output.model if diarization_output else None
+                ),
+                "diarizationDevice": (
+                    diarization_output.device if diarization_output else None
+                ),
+                "diarizationElapsedSecs": diarize_elapsed,
+                "numSpeakers": num_speakers,
             }
             write_manifest(ws, manifest)
             _emit_event(
