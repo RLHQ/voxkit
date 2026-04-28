@@ -89,9 +89,6 @@ RTF:               0.0476
 hallucinations:    0          (英文素材不触发中文黑名单)
 ```
 
-样本工作目录见 [`tmp/voxkit-real/`](tmp/voxkit-real/)（`manifest.json` / `events.ndjson` /
-`work/` 子树齐全，可作 schema 参考）。
-
 ### CLI 标志
 
 | 标志 | 默认 | 说明 |

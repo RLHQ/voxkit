@@ -163,7 +163,14 @@ def find_vad_model(*, override: Path | None = None) -> Path | None:
     Order:
       1. ``override``
       2. ``$WHISPER_VAD_MODEL_PATH`` 环境变量
-      3. ``/opt/homebrew/share/whisper-cpp/ggml-silero-v5.1.2.bin``
+      3. ``~/.cache/voxkit/aux/ggml-silero-v5.1.2.bin``（``voxkit fetch-bundle`` 装的）
+      4. ``/opt/homebrew/share/whisper-cpp/ggml-silero-v5.1.2.bin``（brew 自带）
+
+    第 3 项放在 brew 路径之前，因为 voxkit aux 是 voxkit 显式管理的版本（与
+    bundle manifest 中的 sha256 对齐），更可控；brew 路径是社区分发的 fallback，
+    在 Linux apt 装 whisper-cpp 等没有 brew 的场景下也不会命中——所以**没有
+    fetch-bundle 装的这条路径，干净 Linux 笔记本就只有 override / env 两条线，
+    aux bundle 等于白下**。
 
     Returns:
         Path（若存在）或 None（caller 可以决定是否禁用 VAD 并 warn-once）。
@@ -178,6 +185,10 @@ def find_vad_model(*, override: Path | None = None) -> Path | None:
         p = Path(env_vad)
         if p.is_file():
             return p
+
+    voxkit_aux = Path.home() / ".cache" / "voxkit" / "aux" / "ggml-silero-v5.1.2.bin"
+    if voxkit_aux.is_file():
+        return voxkit_aux
 
     brew = Path("/opt/homebrew/share/whisper-cpp/ggml-silero-v5.1.2.bin")
     if brew.is_file():

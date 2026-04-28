@@ -153,8 +153,10 @@ def _scan_aux_files(specs: List[dict]) -> List[tuple[dict, Path, AuxFileEntry]]:
             continue
         size = src.stat().st_size
         sha = sha256_file(src)
-        # target_path 在 manifest 里持久化为已展开的绝对路径，方便 fetch 端不再处理 ~
-        target = str(Path(spec["target"]).expanduser())
+        # target_path 在 manifest 里**保持 spec 原样**（包含 ~），由 fetch 端按当前
+        # 用户机器 expanduser。绝不要在 build 端展开成 /Users/<builder>/…——那会把
+        # builder 的用户名烤进 manifest，让其他用户/机器拉到 release 后写到错误路径。
+        target = spec["target"]
         entry = AuxFileEntry(
             name=spec["name"],
             filename=spec["filename"],

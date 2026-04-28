@@ -44,14 +44,23 @@ def _make_executable(path: Path) -> Path:
     return path
 
 
-def _isolate_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    """清掉所有可能干扰 discovery 的环境变量。"""
+def _isolate_env(monkeypatch: pytest.MonkeyPatch, home: Path | None = None) -> None:
+    """清掉所有可能干扰 discovery 的环境变量；可选地隔离 ``$HOME``。
+
+    传 ``home`` → 把 ``$HOME`` 重定向到指定目录，让 ``Path.home()`` /
+    ``Path("~/...").expanduser()`` 落进 tmp 而非开发者真实 home。
+    需要这层隔离的场景：``find_vad_model`` / ``find_whisper_model`` 会查
+    ``~/.cache/voxkit/{aux,models}/...``，开发者机器上这些路径常驻文件，
+    不隔离会让"应当返回 None"的测试意外命中。
+    """
     for k in (
         "WHISPER_BIN",
         "WHISPER_MODEL_PATH",
         "WHISPER_VAD_MODEL_PATH",
     ):
         monkeypatch.delenv(k, raising=False)
+    if home is not None:
+        monkeypatch.setenv("HOME", str(home))
 
 
 # ───────────────────────────────────────────────────────────────────────
@@ -196,9 +205,8 @@ def test_find_vad_model_override(tmp_path, monkeypatch):
 
 
 def test_find_vad_model_brew(tmp_path, monkeypatch):
-    _isolate_env(monkeypatch)
-    fake_brew = tmp_path / "ggml-silero-v5.1.2.bin"
-    fake_brew.write_bytes(b"x")
+    # 隔离 HOME 让 voxkit aux 路径解析到 tmp（不会命中开发者本机的 ~/.cache/voxkit/aux/）
+    _isolate_env(monkeypatch, home=tmp_path)
     real_is_file = Path.is_file
 
     def fake_is_file(self):  # type: ignore[override]
@@ -213,7 +221,7 @@ def test_find_vad_model_brew(tmp_path, monkeypatch):
 
 
 def test_find_vad_model_none(tmp_path, monkeypatch):
-    _isolate_env(monkeypatch)
+    _isolate_env(monkeypatch, home=tmp_path)
     real_is_file = Path.is_file
 
     def fake_is_file(self):  # type: ignore[override]
@@ -224,6 +232,41 @@ def test_find_vad_model_none(tmp_path, monkeypatch):
     monkeypatch.setattr(Path, "is_file", fake_is_file)
     got = find_vad_model()
     assert got is None
+
+
+def test_find_vad_model_voxkit_aux(tmp_path, monkeypatch):
+    """voxkit fetch-bundle 装到 ``~/.cache/voxkit/aux/`` 的 silero VAD 应被找到。
+
+    回归保护：之前 ``find_vad_model`` 不查这个路径，导致 fetch-bundle 装的 aux
+    在没 brew 的环境（Linux apt / 旧 brew formula）下完全没用。
+    """
+    _isolate_env(monkeypatch, home=tmp_path)
+    aux_path = tmp_path / ".cache" / "voxkit" / "aux" / "ggml-silero-v5.1.2.bin"
+    aux_path.parent.mkdir(parents=True)
+    aux_path.write_bytes(b"silero-fake")
+
+    got = find_vad_model()
+    assert got == aux_path
+
+
+def test_find_vad_model_voxkit_aux_priority_over_brew(tmp_path, monkeypatch):
+    """voxkit aux 与 brew 都在场时，优先 voxkit aux（受 voxkit manifest 校验保护，更可控）。"""
+    _isolate_env(monkeypatch, home=tmp_path)
+
+    aux_path = tmp_path / ".cache" / "voxkit" / "aux" / "ggml-silero-v5.1.2.bin"
+    aux_path.parent.mkdir(parents=True)
+    aux_path.write_bytes(b"voxkit-aux-version")
+
+    real_is_file = Path.is_file
+
+    def fake_is_file(self):  # type: ignore[override]
+        if str(self) == "/opt/homebrew/share/whisper-cpp/ggml-silero-v5.1.2.bin":
+            return True
+        return real_is_file(self)
+
+    monkeypatch.setattr(Path, "is_file", fake_is_file)
+    got = find_vad_model()
+    assert got == aux_path, "voxkit aux 应优先于 brew 路径"
 
 
 # ───────────────────────────────────────────────────────────────────────

@@ -214,10 +214,13 @@ def check_ffmpeg() -> List[CheckResult]:
 def check_models_offline() -> CheckResult:
     """检测 HF cache 中 4 个模型是否都齐全。
 
-    判定标准：每个模型目录都有
-      - ``refs/main`` 非空
-      - ``snapshots/<commit>/`` 至少一个文件存在
-    完整 → ✅；任一缺失 → 不阻断，由后续 gated 检查接力。
+    完整 → ✅，doctor 切换"离线模式"显示，diarize worker 自动获得
+    ``HF_HUB_OFFLINE=1`` 注入（见 ``core.env.patched_env``）。
+    任一缺失 → 不阻断，由后续 gated 检查接力。
+
+    判定标准与 ``core.bundle.models_offline_ready`` 完全一致——后者用于纯布尔决策
+    （patched_env 注入逻辑），这里需要额外列出**具体缺失的仓库名**用于人类提示，
+    所以保留独立 enumerate 而非套壳调用。
     """
     hub = core_bundle.hf_hub_cache_dir()
     missing: List[str] = []
@@ -229,6 +232,9 @@ def check_models_offline() -> CheckResult:
             missing.append(repo_id)
             continue
         commit = refs.read_text().strip()
+        if not commit:
+            missing.append(repo_id)
+            continue
         snap = d / "snapshots" / commit
         if not snap.is_dir() or not any(snap.iterdir()):
             missing.append(repo_id)
@@ -242,7 +248,7 @@ def check_models_offline() -> CheckResult:
         )
     return CheckResult(
         "模型离线就绪", True,
-        f"4 个模型齐全 ({hub})",
+        f"4 个模型齐全 ({hub}); diarize 将自动 HF_HUB_OFFLINE=1",
         category="hf",
     )
 

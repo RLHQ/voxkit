@@ -87,7 +87,10 @@ class AuxFileEntry(BaseModel):
     target_path: str = Field(
         ...,
         alias="targetPath",
-        description="fetch-bundle 解压目标路径（已展开 ~，绝对路径）",
+        description=(
+            "fetch-bundle 解压目标路径，**保留 `~/...` 形式**。"
+            "由 fetch 端按运行时 ``$HOME`` 展开，保证跨用户/跨机器可移植。"
+        ),
     )
 
 
@@ -116,6 +119,43 @@ def sha256_file(path: Path, *, chunk_size: int = 1 << 20) -> str:
         while chunk := f.read(chunk_size):
             h.update(chunk)
     return h.hexdigest()
+
+
+def models_offline_ready(hub: Optional[Path] = None) -> bool:
+    """检测 HF cache 中 voxkit 必需的 4 个模型是否都齐全（refs/main + snapshot 命中）。
+
+    判定标准（与单个模型一致）：
+      - ``refs/main`` 文件存在且非空
+      - ``snapshots/<refs/main 中的 commit>/`` 目录存在且非空
+
+    用途：
+      - doctor 决定切换"离线模式"显示
+      - env.patched_env() 决定是否给 worker 注入 ``HF_HUB_OFFLINE=1``
+        （cache 齐全时，让 huggingface_hub 完全跳过 HEAD 请求 → 启动 -15s + 无
+        unauthenticated warning + 真无网环境也工作）
+
+    单一职责：纯探测，不打印、不抛错；空 cache 或部分缺失都返回 False。
+    BUNDLE_MODELS 由 ``core.constants`` 提供，在此 lazy-import 避免循环依赖。
+    """
+    # lazy import：constants 不依赖 bundle，bundle 也不该顶层依赖 constants
+    # （constants 是配置常量层，bundle 是数据/IO 层，避免互相牵扯）
+    from voxkit.core.constants import BUNDLE_MODELS
+
+    if hub is None:
+        hub = hf_hub_cache_dir()
+    for spec in BUNDLE_MODELS:
+        repo_id = spec["repo_id"]
+        d = hub / repo_id_to_dirname(repo_id)
+        refs = d / "refs" / "main"
+        if not refs.is_file():
+            return False
+        commit = refs.read_text().strip()
+        if not commit:
+            return False
+        snap = d / "snapshots" / commit
+        if not snap.is_dir() or not any(snap.iterdir()):
+            return False
+    return True
 
 
 # ── CC-BY-4.0 attribution 模板 ────────────────────────────────────────────
@@ -191,6 +231,7 @@ __all__ = [
     "hf_hub_cache_dir",
     "repo_id_to_dirname",
     "sha256_file",
+    "models_offline_ready",
     "FileEntry",
     "ModelEntry",
     "AuxFileEntry",

@@ -97,6 +97,69 @@ def test_sha256_file(tmp_path):
     assert core_bundle.sha256_file(p) == hashlib.sha256(b"hello world").hexdigest()
 
 
+def test_models_offline_ready_all_present(tmp_path, monkeypatch):
+    """4 个 BUNDLE_MODELS 都有 refs/main + 非空 snapshot → True。"""
+    fake_specs = [
+        {"repo_id": "fake/m1", "license": "mit"},
+        {"repo_id": "fake/m2", "license": "mit"},
+    ]
+    monkeypatch.setattr("voxkit.core.bundle.BUNDLE_MODELS", fake_specs, raising=False)
+    # bundle.models_offline_ready 用 lazy import，要 patch 真正的 source
+    import voxkit.core.constants as C
+    monkeypatch.setattr(C, "BUNDLE_MODELS", fake_specs)
+
+    hub = tmp_path / "hub"
+    for spec in fake_specs:
+        _make_fake_cache(tmp_path / spec["repo_id"].replace("/", "_"),
+                         spec["repo_id"], commit="c" * 12,
+                         files={"x.bin": b"hi"})
+    # 把所有伪 repo 的 hub/ 拷贝合并到一个总 hub/
+    hub.mkdir()
+    for spec in fake_specs:
+        sub = (tmp_path / spec["repo_id"].replace("/", "_") / "hub")
+        for child in sub.iterdir():
+            shutil.copytree(child, hub / child.name)
+
+    assert core_bundle.models_offline_ready(hub) is True
+
+
+def test_models_offline_ready_missing_one(tmp_path, monkeypatch):
+    """任一模型缺 → False。"""
+    fake_specs = [
+        {"repo_id": "fake/present", "license": "mit"},
+        {"repo_id": "fake/missing", "license": "mit"},
+    ]
+    import voxkit.core.constants as C
+    monkeypatch.setattr(C, "BUNDLE_MODELS", fake_specs)
+
+    hub = tmp_path / "hub"
+    src_root = tmp_path / "src"
+    _make_fake_cache(src_root, "fake/present", commit="a" * 12,
+                     files={"x.bin": b"hi"})
+    hub.mkdir()
+    for child in (src_root / "hub").iterdir():
+        shutil.copytree(child, hub / child.name)
+    # fake/missing 故意不创建
+
+    assert core_bundle.models_offline_ready(hub) is False
+
+
+def test_models_offline_ready_empty_refs(tmp_path, monkeypatch):
+    """refs/main 存在但内容为空 → False（防御 build 中断的半成品 cache）。"""
+    fake_specs = [{"repo_id": "fake/empty-refs", "license": "mit"}]
+    import voxkit.core.constants as C
+    monkeypatch.setattr(C, "BUNDLE_MODELS", fake_specs)
+
+    hub = tmp_path / "hub"
+    repo_dir = hub / core_bundle.repo_id_to_dirname("fake/empty-refs")
+    (repo_dir / "refs").mkdir(parents=True)
+    (repo_dir / "refs" / "main").write_text("")  # 空内容
+    (repo_dir / "snapshots" / "anything").mkdir(parents=True)
+    (repo_dir / "snapshots" / "anything" / "x.txt").write_text("y")
+
+    assert core_bundle.models_offline_ready(hub) is False
+
+
 def test_build_then_fetch_round_trip(tmp_path, patched_bundle_models):
     """完整 round-trip：build 出 bundle → fetch 到另一个 cache → 内容一致。"""
     src_root = tmp_path / "src"
@@ -406,6 +469,87 @@ def test_fetch_old_manifest_without_aux_field(tmp_path, patched_bundle_models):
         force=False, no_verify=False, verify_all=True,
     ))
     assert rc == 0
+
+
+def test_build_aux_target_path_keeps_tilde_for_portability(
+    tmp_path, monkeypatch, patched_bundle_models
+):
+    """spec 用 ``~/...`` → manifest 必须保留 ``~/...``，不能展开成 builder 的绝对路径。
+
+    回归测试：之前 build 端调用 expanduser() 把 ``~/.cache/voxkit/aux/x.bin`` 烤成
+    ``/Users/<builder>/.cache/voxkit/aux/x.bin``，导致其他用户拉到 release 后
+    试图写到不存在的路径。修复：原样存 ``~/...``，让 fetch 端按当前 ``Path.home()``
+    展开。
+    """
+    src = tmp_path / "fake-brew" / "ggml-silero-fake.bin"
+    src.parent.mkdir(parents=True, exist_ok=True)
+    src.write_bytes(b"\x10" * 256)
+
+    spec = {
+        "name": "silero-vad",
+        "filename": "ggml-silero-fake.bin",
+        "license": "mit",
+        "source_candidates": [str(src)],
+        # 关键：spec 用 ~ 形式，模拟真实 BUNDLE_AUX_FILES
+        "target": "~/.cache/voxkit/aux/ggml-silero-fake.bin",
+    }
+    monkeypatch.setattr("voxkit.commands.build_bundle.BUNDLE_AUX_FILES", [spec])
+
+    _bundle_p, manifest_p = _build_simple_bundle(tmp_path)
+    manifest = core_bundle.BundleManifest.model_validate_json(manifest_p.read_text())
+
+    assert len(manifest.aux_files) == 1
+    aux = manifest.aux_files[0]
+    # 必须保留 ~ 前缀；绝对不能含 builder 的 home 路径
+    assert aux.target_path == "~/.cache/voxkit/aux/ggml-silero-fake.bin", (
+        f"target_path 不应被 build 端 expanduser；得到: {aux.target_path}"
+    )
+    assert "/Users/" not in aux.target_path
+    assert "/home/" not in aux.target_path
+
+
+def test_fetch_aux_with_tilde_target_path_uses_runtime_home(
+    tmp_path, monkeypatch, patched_bundle_models
+):
+    """manifest 中 ``~/...`` → fetch 端按运行时 ``Path.home()`` 展开，不用 builder 的 home。
+
+    模拟：build 在 user-A 机器打的 bundle，fetch 在 user-B 机器跑——target 必须落
+    到 user-B 的 home，不是被烤进 manifest 的某个固定路径。
+    """
+    src = tmp_path / "fake-brew" / "aux.bin"
+    src.parent.mkdir(parents=True, exist_ok=True)
+    payload = b"portable-payload" * 16
+    src.write_bytes(payload)
+
+    spec = {
+        "name": "fake-aux",
+        "filename": "aux.bin",
+        "license": "mit",
+        "source_candidates": [str(src)],
+        "target": "~/.cache/voxkit/aux/aux.bin",
+    }
+    monkeypatch.setattr("voxkit.commands.build_bundle.BUNDLE_AUX_FILES", [spec])
+
+    bundle_p, manifest_p = _build_simple_bundle(tmp_path)
+
+    # ── fetch 时把 $HOME 重定向到 tmp_path（模拟另一个用户）──
+    # 注意：Path.expanduser() 走的是 os.path.expanduser → $HOME env，
+    # 不是 Path.home()。monkeypatch Path.home 没用，必须 setenv HOME。
+    fake_home = tmp_path / "fake-home-of-user-B"
+    fake_home.mkdir()
+    monkeypatch.setenv("HOME", str(fake_home))
+
+    dst_hub = tmp_path / "dst" / "hub"
+    rc = F.run(argparse.Namespace(
+        bundle=str(bundle_p), manifest=str(manifest_p),
+        from_url=None, release=None, repo="any/any",
+        hf_cache=str(dst_hub),
+        force=False, no_verify=False, verify_all=True,
+    ))
+    assert rc == 0
+    expected = fake_home / ".cache" / "voxkit" / "aux" / "aux.bin"
+    assert expected.is_file(), f"aux 应被解析到运行时 home: {expected}"
+    assert expected.read_bytes() == payload
 
 
 def test_fetch_aux_skip_without_force(tmp_path, monkeypatch, patched_bundle_models, capsys):
