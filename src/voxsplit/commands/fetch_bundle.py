@@ -45,18 +45,24 @@ from voxsplit.core.constants import (
 
 
 # ── 下载实现 ─────────────────────────────────────────────────────────────
-def _download_via_gh(repo: str, tag: str, asset: str, dest: Path) -> bool:
-    """用 gh release download 拉 release asset。成功 True；gh 不在或失败 False。"""
+def _download_via_gh(repo: str, tag: Optional[str], asset: str, dest: Path) -> bool:
+    """``gh release download`` 拉 release asset。``tag=None`` 时拉 latest release。
+
+    gh 的语义：``gh release download [<tag>]`` 省略 tag 即拉最新；
+    传字符串 ``"latest"`` 反而被当成 tag 名查找，会 404。
+    """
     if not shutil.which("gh"):
         return False
-    cmd = [
-        "gh", "release", "download", tag,
+    cmd = ["gh", "release", "download"]
+    if tag:
+        cmd.append(tag)
+    cmd += [
         "--repo", repo,
         "--pattern", asset,
         "--output", str(dest),
         "--clobber",
     ]
-    print(f"[fetch] gh release download {tag} {asset}")
+    print(f"[fetch] gh release download {tag or '(latest)'} {asset}")
     proc = subprocess.run(cmd, capture_output=True, text=True)
     if proc.returncode == 0 and dest.is_file():
         return True
@@ -94,7 +100,7 @@ def _stdlib_download(url: str, dest: Path) -> bool:
 
 
 # ── manifest 拉取（与 bundle 同位置）─────────────────────────────────────
-def _fetch_manifest(repo: str, tag: str, dest: Path) -> bool:
+def _fetch_manifest(repo: str, tag: Optional[str], dest: Path) -> bool:
     """优先 gh，fallback 到 curl 公共 URL（私有 release 不行，但留作 escape hatch）。"""
     if _download_via_gh(repo, tag, BUNDLE_MANIFEST_FILENAME, dest):
         return True
@@ -191,8 +197,8 @@ def run(args: argparse.Namespace) -> int:
             manifest_path = Path(args.manifest).expanduser().resolve()
 
         else:
-            # 默认走 GitHub Release
-            tag = args.release
+            # 默认走 GitHub Release（None = latest，避免把字符串 "latest" 当 tag）
+            tag = args.release if args.release and args.release != "latest" else None
             repo = args.repo
             bundle_path = tmp / BUNDLE_FILENAME
             manifest_path = tmp / BUNDLE_MANIFEST_FILENAME
