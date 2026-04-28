@@ -20,9 +20,9 @@ from pathlib import Path
 
 import pytest
 
-from voxsplit.commands import build_bundle as B
-from voxsplit.commands import fetch_bundle as F
-from voxsplit.core import bundle as core_bundle
+from voxkit.commands import build_bundle as B
+from voxkit.commands import fetch_bundle as F
+from voxkit.core import bundle as core_bundle
 
 
 # ── fixture：fake HF cache ─────────────────────────────────────────────
@@ -55,9 +55,16 @@ def _make_fake_cache(root: Path, repo_id: str, *, commit: str, files: dict[str, 
 # ── monkey-patch BUNDLE_MODELS / 默认 cache ────────────────────────────
 @pytest.fixture
 def patched_bundle_models(monkeypatch):
-    """让 build / doctor 只关心一个伪 repo，避免触碰真实 4 个模型。"""
+    """让 build / doctor 只关心一个伪 repo，避免触碰真实 4 个模型。
+
+    同时把 ``BUNDLE_AUX_FILES`` 默认 patch 为空——保证现有测试在跑 build/fetch
+    时不会触碰开发者机器上真实的 /opt/homebrew/.../silero.bin，
+    更不会把 aux 文件落到真实 ``~/.cache/voxkit/aux/``。
+    需要测 aux 行为的新测试自己再 patch 该常量。
+    """
     fake = [{"repo_id": "fake-org/fake-model", "license": "mit"}]
-    monkeypatch.setattr("voxsplit.commands.build_bundle.BUNDLE_MODELS", fake)
+    monkeypatch.setattr("voxkit.commands.build_bundle.BUNDLE_MODELS", fake)
+    monkeypatch.setattr("voxkit.commands.build_bundle.BUNDLE_AUX_FILES", [])
     return fake
 
 
@@ -113,8 +120,8 @@ def test_build_then_fetch_round_trip(tmp_path, patched_bundle_models):
         bundle_version="v-test",
     ))
     assert rc == 0
-    bundle_p = out_dir / "voxsplit-models.tar.gz"
-    manifest_p = out_dir / "voxsplit-models.manifest.json"
+    bundle_p = out_dir / "voxkit-models.tar.gz"
+    manifest_p = out_dir / "voxkit-models.manifest.json"
     assert bundle_p.is_file()
     assert manifest_p.is_file()
 
@@ -188,8 +195,8 @@ def test_fetch_detects_corrupt_bundle(tmp_path, patched_bundle_models):
         bundle_version="v-test",
     )) == 0
 
-    bundle_p = out_dir / "voxsplit-models.tar.gz"
-    manifest_p = out_dir / "voxsplit-models.manifest.json"
+    bundle_p = out_dir / "voxkit-models.tar.gz"
+    manifest_p = out_dir / "voxkit-models.manifest.json"
 
     # 故意篡改 bundle（追加 1 字节）
     with bundle_p.open("ab") as f:
@@ -204,3 +211,241 @@ def test_fetch_detects_corrupt_bundle(tmp_path, patched_bundle_models):
         force=False, no_verify=False, verify_all=False,
     ))
     assert rc == 1
+
+
+# ── aux files 测试（Round 2 Agent B）────────────────────────────────────
+def _make_aux_spec(tmp_path: Path, *, src_filename: str, target_filename: str,
+                   content: bytes) -> tuple[Path, dict]:
+    """构造一个 aux spec dict + 写入源文件。返回 (target_path, spec)。"""
+    src = tmp_path / "fake-brew" / src_filename
+    src.parent.mkdir(parents=True, exist_ok=True)
+    src.write_bytes(content)
+    target = tmp_path / "fake-target" / target_filename
+    spec = {
+        "name": "fake-aux",
+        "filename": src_filename,  # bundle tar 内 aux/<filename>
+        "license": "mit",
+        "source_candidates": [str(src)],
+        "target": str(target),
+    }
+    return target, spec
+
+
+def _build_simple_bundle(
+    tmp_path: Path, *, aux_specs: list[dict] | None = None
+) -> tuple[Path, Path]:
+    """build 出一个最小 bundle（1 个伪 model，0 或多个 aux）。返回 (bundle, manifest)。
+
+    通过 monkey-patch 临时替换 build_bundle 模块级 BUNDLE_AUX_FILES。需要在
+    fixture 已经把 BUNDLE_MODELS 替换为伪 repo 之后调用。
+    """
+    src_root = tmp_path / "src"
+    out_dir = tmp_path / "out"
+    out_dir.mkdir(exist_ok=True)
+    src_hub = _make_fake_cache(src_root, "fake-org/fake-model",
+                               commit="abc123" * 6,
+                               files={"config.yaml": b"k: v\n"})
+
+    # mp 的 setattr 必须用 monkeypatch，但这函数没有 fixture——交给调用方用 monkeypatch.setattr
+    rc = B.run(argparse.Namespace(
+        hf_cache=str(src_hub),
+        output_dir=str(out_dir),
+        bundle_version="v-aux",
+    ))
+    assert rc == 0
+    return out_dir / "voxkit-models.tar.gz", out_dir / "voxkit-models.manifest.json"
+
+
+def test_build_with_aux_file_present(tmp_path, monkeypatch, patched_bundle_models):
+    """aux 文件源存在 → manifest 含 aux_files 且 tar 包含 aux/<filename>。"""
+    import tarfile
+
+    target, spec = _make_aux_spec(
+        tmp_path,
+        src_filename="ggml-silero-fake.bin",
+        target_filename="ggml-silero-fake.bin",
+        content=b"\x10" * 2048,
+    )
+    monkeypatch.setattr("voxkit.commands.build_bundle.BUNDLE_AUX_FILES", [spec])
+
+    bundle_p, manifest_p = _build_simple_bundle(tmp_path)
+    manifest = core_bundle.BundleManifest.model_validate_json(manifest_p.read_text())
+
+    assert len(manifest.aux_files) == 1
+    aux = manifest.aux_files[0]
+    assert aux.filename == "ggml-silero-fake.bin"
+    assert aux.size_bytes == 2048
+    assert aux.sha256 == hashlib.sha256(b"\x10" * 2048).hexdigest()
+    # target_path 应已展开（无 ~），与 spec 中 tmp 路径一致
+    assert aux.target_path == str(target)
+
+    # tar 内必须有 aux/<filename>
+    with tarfile.open(bundle_p, "r:gz") as tf:
+        names = tf.getnames()
+    assert "aux/ggml-silero-fake.bin" in names
+
+
+def test_build_with_aux_file_missing(tmp_path, monkeypatch, patched_bundle_models, capsys):
+    """所有 source_candidates 不存在 → build 不报错，aux_files 为空，stderr 有警告。"""
+    spec = {
+        "name": "missing-aux",
+        "filename": "nonexistent.bin",
+        "license": "mit",
+        "source_candidates": [
+            str(tmp_path / "definitely-not-here-1.bin"),
+            str(tmp_path / "definitely-not-here-2.bin"),
+        ],
+        "target": str(tmp_path / "target" / "nonexistent.bin"),
+    }
+    monkeypatch.setattr("voxkit.commands.build_bundle.BUNDLE_AUX_FILES", [spec])
+
+    bundle_p, manifest_p = _build_simple_bundle(tmp_path)
+    manifest = core_bundle.BundleManifest.model_validate_json(manifest_p.read_text())
+
+    assert manifest.aux_files == []  # 空列表（兼容 pydantic 默认）
+    captured = capsys.readouterr()
+    assert "not found" in captured.err
+    assert "nonexistent.bin" in captured.err
+
+
+def test_fetch_installs_aux_file_to_target(tmp_path, monkeypatch, patched_bundle_models):
+    """build → fetch round-trip：aux 文件落到 target_path 且 sha256 一致。"""
+    content = b"silero-fake-payload" * 64  # 1216 bytes
+    target, spec = _make_aux_spec(
+        tmp_path,
+        src_filename="ggml-silero-fake.bin",
+        target_filename="ggml-silero-fake.bin",
+        content=content,
+    )
+    monkeypatch.setattr("voxkit.commands.build_bundle.BUNDLE_AUX_FILES", [spec])
+
+    bundle_p, manifest_p = _build_simple_bundle(tmp_path)
+
+    dst_hub = tmp_path / "dst" / "hub"
+    rc = F.run(argparse.Namespace(
+        bundle=str(bundle_p), manifest=str(manifest_p),
+        from_url=None, release=None, repo="any/any",
+        hf_cache=str(dst_hub),
+        force=False, no_verify=False, verify_all=True,
+    ))
+    assert rc == 0
+    # 校验 target 落地
+    assert target.is_file(), f"aux 应被搬到 {target}"
+    assert target.read_bytes() == content
+    # staging hub/aux/ 必须被清理（不留垃圾）
+    assert not (dst_hub / "aux").exists(), "hub/aux/ 必须被清理"
+
+
+def test_fetch_backward_compat_no_aux(tmp_path, patched_bundle_models):
+    """没有 aux_files 的 bundle（fixture 默认空）→ build/fetch 都正常。"""
+    src_root = tmp_path / "src"
+    out_dir = tmp_path / "out"
+    out_dir.mkdir()
+    src_hub = _make_fake_cache(src_root, "fake-org/fake-model",
+                               commit="0" * 30, files={"a.txt": b"hi\n"})
+
+    rc = B.run(argparse.Namespace(
+        hf_cache=str(src_hub),
+        output_dir=str(out_dir),
+        bundle_version="v-noaux",
+    ))
+    assert rc == 0
+    bundle_p = out_dir / "voxkit-models.tar.gz"
+    manifest_p = out_dir / "voxkit-models.manifest.json"
+
+    manifest = core_bundle.BundleManifest.model_validate_json(manifest_p.read_text())
+    assert manifest.aux_files == []  # 空列表
+
+    # JSON 中即便有 auxFiles 字段为空数组也是合法的（字段允许默认值）
+    raw = json.loads(manifest_p.read_text())
+    assert raw.get("auxFiles", []) == []
+
+    # fetch 应当不抛错且不创建 hub/aux/
+    dst_hub = tmp_path / "dst" / "hub"
+    rc = F.run(argparse.Namespace(
+        bundle=str(bundle_p), manifest=str(manifest_p),
+        from_url=None, release=None, repo="any/any",
+        hf_cache=str(dst_hub),
+        force=False, no_verify=False, verify_all=True,
+    ))
+    assert rc == 0
+    assert not (dst_hub / "aux").exists()
+
+
+def test_fetch_old_manifest_without_aux_field(tmp_path, patched_bundle_models):
+    """显式删除 manifest 中的 auxFiles 字段（模拟 v0.2.0 旧 bundle）→ fetch 仍然成功。"""
+    src_root = tmp_path / "src"
+    out_dir = tmp_path / "out"
+    out_dir.mkdir()
+    src_hub = _make_fake_cache(src_root, "fake-org/fake-model",
+                               commit="1" * 30, files={"a.txt": b"hi\n"})
+
+    rc = B.run(argparse.Namespace(
+        hf_cache=str(src_hub),
+        output_dir=str(out_dir),
+        bundle_version="v-legacy",
+    ))
+    assert rc == 0
+    manifest_p = out_dir / "voxkit-models.manifest.json"
+
+    # 模拟旧版 manifest：删掉 auxFiles 键
+    raw = json.loads(manifest_p.read_text())
+    raw.pop("auxFiles", None)
+    manifest_p.write_text(json.dumps(raw))
+
+    # 仍然要能解析 + fetch
+    parsed = core_bundle.BundleManifest.model_validate_json(manifest_p.read_text())
+    assert parsed.aux_files == []
+
+    dst_hub = tmp_path / "dst" / "hub"
+    rc = F.run(argparse.Namespace(
+        bundle=str(out_dir / "voxkit-models.tar.gz"),
+        manifest=str(manifest_p),
+        from_url=None, release=None, repo="any/any",
+        hf_cache=str(dst_hub),
+        force=False, no_verify=False, verify_all=True,
+    ))
+    assert rc == 0
+
+
+def test_fetch_aux_skip_without_force(tmp_path, monkeypatch, patched_bundle_models, capsys):
+    """target 已存在 + 无 --force → 跳过；带 --force → 覆盖。"""
+    content_v1 = b"first-version"
+    content_v2 = b"second-version-different-bytes"
+    target, spec = _make_aux_spec(
+        tmp_path,
+        src_filename="aux.bin",
+        target_filename="aux.bin",
+        content=content_v2,  # bundle 中是 v2
+    )
+    # 先用 v1 占位 target
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(content_v1)
+    pre_mtime = target.stat().st_mtime
+
+    monkeypatch.setattr("voxkit.commands.build_bundle.BUNDLE_AUX_FILES", [spec])
+    bundle_p, manifest_p = _build_simple_bundle(tmp_path)
+
+    # 第一次 fetch：no force → 跳过，target 保持 v1
+    dst_hub = tmp_path / "dst1" / "hub"
+    rc = F.run(argparse.Namespace(
+        bundle=str(bundle_p), manifest=str(manifest_p),
+        from_url=None, release=None, repo="any/any",
+        hf_cache=str(dst_hub),
+        force=False, no_verify=False, verify_all=True,
+    ))
+    assert rc == 0
+    assert target.read_bytes() == content_v1, "no force 不应覆盖现存 target"
+    captured = capsys.readouterr()
+    assert "skipped" in captured.out
+
+    # 第二次 fetch：force=True → 覆盖为 v2
+    dst_hub2 = tmp_path / "dst2" / "hub"
+    rc = F.run(argparse.Namespace(
+        bundle=str(bundle_p), manifest=str(manifest_p),
+        from_url=None, release=None, repo="any/any",
+        hf_cache=str(dst_hub2),
+        force=True, no_verify=False, verify_all=True,
+    ))
+    assert rc == 0
+    assert target.read_bytes() == content_v2, "--force 应覆盖现存 target"

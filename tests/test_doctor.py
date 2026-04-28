@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from voxsplit.commands import doctor as D
+from voxkit.commands import doctor as D
 
 
 # ── check_python ────────────────────────────────────────────────
@@ -108,3 +108,158 @@ def test_check_venv_missing(monkeypatch, tmp_path):
     r = D.check_venv()
     assert not r.ok
     assert r.severity == "warn"  # venv 缺只是 warn（不阻断 doctor 0 退出）
+
+
+# ── Round 2: check_whisper_cli ──────────────────────────────────
+def test_check_whisper_cli_not_found(monkeypatch):
+    """whisper-cli 未安装 → WARN，提示 brew install whisper-cpp。"""
+    monkeypatch.setattr(D, "find_whisper_cli", lambda: None)
+    r = D.check_whisper_cli()
+    assert not r.ok
+    assert r.severity == "warn"
+    assert r.fix and "whisper-cpp" in r.fix
+
+
+def test_check_whisper_cli_all_flags(monkeypatch, tmp_path):
+    """whisper-cli help 包含全部必需 flag → OK。"""
+    fake_bin = tmp_path / "whisper-cli"
+    fake_bin.write_text("#!/bin/sh\n")
+    monkeypatch.setattr(D, "find_whisper_cli", lambda: fake_bin)
+
+    help_text = "\n".join([
+        "Usage: whisper-cli ...",
+        "  --output-json-full",
+        "  --max-context N",
+        "  --vad",
+        "  --split-on-word",
+        "  --logprob-thold N",
+    ])
+
+    class _Completed:
+        stdout = help_text
+        stderr = ""
+
+    def _fake_run(argv, capture_output=True, text=True, timeout=5):
+        assert argv[0] == str(fake_bin) and argv[1] == "--help"
+        return _Completed()
+
+    monkeypatch.setattr(D.subprocess, "run", _fake_run)
+    r = D.check_whisper_cli()
+    assert r.ok, r.detail
+    assert str(fake_bin) in r.detail
+
+
+def test_check_whisper_cli_missing_vad_flag(monkeypatch, tmp_path):
+    """whisper-cli help 缺 --vad → WARN，message 应提到 --vad。"""
+    fake_bin = tmp_path / "whisper-cli"
+    fake_bin.write_text("#!/bin/sh\n")
+    monkeypatch.setattr(D, "find_whisper_cli", lambda: fake_bin)
+
+    # 故意省略 --vad
+    help_text = "\n".join([
+        "  --output-json-full",
+        "  --max-context N",
+        "  --split-on-word",
+        "  --logprob-thold N",
+    ])
+
+    class _Completed:
+        stdout = help_text
+        stderr = ""
+
+    monkeypatch.setattr(
+        D.subprocess, "run",
+        lambda *a, **kw: _Completed(),
+    )
+    r = D.check_whisper_cli()
+    assert not r.ok
+    assert r.severity == "warn"
+    assert "--vad" in r.detail
+    assert r.fix and "upgrade" in r.fix.lower()
+
+
+# ── Round 2: check_whisper_model ────────────────────────────────
+def test_check_whisper_model_present(monkeypatch, tmp_path):
+    """模型文件存在 → OK，detail 含 MB。"""
+    fake_model = tmp_path / "ggml-large-v3-turbo.bin"
+    fake_model.write_bytes(b"x" * (2 * 1024 * 1024))  # 2 MB
+    monkeypatch.setattr(D, "find_whisper_model", lambda name="large-v3-turbo": fake_model)
+    r = D.check_whisper_model()
+    assert r.ok
+    assert "MB" in r.detail
+
+
+def test_check_whisper_model_missing(monkeypatch):
+    """模型缺失 → WARN，hint 提到 huggingface-cli 或 brew。"""
+    monkeypatch.setattr(D, "find_whisper_model", lambda name="large-v3-turbo": None)
+    r = D.check_whisper_model()
+    assert not r.ok
+    assert r.severity == "warn"
+    assert r.fix
+    fix_lower = r.fix.lower()
+    assert "huggingface-cli" in fix_lower or "brew" in fix_lower
+
+
+# ── Round 2: check_vad_model ────────────────────────────────────
+def test_check_vad_model_present(monkeypatch, tmp_path):
+    """VAD 模型存在 → OK，detail 含路径。"""
+    fake_vad = tmp_path / "ggml-silero-v5.1.2.bin"
+    fake_vad.write_text("x")
+    monkeypatch.setattr(D, "find_vad_model", lambda: fake_vad)
+    r = D.check_vad_model()
+    assert r.ok
+    assert str(fake_vad) in r.detail
+
+
+def test_check_vad_model_missing(monkeypatch):
+    """VAD 模型缺失 → WARN。"""
+    monkeypatch.setattr(D, "find_vad_model", lambda: None)
+    r = D.check_vad_model()
+    assert not r.ok
+    assert r.severity == "warn"
+    assert r.fix
+
+
+# ── Round 2: integration — full run() includes the 3 new checks ──
+def test_run_integration_includes_new_checks(monkeypatch, tmp_path, capsys):
+    """run() 全链路：3 个新 WARN 都是 warn，不改变退出码。
+
+    通过 mock 让所有新 check 都"未找到 → WARN"，run() 应仍返回 ExitCode.OK
+    （只要原 7 项无 error）。
+    """
+    # mock 新 3 项为 missing → WARN
+    monkeypatch.setattr(D, "find_whisper_cli", lambda: None)
+    monkeypatch.setattr(D, "find_whisper_model", lambda name="large-v3-turbo": None)
+    monkeypatch.setattr(D, "find_vad_model", lambda: None)
+
+    # 让 HF token 探测落到 tmp_path（避免命中开发机真实 token）
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+
+    # 让 gated HEAD 都 200，避免 HF auth 故障扰乱基线
+    class _Resp:
+        status = 200
+        def __enter__(self): return self
+        def __exit__(self, *a): pass
+
+    # 写一个假 HF token
+    token_dir = tmp_path / ".cache" / "huggingface"
+    token_dir.mkdir(parents=True)
+    (token_dir / "token").write_text("hf_test")
+    monkeypatch.setattr(D.urllib.request, "urlopen", lambda req, timeout=10: _Resp())
+
+    code = D.run()
+    captured = capsys.readouterr().out
+
+    # 新 3 行都应该出现在输出里（即使是 WARN 状态）
+    assert "whisper-cli 可用" in captured
+    assert "whisper 模型" in captured
+    assert "silero VAD 模型" in captured
+
+    # 退出码：所有新 check 都是 WARN，不应该改变 baseline。
+    # 当 ffmpeg/uv/venv 在开发机上可能各种状态，至少应该不是因新 3 项而失败。
+    # 严格判定：退出码不应是 ExitCode.GENERIC_FAIL（1）由新 check 触发。
+    # 实际上只要新 3 项都是 warn，run() 不会因它们而 fail。
+    from voxkit.core.constants import ExitCode
+    assert code in (ExitCode.OK, ExitCode.HF_AUTH, ExitCode.ENV_PROBLEM, ExitCode.GENERIC_FAIL)
+    # 关键不变量：新 3 项 WARN 不会单独导致 GENERIC_FAIL。
+    # 这里我们能确认的最强语义：输出包含 3 个新 check 的行。

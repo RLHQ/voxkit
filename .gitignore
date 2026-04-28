@@ -20,7 +20,7 @@ htmlcov/
 # 测试产物 / 本地缓存
 tests/fixtures/short.wav
 *.tmp.json
-/tmp/voxsplit-*
+/tmp/
 
 # IDE
 .idea/

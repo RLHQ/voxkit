@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "description": "Chinese watermark + ghost-loop blocklist for whisper.cpp output. Ported from Remixr CutFlow services/whisper-hallucination-blocklist.ts.",
+  "watermark_prefixes": [
+    "优优独播剧场",
+    "新唐人电视台",
+    "明镜新闻台",
+    "明镜电视台",
+    "希望之声",
+    "请不吝点赞订阅转发打赏",
+    "请不吝点赞订阅转发"
+  ],
+  "standalone_matches": [
+    "明镜",
+    "明镜新闻",
+    "明镜电视",
+    "新唐人",
+    "MagicMedia",
+    "请订阅",
+    "请订阅本频道",
+    "请点赞订阅",
+    "记得订阅",
+    "记得订阅我们的频道",
+    "关注我的频道",
+    "字幕由社区提供",
+    "字幕组",
+    "本字幕由",
+    "谢谢观看",
+    "感谢观看",
+    "感谢您的观看",
+    "下期再见",
+    "我们下期再见"
+  ],
+  "ghost_loop": {
+    "min_substring_chars": 6,
+    "min_repeats": 2
+  },
+  "normalize": {
+    "strip_chars": " \t\n\r.,。，、！？!?…-—　「」"
+  }
+}

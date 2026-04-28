@@ -3,8 +3,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "voxsplit"
-version = "0.2.0"
+name = "voxkit"
+version = "0.3.0"
 description = "Standalone speaker diarization CLI built around pyannote.audio"
 requires-python = ">=3.10"
 authors = [{ name = "xsharp" }]
@@ -26,10 +26,10 @@ dev = [
 ]
 
 [project.scripts]
-voxsplit = "voxsplit.cli:main"
+voxkit = "voxkit.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/voxsplit"]
+packages = ["src/voxkit"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -5,8 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from voxsplit.commands import align as A
-from voxsplit.io.schema import (
+from voxkit.commands import align as A
+from voxkit.io.schema import (
     AudioInfo,
     DiarizationOutput,
     Segment,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from voxsplit.io.schema import (
+from voxkit.io.schema import (
     AudioInfo,
     DiarizationOutput,
     Segment,
