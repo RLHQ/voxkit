@@ -24,11 +24,24 @@ changes (with migration notes).
   populated when written.
 - `voxkit.io.cues_json` module + `SubtitleCueOut` / `SubtitleCuesOutput`
   Pydantic models in `io/schema.py`.
+- **CJK short-cue merge** — `--resegment=semantic` now also benefits CJK
+  inputs: short cues (< `min_dur_s`, default 1.5s) merge into a same-speaker
+  neighbour to eliminate flicker subtitles. Empirically validated on a
+  106-min Mandarin podcast: 4426 → 2721 cues (−38.5%), avg duration
+  1.43s → 2.33s, sub-1.5s cues 58.8% → 0%, no over-7s cues introduced.
+  Implementation: opens the existing `_merge_too_short` to the CJK passthrough
+  path; pysbd is still skipped (CJK has no word-level timestamps), so the
+  passthrough → merge → monotonic chain is the entire CJK pipeline.
+  Long-segment splitting in CJK remains unimplemented (YAGNI: segmenter's
+  5s/100chars upper bound already gates this in practice).
 
 ### Changed
 
 - `_ensure_raw_json_writable` also unlinks `subtitles.cues.json` on `--force`
   so the exclusive-create write does not collide on rerun.
+- **CJK `--resegment=semantic`** is no longer a strict no-op — it now applies
+  short-cue merging. Output `cue_count` may be lower than `segment_count`
+  (previously they were equal). `transcript.raw.json` is unaffected.
 
 ## [0.3.0] — 2026-04-28
 

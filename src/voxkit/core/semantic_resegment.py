@@ -9,7 +9,7 @@
   - **只影响字幕，不动 transcript.{voxkit,raw}.json**——JSON 是 ASR 真实产出，
     重切是字幕渲染优化，两者语义不同不应混用
 
-算法概要：
+英文路径（有 word-level timestamp）：
 
   1. 拍平所有 word 到 (text, start, end, speaker)；speaker 继承自 segment
   2. 按 speaker 分块（连续同 speaker 归一组），避免跨说话人合并
@@ -18,8 +18,15 @@
   5. 短 cue 合并到同 speaker 邻居（避免闪现 0.5s 字幕）
   6. enforce_monotonic 钳住跨 cue 时间倒挂（whisper word ts 偶尔重叠）
 
-CJK 自动降级：CJK 语言（zh/ja/yue/ko）下 whisper.cpp 不输出 word 时间戳，
-直接 pass-through——每个原 segment 包装成 1 个 cue。
+CJK 路径（whisper.cpp 不输出 word-level timestamp）：
+
+  1. 每个 segment 1:1 包装成 cue（passthrough）
+  2. 短 cue 合并到同 speaker 邻居——核心痛点：whisper 中文 segmenter
+     频繁吐出 < 1.5s 的闪现 cue（实测某 106min 视频 58.8% < 1.5s）
+  3. enforce_monotonic
+  注意：长拆分 / 句子级重切在 CJK 暂不实现——前者需要 segment 内字符级
+  时间插值（误差 ±200ms 量级，字幕渲染可接受），但当前 segmenter 已用
+  5s/100chars 上限切过，长 segment 在实际数据中极罕见，YAGNI 暂不做。
 
 参数（:class:`ResegmentParams`）经实验在 EN podcast 上调校：
 综合分 baseline 48.5 → resegment 67.5，物理分 31.4 → 83.0
@@ -129,11 +136,14 @@ def resegment_for_subtitles(
     if not segments:
         return []
 
-    if language.lower() in CJK_LANGUAGES:
-        return _passthrough(segments)
-
-    if not segments[0].words:
-        return _passthrough(segments)
+    # CJK / no-word-timestamp 路径：1:1 包装 + 同 speaker 短合并 + 单调钳位。
+    # 不能跑 pysbd（没 word-level start/end 来反查字符 span），但短合并完全
+    # 不依赖 word 时间戳——只读 segment-level start/end + speaker，所以
+    # 可以无损开放给 CJK。
+    if language.lower() in CJK_LANGUAGES or not segments[0].words:
+        cues = _passthrough(segments)
+        cues = _merge_too_short(cues, p)
+        return _enforce_monotonic(cues)
 
     # 仅在真正需要时才 import pysbd——保持 voxkit 主路径无依赖
     import pysbd

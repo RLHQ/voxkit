@@ -121,6 +121,12 @@ Remixr 的「未校对」判定。
 仅当 `--resegment=semantic` 且重切真的产出了 cues 时才写（diarized fallback 不算）。
 与 `subtitles.srt/vtt` 同源——同一份 `SubtitleCue[]` 三处渲染：SRT、VTT、JSON。
 
+**英文路径**：pysbd 句子边界 → 长句 split_long → 短 cue 合并 → 单调钳位。
+**CJK 路径**：whisper.cpp 不输出 word timestamp 故跳过 pysbd，但 **短 cue 合并仍然生效**——
+将 < `min_dur_s`（默认 1.5s）的同 speaker 相邻 cue 合并以消除闪现字幕。实测某 106 min
+中文播客：4426 → 2721 cues（−38.5%），平均时长 1.43s → 2.33s，闪现率 58.8% → 0%。
+长 segment 在 CJK 不做拆分（segmenter 的 5s/100chars 上限已实务封顶）。
+
 ```jsonc
 {
   "schemaVersion": "1",

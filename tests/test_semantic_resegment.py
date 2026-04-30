@@ -50,8 +50,8 @@ def test_empty_input_returns_empty():
     assert resegment_for_subtitles([], language="en") == []
 
 
-def test_cjk_passthrough():
-    """CJK 不调 pysbd（即使 pysbd 不在也应该正常返回）。"""
+def test_cjk_long_cues_passthrough_unchanged():
+    """CJK 路径不调 pysbd；当 cue 已经 ≥ min_dur_s 时不该合并，1:1 输出。"""
     segs = [
         _seg("s1", 0.0, 2.0, "你好世界。", speaker="Speaker 1"),
         _seg("s2", 2.0, 4.0, "今天天气真好。", speaker="Speaker 1"),
@@ -63,8 +63,38 @@ def test_cjk_passthrough():
     assert cues[1].text == "今天天气真好。"
 
 
+def test_cjk_short_cues_get_merged():
+    """档 1：CJK 路径打开 _merge_too_short——同 speaker 短 cue 合并到邻居，
+    避免 < 1.5s 的闪现字幕。
+    """
+    # 三个 1s 同 speaker cue → 单调合并到 max_dur_s 上限附近
+    segs = [
+        _seg("s1", 0.0, 1.0, "第一句", speaker="Speaker 1"),
+        _seg("s2", 1.0, 2.0, "第二句", speaker="Speaker 1"),
+        _seg("s3", 2.0, 3.0, "第三句", speaker="Speaker 1"),
+    ]
+    cues = resegment_for_subtitles(segs, language="zh")
+    # 至少减少 cue 数；且合并后每个 cue ≥ min_dur_s（除非物理上限阻挡）
+    assert len(cues) < 3
+    # 合并后的文本保留单空格分隔
+    joined = " ".join(c.text for c in cues)
+    assert "第一句" in joined and "第二句" in joined and "第三句" in joined
+
+
+def test_cjk_short_cues_different_speakers_dont_merge():
+    """跨 speaker 不合并——即使两侧都很短，也保留为独立 cue（避免说话人混淆）。"""
+    segs = [
+        _seg("s1", 0.0, 1.0, "你好", speaker="Speaker 1"),
+        _seg("s2", 1.0, 2.0, "Hi", speaker="Speaker 2"),
+    ]
+    cues = resegment_for_subtitles(segs, language="zh")
+    assert len(cues) == 2
+    assert cues[0].speaker == "Speaker 1"
+    assert cues[1].speaker == "Speaker 2"
+
+
 def test_passthrough_when_words_missing():
-    """非 CJK 但 segments[0].words 为空 → pass-through 防御性兜底。"""
+    """非 CJK 但 segments[0].words 为空 → 走 CJK-style 路径（passthrough + 短合并）。"""
     segs = [_seg("s1", 0.0, 2.0, "Hello world.", words=[])]
     cues = resegment_for_subtitles(segs, language="en")
     assert len(cues) == 1
@@ -72,12 +102,14 @@ def test_passthrough_when_words_missing():
 
 
 def test_passthrough_skips_blank_text():
+    """空白 segment 在入口就被滤掉，不参与合并候选。"""
     segs = [
-        _seg("s1", 0.0, 1.0, "Hello.", speaker="A"),
-        _seg("s2", 1.0, 2.0, "   ", speaker="A"),
-        _seg("s3", 2.0, 3.0, "World.", speaker="A"),
+        # 两侧 cue 时长 ≥ min_dur_s，确保不会合并；专测空白过滤
+        _seg("s1", 0.0, 2.0, "Hello.", speaker="A"),
+        _seg("s2", 2.0, 3.0, "   ", speaker="A"),
+        _seg("s3", 3.0, 5.0, "World.", speaker="A"),
     ]
-    cues = resegment_for_subtitles(segs, language="zh")  # CJK 路径走 passthrough
+    cues = resegment_for_subtitles(segs, language="zh")
     assert [c.text for c in cues] == ["Hello.", "World."]
 
 
