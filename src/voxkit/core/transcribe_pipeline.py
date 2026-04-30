@@ -41,7 +41,12 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable, Literal
+
+if TYPE_CHECKING:
+    from voxkit.core.semantic_resegment import SubtitleCue
+
+ResegmentMode = Literal["none", "semantic"]
 
 from voxkit import __version__
 from voxkit.core import env as core_env
@@ -61,7 +66,7 @@ from voxkit.core.asr_merge import (
     merge_chunks,
     write_merge_log,
 )
-from voxkit.core.constants import ExitCode
+from voxkit.core.constants import DIA_PHANTOM_FILTER_S, ExitCode
 from voxkit.core.hallucination_filter import (
     Blocklist,
     DroppedEntry,
@@ -101,14 +106,13 @@ from voxkit.io.schema import (
     TranscriptSegment,
 )
 from voxkit.io.srt import (
-    format_srt_time,
-    format_vtt_time,
     to_subtitles_srt,
     to_subtitles_vtt,
 )
 
 __all__ = [
     "PipelineError",
+    "ResegmentMode",
     "TranscribeRequest",
     "TranscribeResult",
     "run_pipeline",
@@ -151,6 +155,11 @@ class TranscribeRequest:
     # ── Phase 2 — diarization integration ────────────────────────────
     with_diarization: bool = False
     speaker_labels: str = "ranked"
+    # ── Phase 3 — semantic subtitle resegmentation ───────────────────
+    # "semantic" runs voxkit.core.semantic_resegment as a post-processor
+    # (pysbd sentence boundaries + clause-aware splitting; CJK passthrough).
+    # Only affects SRT/VTT — JSON outputs are byte-identical regardless.
+    resegment: ResegmentMode = "none"
 
 
 @dataclass(frozen=True)
@@ -534,40 +543,17 @@ def _run_diarization_pass(
     return diarization, elapsed_d
 
 
-def _render_remixr_srt(t: RemixrTranscript) -> str:
-    """Render an SRT document from a Remixr-shaped transcript.
-
-    Mirrors :func:`voxkit.io.srt.to_subtitles_srt` (which only accepts
-    voxkit-native ``TranscriptionOutput``) but reads ``speaker`` off each
-    :class:`RemixrSegment` so real speaker labels survive into the file.
-
-    One cue per segment, 1-indexed. ``speaker_prefix`` is implicit + always on
-    here — that is the whole point of the with-diarization codepath.
+def _remixr_to_cues(t: RemixrTranscript) -> "list[SubtitleCue]":
+    """Adapt a diarized RemixrTranscript to ``SubtitleCue[]`` for the cue
+    renderer. One cue per segment; speaker label survives. Used both when
+    resegment is off (legacy 1-cue-per-segment) and as a typed bridge so the
+    SRT / VTT renderers have a single code path.
     """
-    parts: list[str] = []
-    for i, seg in enumerate(t.segments, 1):
-        body = seg.text.strip()
-        line = f"{seg.speaker}: {body}" if seg.speaker else body
-        parts.append(str(i))
-        parts.append(f"{format_srt_time(seg.start)} --> {format_srt_time(seg.end)}")
-        parts.append(line)
-        parts.append("")
-    if not parts:
-        return ""
-    return "\n".join(parts) + "\n"
-
-
-def _render_remixr_vtt(t: RemixrTranscript) -> str:
-    """WebVTT counterpart of :func:`_render_remixr_srt`."""
-    parts: list[str] = ["WEBVTT", ""]
-    for i, seg in enumerate(t.segments, 1):
-        body = seg.text.strip()
-        line = f"{seg.speaker}: {body}" if seg.speaker else body
-        parts.append(str(i))
-        parts.append(f"{format_vtt_time(seg.start)} --> {format_vtt_time(seg.end)}")
-        parts.append(line)
-        parts.append("")
-    return "\n".join(parts) + "\n"
+    from voxkit.core.semantic_resegment import SubtitleCue
+    return [
+        SubtitleCue(start=s.start, end=s.end, speaker=s.speaker, text=s.text.strip())
+        for s in t.segments
+    ]
 
 
 # ── Main entry point ──────────────────────────────────────────────────────
@@ -854,6 +840,8 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                     voxkit_out.segments,
                     diarization_output,
                     speaker_labels=speaker_labels_mode,
+                    min_dia_duration_s=DIA_PHANTOM_FILTER_S,
+                    fallback_to_nearest=True,
                 )
                 unmatched_count = len(unmatched_ids)
                 matched_count = len(voxkit_out.segments) - unmatched_count
@@ -951,10 +939,8 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                 forward_to_stderr=forward_stderr,
             )
 
-            # 9. Subtitles. With diarization we render straight from the
-            #    speaker-bearing RemixrTranscript so SRT/VTT carry real labels;
-            #    without diarization we fall back to the v0.3.0 path
-            #    (TranscriptionOutput → "Speaker A:" placeholder).
+            # 9. Subtitles. resegment only affects SRT/VTT — JSON outputs above
+            #    are ASR ground truth, byte-identical regardless of this flag.
             artifacts: dict[str, Path] = {
                 "raw_json": ws.raw_json_path,
                 "voxkit_json": ws.voxkit_json_path,
@@ -963,15 +949,50 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
             }
             if diarization_output is not None:
                 artifacts["diarization_json"] = ws.work / "diarization.json"
+
+            cues: "list[SubtitleCue] | None" = None
+            if req.resegment == "semantic" and (req.emit_srt or req.emit_vtt):
+                try:
+                    from voxkit.core.semantic_resegment import (
+                        ResegmentParams,
+                        resegment_for_subtitles,
+                    )
+                    cues = resegment_for_subtitles(
+                        remixr_t.segments,
+                        language=language_for_output,
+                        params=ResegmentParams(),
+                    )
+                    _emit_event(
+                        em,
+                        {
+                            "event": "resegment.done",
+                            "input_segments": len(remixr_t.segments),
+                            "output_cues": len(cues),
+                        },
+                        forward_to_stderr=forward_stderr,
+                    )
+                except ImportError as exc:
+                    msg = (
+                        f"resegment=semantic requested but pysbd not available "
+                        f"({exc}); falling back to legacy renderer"
+                    )
+                    warnings.append(msg)
+                    voxkit_out.warnings.append(msg)
+                    cues = None
+
+            # Diarized path collapses to the cue renderer too: adapt
+            # RemixrSegment → SubtitleCue (1:1) so SRT/VTT have a single
+            # implementation regardless of resegment / diarization combination.
+            if cues is None and diarization_output is not None:
+                cues = _remixr_to_cues(remixr_t)
+
             if req.emit_srt:
-                if diarization_output is not None:
-                    ws.srt_path.write_text(
-                        _render_remixr_srt(remixr_t), encoding="utf-8"
-                    )
+                if cues is not None:
+                    from voxkit.io.srt import to_subtitles_srt_from_cues
+                    srt_text = to_subtitles_srt_from_cues(cues)
                 else:
-                    ws.srt_path.write_text(
-                        to_subtitles_srt(voxkit_out), encoding="utf-8"
-                    )
+                    srt_text = to_subtitles_srt(voxkit_out)
+                ws.srt_path.write_text(srt_text, encoding="utf-8")
                 artifacts["srt"] = ws.srt_path
                 _emit_event(
                     em,
@@ -979,14 +1000,12 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                     forward_to_stderr=forward_stderr,
                 )
             if req.emit_vtt:
-                if diarization_output is not None:
-                    ws.vtt_path.write_text(
-                        _render_remixr_vtt(remixr_t), encoding="utf-8"
-                    )
+                if cues is not None:
+                    from voxkit.io.srt import to_subtitles_vtt_from_cues
+                    vtt_text = to_subtitles_vtt_from_cues(cues)
                 else:
-                    ws.vtt_path.write_text(
-                        to_subtitles_vtt(voxkit_out), encoding="utf-8"
-                    )
+                    vtt_text = to_subtitles_vtt(voxkit_out)
+                ws.vtt_path.write_text(vtt_text, encoding="utf-8")
                 artifacts["vtt"] = ws.vtt_path
                 _emit_event(
                     em,
@@ -1040,6 +1059,11 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                 ),
                 "diarizationElapsedSecs": diarize_elapsed,
                 "numSpeakers": num_speakers,
+                # ── Phase 3: subtitle resegment metadata ─────────────
+                "subtitle": {
+                    "resegment": req.resegment,
+                    "cueCount": len(cues) if cues is not None else None,
+                },
             }
             write_manifest(ws, manifest)
             _emit_event(

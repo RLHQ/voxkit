@@ -1,23 +1,40 @@
-"""SRT / VTT subtitle generators for voxkit-native ``TranscriptionOutput``.
+"""SRT / VTT subtitle generators.
+
+Two render paths:
+
+  - **Segment path** (``to_subtitles_srt`` / ``to_subtitles_vtt``):
+    one cue per ``TranscriptSegment``; speaker prefix is always
+    ``"Speaker A: "`` because the voxkit-native schema has no speaker field.
+
+  - **Cue path** (``to_subtitles_srt_from_cues`` / ``to_subtitles_vtt_from_cues``):
+    one cue per ``SubtitleCue``; speaker prefix is per-cue (already carries
+    diarization label). Used by the optional semantic resegment post-processor
+    (:mod:`voxkit.core.semantic_resegment`).
 
 ``format_srt_time`` / ``format_vtt_time`` are the single source of truth for
 subtitle timestamp formatting; ``commands/align.py`` delegates here so the
 two surfaces never drift.
-
-These functions accept ``TranscriptionOutput`` (the rich form) only; they do
-not accept ``RemixrTranscript`` because that would defeat the speaker-prefix
-contract (Remixr segments always carry ``"Speaker A"`` as a placeholder).
 """
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Sequence
+
 from voxkit.io.schema import TranscriptionOutput
+
+if TYPE_CHECKING:
+    # SubtitleCue lives in core.semantic_resegment; only its attribute shape
+    # (start / end / speaker / text) is read here, so keep the import in
+    # TYPE_CHECKING to skip a runtime dep on a sibling layer.
+    from voxkit.core.semantic_resegment import SubtitleCue
 
 __all__ = [
     "format_srt_time",
     "format_vtt_time",
     "to_subtitles_srt",
     "to_subtitles_vtt",
+    "to_subtitles_srt_from_cues",
+    "to_subtitles_vtt_from_cues",
 ]
 
 
@@ -104,3 +121,47 @@ def to_subtitles_vtt(
         parts.append(_segment_text(seg.text, speaker_prefix))
         parts.append("")
     return "\n".join(parts) + "\n"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Cue path — for semantic_resegment post-processor output
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def _cue_text(text: str, speaker: str | None) -> str:
+    body = text.strip()
+    if speaker:
+        return f"{speaker}: {body}"
+    return body
+
+
+def _render_cues(
+    cues: Sequence["SubtitleCue"],
+    *,
+    time_fmt,
+    header: list[str],
+) -> str:
+    parts: list[str] = list(header)
+    for i, c in enumerate(cues, 1):
+        parts.append(str(i))
+        parts.append(f"{time_fmt(c.start)} --> {time_fmt(c.end)}")
+        parts.append(_cue_text(c.text, c.speaker))
+        parts.append("")
+    if not parts:
+        return ""
+    return "\n".join(parts) + "\n"
+
+
+def to_subtitles_srt_from_cues(cues: Sequence["SubtitleCue"]) -> str:
+    """Render :class:`SubtitleCue` sequence as an SRT document.
+
+    Each cue already carries its own speaker label (or ``None`` when no
+    diarization ran). The resegment module is responsible for monotonic
+    timestamps and physical limits.
+    """
+    return _render_cues(cues, time_fmt=format_srt_time, header=[])
+
+
+def to_subtitles_vtt_from_cues(cues: Sequence["SubtitleCue"]) -> str:
+    """Render :class:`SubtitleCue` sequence as a WebVTT document."""
+    return _render_cues(cues, time_fmt=format_vtt_time, header=["WEBVTT", ""])

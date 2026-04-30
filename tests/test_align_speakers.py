@@ -199,3 +199,75 @@ def test_input_diarization_is_not_mutated():
     original_dia_dump = dia.model_dump()
     assign_speakers([_seg("s", 1.0, 2.0)], dia, speaker_labels="ranked")
     assert dia.model_dump() == original_dia_dump
+
+
+# ── Phase 3: min_dia_duration_s + fallback_to_nearest ──────────────────────
+
+
+def test_min_dia_duration_filters_short_segments():
+    """pyannote 偶尔吐 17ms / 80ms 的瞬时 alt-speaker → 必须能被过滤。"""
+    dia = _make_diarization([
+        # 主说话人 Speaker 1 占长时间；中间穿插一个 80ms 假 Speaker 2
+        Segment(start=0.0, end=10.0, speaker="Speaker 1", raw_speaker="SPEAKER_00"),
+        Segment(start=4.95, end=5.03, speaker="Speaker 2", raw_speaker="SPEAKER_01"),
+        Segment(start=5.03, end=20.0, speaker="Speaker 1", raw_speaker="SPEAKER_00"),
+    ])
+    # Transcript segment 与所有三段都重叠
+    seg = _seg("s", 4.9, 5.1)
+
+    # 默认（不过滤）→ 80ms 假段会出现在候选里；但因 Speaker 1 段重叠更长，
+    # 这个 case 仍是 Speaker 1，所以单独测过滤导致候选变化
+    spk, _ = assign_speakers([seg], dia, min_dia_duration_s=0.5)
+    assert spk == {"s": "Speaker 1"}
+
+    # 当所有有效段被过滤完时 → 全部 unmatched
+    spk, unmatched = assign_speakers([seg], dia, min_dia_duration_s=30.0)
+    assert spk == {}
+    assert unmatched == ["s"]
+
+
+def test_fallback_to_nearest_resolves_zero_overlap():
+    """落在 dia segments 间隙的 transcript segment：opt-in 时回退到最近段。"""
+    dia = _make_diarization([
+        Segment(start=0.0, end=5.0, speaker="Speaker 1", raw_speaker="SPEAKER_00"),
+        Segment(start=10.0, end=15.0, speaker="Speaker 2", raw_speaker="SPEAKER_01"),
+    ])
+    # Transcript segment 完全在 [5, 10] gap 中
+    seg = _seg("s", 6.0, 7.0)
+
+    # 默认（不 fallback）→ unmatched
+    spk, unmatched = assign_speakers([seg], dia)
+    assert spk == {}
+    assert unmatched == ["s"]
+
+    # opt-in fallback → 6-7 距 5 更近 → Speaker 1
+    spk, unmatched = assign_speakers([seg], dia, fallback_to_nearest=True)
+    assert spk == {"s": "Speaker 1"}
+    assert unmatched == []
+
+    # 同样 opt-in，但落在偏右 → Speaker 2
+    seg2 = _seg("s2", 8.5, 9.5)
+    spk, unmatched = assign_speakers([seg2], dia, fallback_to_nearest=True)
+    assert spk == {"s2": "Speaker 2"}
+
+
+def test_fallback_with_filter_combination():
+    """min_dia_duration_s + fallback_to_nearest 同时启用：先过滤再算 overlap，
+    无 overlap 再退到（已过滤的）最近段。"""
+    dia = _make_diarization([
+        Segment(start=0.0, end=5.0, speaker="Speaker 1", raw_speaker="SPEAKER_00"),
+        # 噪声段：80ms，碰巧覆盖 transcript segment
+        Segment(start=6.0, end=6.08, speaker="Speaker 2", raw_speaker="SPEAKER_01"),
+        Segment(start=10.0, end=15.0, speaker="Speaker 1", raw_speaker="SPEAKER_00"),
+    ])
+    seg = _seg("s", 6.0, 7.0)
+
+    # 不过滤：噪声段提供唯一 overlap → Speaker 2（误分）
+    spk, _ = assign_speakers([seg], dia)
+    assert spk == {"s": "Speaker 2"}
+
+    # 过滤短段 + fallback：噪声段消失，无 overlap → 退到最近的 Speaker 1 段
+    spk, _ = assign_speakers(
+        [seg], dia, min_dia_duration_s=0.5, fallback_to_nearest=True
+    )
+    assert spk == {"s": "Speaker 1"}

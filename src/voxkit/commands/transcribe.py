@@ -163,6 +163,16 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
         dest="speaker_labels",
         help="ranked = 按时长排名（Speaker 1/2/3）；raw = pyannote 原始标签（SPEAKER_00 等）",
     )
+    # ── Phase 3: semantic subtitle resegmentation ──────────────────
+    p.add_argument(
+        "--resegment",
+        choices=["none", "semantic"],
+        default="none",
+        help=(
+            "字幕重切策略；semantic 用 pysbd 按句子边界 + 子句切分（仅影响 SRT/VTT，"
+            "不动 transcript JSON）；CJK 自动 pass-through。需安装 pysbd。"
+        ),
+    )
 
 
 def run(args: argparse.Namespace) -> int:
@@ -233,6 +243,7 @@ def run(args: argparse.Namespace) -> int:
         emit_vtt=args.emit_vtt,
         with_diarization=args.with_diarization,
         speaker_labels=args.speaker_labels,
+        resegment=args.resegment,
     )
 
     try:

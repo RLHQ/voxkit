@@ -105,6 +105,11 @@ WORKER_JSON_SENTINEL = "__VOXKIT_JSON__"
 # whisper_exec 跳过 --max-len 1 / --split-on-word。集中定义避免漂移。
 CJK_LANGUAGES: frozenset[str] = frozenset({"zh", "ja", "yue", "ko"})
 
+# pyannote 偶尔吐 17ms / 80ms 的瞬时 alt-speaker burst（重叠检测 / 聚类抖动）；
+# 短于此阈值的 dia 段被 align_speakers 视为噪声丢弃，避免污染 majority vote。
+# 经验值 0.5s 在典型播客上稳定；调小会让短促"yeah"被归到正确说话人但风险变高。
+DIA_PHANTOM_FILTER_S: float = 0.5
+
 
 # ── Exit codes（只追加，不重排）────────────────────────────
 class ExitCode(IntEnum):
@@ -130,5 +135,6 @@ __all__ = [
     "PYANNOTE_VERSION_SPEC",
     "WORKER_JSON_SENTINEL",
     "CJK_LANGUAGES",
+    "DIA_PHANTOM_FILTER_S",
     "ExitCode",
 ]
