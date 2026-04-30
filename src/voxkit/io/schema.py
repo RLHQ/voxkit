@@ -184,6 +184,52 @@ class RemixrTranscript(BaseModel):
     segments: List[RemixrSegment]
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Subtitle cues — render-layer artifact (subtitles.cues.json)
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# 这是 ``--resegment semantic`` 的机读出口：与 ``subtitles.srt/vtt`` 同源（同一
+# 份 ``SubtitleCue[]``），但保留浮点精度 + 显式 speaker 字段。下游消费者（如
+# Remixr）想要语义重切的成果时读这份文件，而不是反解 SRT 文本——也不应该把它
+# 错当成 ASR ground truth：``transcript.raw.json`` 永远是 ASR 真实产出，本文件
+# 是渲染期决策，混用会污染 Remixr 的 proofread 判定。
+
+
+class SubtitleCueOut(BaseModel):
+    """单条字幕 cue 的可序列化形态；与 ``core.semantic_resegment.SubtitleCue``
+    同形（start/end/speaker/text），但走 Pydantic 以确保 JSON 输出格式稳定。
+
+    ``speaker`` 用 ``None`` 表示未跑 diarization（区别于占位 ``"Speaker A"``）。
+    """
+
+    start: float
+    end: float
+    speaker: Optional[str] = None
+    text: str
+
+
+class SubtitleCuesOutput(BaseModel):
+    """``subtitles.cues.json`` 的顶层 schema。
+
+    与 ``RemixrTranscript`` 平行的渲染层契约：
+
+      - ``schemaVersion``：独立计数器，初始 ``"1"``；下游消费者据此判断兼容性
+      - ``sourceId``：与 ``transcript.raw.json`` 中的 sourceId 一致，便于关联
+      - ``resegment``：产出 cues 的策略（``"semantic"`` / ``"none"`` 等），方便
+        审计 cue 是怎么来的；当前只 ``"semantic"`` 模式真的会写这个文件
+      - ``params``：重切参数快照，可复现；缺省字段不写入 JSON
+      - ``cues``：扁平的 ``SubtitleCueOut[]``
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    schema_version: str = Field("1", alias="schemaVersion")
+    source_id: str = Field(..., alias="sourceId")
+    resegment: str
+    params: Optional[dict] = None
+    cues: List[SubtitleCueOut]
+
+
 __all__ = [
     "AudioInfo",
     "SpeakerInfo",
@@ -198,4 +244,7 @@ __all__ = [
     "RemixrWord",
     "RemixrSegment",
     "RemixrTranscript",
+    # subtitle cues — render-layer artifact
+    "SubtitleCueOut",
+    "SubtitleCuesOutput",
 ]

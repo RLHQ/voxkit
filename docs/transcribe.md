@@ -34,6 +34,7 @@ work/merge.json                              (每 chunk 保留/丢弃 segment id
     ├──► transcript.voxkit.json               (voxkit 原生)
     ├──► transcript.raw.json                  (Remixr-shaped, exclusive write)
     ├──► subtitles.srt / subtitles.vtt
+    ├──► subtitles.cues.json                  (--resegment=semantic 才写; 渲染层 cues 的机读出口)
     └──► manifest.json                        (含 perChunk + warnings)
 ```
 
@@ -115,6 +116,70 @@ Remixr 的「未校对」判定。
 }
 ```
 
+### `subtitles.cues.json`（语义重切的机读出口）
+
+仅当 `--resegment=semantic` 且重切真的产出了 cues 时才写（diarized fallback 不算）。
+与 `subtitles.srt/vtt` 同源——同一份 `SubtitleCue[]` 三处渲染：SRT、VTT、JSON。
+
+```jsonc
+{
+  "schemaVersion": "1",
+  "sourceId": "YTVSwOY19Qs",
+  "resegment": "semantic",
+  "params": {
+    "max_dur_s": 7.0,
+    "min_dur_s": 1.5,
+    "max_chars": 84,
+    "soft_max_chars": 75,
+    "max_cps": 22.0,
+    "prosody_gap_s": 0.25,
+    "prosody_gap_weight": 7,
+    "soft_break_weights": { ";": 10, ":": 8, ",": 3, "but": 4 }
+  },
+  "cues": [
+    { "start": 0.10, "end": 5.48, "speaker": "Speaker A", "text": "Since last year..." },
+    { "start": 5.50, "end": 9.12, "speaker": "Speaker B", "text": "Yeah, exactly." }
+  ]
+}
+```
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `schemaVersion` | string | 独立版本计数器，初始 `"1"` |
+| `sourceId` | string | 与 `transcript.raw.json` 中一致 |
+| `resegment` | string | 当前固定 `"semantic"`；预留扩展（pysbd 之外的策略） |
+| `params` | object \| 缺省 | `ResegmentParams` 快照，可复现 |
+| `cues[].start` / `.end` | number (s) | 绝对时间，浮点（不是 SRT 的 ms 取整） |
+| `cues[].speaker` | string \| null | diarization 跑过则填 ranked label，否则 `null` 或 `"Speaker A"` |
+| `cues[].text` | string | 已合并的子句文本 |
+
+**与 `transcript.raw.json` 的关系**：完全解耦。`raw.json` 是 ASR ground truth（segmenter 的粗粒度切分 + word 时间戳），`cues.json` 是渲染层决策（pysbd 句子边界 + 物理上限切分）。下游想要语义重切的成果就读这份；想要原始 ASR 还是去读 `raw.json`。**禁止**把 cues 反向塞回 `raw.json.segments[].subtitles[]`——那会触发 Remixr proofread agent 的「已校对」误判。
+
+**Remixr 集成示例**（TS 伪码）：
+
+```ts
+import { z } from "zod";
+
+const SubtitleCueZ = z.object({
+  start: z.number(),
+  end:   z.number(),
+  speaker: z.string().nullable().optional(),
+  text:  z.string(),
+});
+const CuesFileZ = z.object({
+  schemaVersion: z.literal("1"),
+  sourceId: z.string(),
+  resegment: z.string(),
+  cues: z.array(SubtitleCueZ),
+});
+
+const cuesPath = `storage/projects/${pid}/sources/${sid}/subtitles.cues.json`;
+const cues = CuesFileZ.parse(JSON.parse(await fs.readFile(cuesPath, "utf8")));
+// cues.cues 即可直接喂播放器/字幕预览，无需反解 SRT
+```
+
+manifest 里通过 `artifacts.subtitle_cues_json` 声明该文件是否产出。
+
 ### `transcript.voxkit.json`（voxkit 原生）
 
 `raw.json` 的超集，含审计信息：
@@ -184,12 +249,13 @@ Pydantic 模型见 `src/voxkit/io/schema.py::TranscriptionOutput`。
   ],
   "warnings": [ "merge note: out_of_order at seg_008 (...)" ],
   "artifacts": {
-    "raw_json":    "/abs/.../transcript.raw.json",
-    "voxkit_json": "/abs/.../transcript.voxkit.json",
-    "manifest":    "/abs/.../manifest.json",
-    "events":      "/abs/.../events.ndjson",
-    "srt":         "/abs/.../subtitles.srt",
-    "vtt":         "/abs/.../subtitles.vtt"
+    "raw_json":           "/abs/.../transcript.raw.json",
+    "voxkit_json":        "/abs/.../transcript.voxkit.json",
+    "manifest":           "/abs/.../manifest.json",
+    "events":             "/abs/.../events.ndjson",
+    "srt":                "/abs/.../subtitles.srt",
+    "vtt":                "/abs/.../subtitles.vtt",
+    "subtitle_cues_json": "/abs/.../subtitles.cues.json"
   }
 }
 ```

@@ -7,7 +7,28 @@ changes (with migration notes).
 
 ## [Unreleased]
 
-(none)
+### Added
+
+- **`subtitles.cues.json`** — render-layer machine-readable mirror of the
+  semantic resegmenter output. Written only when `--resegment=semantic` and
+  the resegment path actually produced cues (the diarized 1-cue-per-segment
+  fallback is excluded). Schema:
+  `{schemaVersion, sourceId, resegment, params, cues[{start,end,speaker,text}]}`.
+  Lets downstream consumers (e.g. Remixr) ingest semantic cues directly
+  instead of reverse-parsing SRT text. `transcript.raw.json` stays untouched
+  — it is ASR ground truth; cues are render-layer derivatives, see
+  `docs/transcribe.md` for the rationale.
+- New events `write.subtitle_cues` (path + cue_count) and the existing
+  `resegment.done` now bracket cues.json emission.
+- `Workspace.cues_json_path`; `manifest.artifacts.subtitle_cues_json`
+  populated when written.
+- `voxkit.io.cues_json` module + `SubtitleCueOut` / `SubtitleCuesOutput`
+  Pydantic models in `io/schema.py`.
+
+### Changed
+
+- `_ensure_raw_json_writable` also unlinks `subtitles.cues.json` on `--force`
+  so the exclusive-create write does not collide on rerun.
 
 ## [0.3.0] — 2026-04-28
 

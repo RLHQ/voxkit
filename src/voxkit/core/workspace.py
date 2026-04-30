@@ -12,6 +12,7 @@ Layout::
       transcript.voxkit.json              # voxkit-native rich transcript
       subtitles.srt
       subtitles.vtt
+      subtitles.cues.json                 # render-layer cues (only when --resegment=semantic)
       events.ndjson                       # mirrored progress events
       .lock                               # PID lock (separate from manifest)
       work/
@@ -85,6 +86,7 @@ class Workspace:
     voxkit_json_path: Path
     srt_path: Path
     vtt_path: Path
+    cues_json_path: Path
     events_path: Path
     hallucinations_log: Path
     merge_log: Path
@@ -105,6 +107,7 @@ def _build_workspace(root: Path) -> Workspace:
         voxkit_json_path=root / "transcript.voxkit.json",
         srt_path=root / "subtitles.srt",
         vtt_path=root / "subtitles.vtt",
+        cues_json_path=root / "subtitles.cues.json",
         events_path=root / "events.ndjson",
         hallucinations_log=work / "hallucinations.log",
         merge_log=work / "merge.json",

@@ -434,12 +434,21 @@ def _ensure_raw_json_writable(req: TranscribeRequest) -> None:
     * Present + ``resume=False`` (i.e. ``--force`` / ``--no-resume``) → unlink
       so the subsequent ``write_remixr_json('x')`` can proceed cleanly.
 
+    Also clears ``subtitles.cues.json`` on ``--force`` for symmetry — that file
+    uses the same exclusive-create contract and would otherwise survive a
+    ``--force`` rerun and trigger a late-stage ``FileExistsError``.
+
     This matches the brainstorming-phase decision: ``transcript.raw.json``
     is treated like Remixr's own raw artifacts (write-once-never-overwrite)
     by default; ``--force`` is the explicit opt-out.
     """
     raw_path = req.workspace.raw_json_path
+    cues_path = req.workspace.cues_json_path
     if not raw_path.exists():
+        # cues_json is only written when raw_json is also fresh — but on a
+        # --force rerun that wiped raw_json by hand, we still want to clean it.
+        if not req.resume and cues_path.exists():
+            cues_path.unlink()
         return
     if req.resume:
         raise PipelineError(
@@ -449,6 +458,8 @@ def _ensure_raw_json_writable(req: TranscribeRequest) -> None:
             exit_code=ExitCode.GENERIC_FAIL.value,
         )
     raw_path.unlink()
+    if cues_path.exists():
+        cues_path.unlink()
 
 
 # ── Phase 2: diarization integration helpers ──────────────────────────────
@@ -939,8 +950,11 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                 forward_to_stderr=forward_stderr,
             )
 
-            # 9. Subtitles. resegment only affects SRT/VTT — JSON outputs above
-            #    are ASR ground truth, byte-identical regardless of this flag.
+            # 9. Subtitles. resegment only affects SRT/VTT — transcript.raw.json
+            #    above is ASR ground truth, byte-identical regardless of this flag.
+            #    The semantic-resegmented cues additionally land in
+            #    subtitles.cues.json (machine-readable mirror of the cue stream)
+            #    so downstream consumers do not need to reverse-parse SRT text.
             artifacts: dict[str, Path] = {
                 "raw_json": ws.raw_json_path,
                 "voxkit_json": ws.voxkit_json_path,
@@ -951,17 +965,23 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                 artifacts["diarization_json"] = ws.work / "diarization.json"
 
             cues: "list[SubtitleCue] | None" = None
+            cues_from_resegment = False
+            resegment_params_snapshot: "dict | None" = None
             if req.resegment == "semantic" and (req.emit_srt or req.emit_vtt):
                 try:
+                    from dataclasses import asdict
                     from voxkit.core.semantic_resegment import (
                         ResegmentParams,
                         resegment_for_subtitles,
                     )
+                    rp = ResegmentParams()
                     cues = resegment_for_subtitles(
                         remixr_t.segments,
                         language=language_for_output,
-                        params=ResegmentParams(),
+                        params=rp,
                     )
+                    cues_from_resegment = True
+                    resegment_params_snapshot = asdict(rp)
                     _emit_event(
                         em,
                         {
@@ -979,6 +999,38 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                     warnings.append(msg)
                     voxkit_out.warnings.append(msg)
                     cues = None
+                    cues_from_resegment = False
+
+            # Render-layer machine-readable mirror: only when cues came from the
+            # semantic resegmenter. The diarized 1-cue-per-segment fallback is a
+            # typed bridge — emitting it here would mislabel ASR segments as
+            # "semantic" cues.
+            if cues_from_resegment and cues is not None:
+                from voxkit.io.cues_json import write_cues_json
+                try:
+                    write_cues_json(
+                        cues,
+                        ws.cues_json_path,
+                        source_id=req.source_id,
+                        resegment="semantic",
+                        params=resegment_params_snapshot,
+                    )
+                except FileExistsError as exc:
+                    raise PipelineError(
+                        f"{ws.cues_json_path} already exists (race); "
+                        f"pick a fresh --workdir",
+                        exit_code=int(ExitCode.GENERIC_FAIL),
+                    ) from exc
+                artifacts["subtitle_cues_json"] = ws.cues_json_path
+                _emit_event(
+                    em,
+                    {
+                        "event": "write.subtitle_cues",
+                        "path": str(ws.cues_json_path),
+                        "cue_count": len(cues),
+                    },
+                    forward_to_stderr=forward_stderr,
+                )
 
             # Diarized path collapses to the cue renderer too: adapt
             # RemixrSegment → SubtitleCue (1:1) so SRT/VTT have a single

@@ -585,3 +585,95 @@ def test_srt_contains_speaker_prefix(
     srt = ws.srt_path.read_text(encoding="utf-8")
     assert "Speaker A:" in srt
     assert "-->" in srt
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# subtitles.cues.json — render-layer machine-readable output
+# ─────────────────────────────────────────────────────────────────────────
+
+
+def test_resegment_none_skips_cues_json(
+    tmp_path: Path, patched_pipeline: dict[str, Any]
+) -> None:
+    """Default ``resegment=none`` must not produce ``subtitles.cues.json`` —
+    that file is the semantic-resegment artifact, not a generic export.
+    """
+    ws = open_workspace(tmp_path / "ws")
+    req = _make_request(ws)
+    assert req.resegment == "none"
+    run_pipeline(req)
+    assert not ws.cues_json_path.exists()
+
+
+def test_resegment_semantic_writes_cues_json(
+    tmp_path: Path, patched_pipeline: dict[str, Any]
+) -> None:
+    """``resegment=semantic`` produces a parseable ``subtitles.cues.json`` whose
+    cue count matches the manifest and whose sourceId matches the request.
+    """
+    pytest.importorskip("pysbd")
+
+    ws = open_workspace(tmp_path / "ws")
+    req = replace(_make_request(ws), resegment="semantic")
+    run_pipeline(req)
+
+    assert ws.cues_json_path.exists(), "subtitles.cues.json must be written"
+    payload = json.loads(ws.cues_json_path.read_text(encoding="utf-8"))
+
+    # Schema invariants
+    assert payload["schemaVersion"] == "1"
+    assert payload["sourceId"] == "fake_src"
+    assert payload["resegment"] == "semantic"
+    assert isinstance(payload["cues"], list)
+    # Params snapshot is present so downstream can audit how cues were sliced.
+    assert "params" in payload and isinstance(payload["params"], dict)
+    assert "max_dur_s" in payload["params"]
+
+    # Cross-check against manifest.
+    manifest = json.loads(ws.manifest_path.read_text(encoding="utf-8"))
+    assert manifest["subtitle"]["resegment"] == "semantic"
+    assert manifest["subtitle"]["cueCount"] == len(payload["cues"])
+    assert "subtitle_cues_json" in manifest["artifacts"]
+    assert manifest["artifacts"]["subtitle_cues_json"] == str(ws.cues_json_path)
+
+
+def test_resegment_semantic_force_rerun_unlinks_cues_json(
+    tmp_path: Path, patched_pipeline: dict[str, Any]
+) -> None:
+    """``--force`` (resume=False) must clear stale subtitles.cues.json so the
+    next exclusive-create write does not collide with the previous artifact.
+    """
+    pytest.importorskip("pysbd")
+
+    ws = open_workspace(tmp_path / "ws")
+    first = replace(_make_request(ws, resume=True), resegment="semantic")
+    run_pipeline(first)
+    first_inode = ws.cues_json_path.stat().st_ino
+
+    forced = replace(_make_request(ws, resume=False), resegment="semantic")
+    run_pipeline(forced)
+    assert ws.cues_json_path.exists()
+    assert ws.cues_json_path.stat().st_ino != first_inode
+
+
+def test_resegment_semantic_emits_write_event(
+    tmp_path: Path, patched_pipeline: dict[str, Any]
+) -> None:
+    """events.ndjson records ``resegment.done`` and ``write.subtitle_cues``."""
+    pytest.importorskip("pysbd")
+
+    ws = open_workspace(tmp_path / "ws")
+    req = replace(_make_request(ws), resegment="semantic")
+    run_pipeline(req)
+
+    events = [
+        json.loads(line)
+        for line in ws.events_path.read_text(encoding="utf-8").splitlines()
+        if line
+    ]
+    seen = {e.get("event") for e in events}
+    assert "resegment.done" in seen
+    assert "write.subtitle_cues" in seen
+    write_evt = next(e for e in events if e.get("event") == "write.subtitle_cues")
+    assert write_evt["path"] == str(ws.cues_json_path)
+    assert isinstance(write_evt["cue_count"], int)
