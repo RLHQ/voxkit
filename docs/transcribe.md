@@ -1,7 +1,7 @@
 # `voxkit transcribe` — 深入
 
 本文是 `voxkit transcribe` 的完整参考。CLI 表层用法见
-[`README.md`](../README.md#上手--transcribev030-新增)。
+[`README.md`](../README.md#上手--transcribe)。
 
 ## 数据流
 
@@ -15,21 +15,23 @@ work/input.16khz.mono.wav
 ChunkPlan: [ChunkSpec(0, 0..600), ChunkSpec(1, 595..1195), …]
     │
     ▼  per chunk:  ffmpeg -ss <start> -t <dur>  →  whisper-cli (-mc 0 -lpt -0.8 --vad ...)
-work/chunks/chunk_NNN.{wav,json}     (checkpoint：--resume 命中即跳过)
+work/chunks/chunk_NNN.{wav,json}              (checkpoint：--resume 命中即跳过)
     │
     ▼  parse_whisper_json → list[Entry]       (chunk-relative 时间)
     │
     ▼  filter_entries(blocklist)              (watermark / standalone / ghost-loop)
-work/chunks/hallucinations.log              (NDJSON 审计日志)
+work/chunks/hallucinations.log                (NDJSON 审计日志)
     │
     ▼  detect_mode + segment_entries          (英文 word 模式 / CJK phrase 模式)
 list[TranscriptSegment]                       (chunk-relative)
     │
     ▼  merge_chunks(overlap_tolerance=0.5s)   (offset_segment 同步偏移 segment 与 words[])
 list[TranscriptSegment]                       (绝对时间)
-work/merge.json                              (每 chunk 保留/丢弃 segment id)
+work/merge.json                               (每 chunk 保留/丢弃 segment id)
     │
     ▼  TranscriptionOutput (Pydantic, schemaVersion="1")
+    │
+    ▼  optional: --with-diarization → pyannote → speaker labels
     │
     ├──► transcript.voxkit.json               (voxkit 原生)
     ├──► transcript.raw.json                  (Remixr-shaped, exclusive write)
@@ -53,7 +55,7 @@ work/merge.json                              (每 chunk 保留/丢弃 segment id
 | `--logprob-thold` | -0.8 | whisper.cpp 默认 -1.0，本工具收紧 |
 | `dynamic timeout` | `max(30 min, duration*0.3)` | per-chunk |
 
-均移植自 Remixr `services/whisper.ts`，6 个月血泪沉淀的数值。
+均移植自 Remixr `services/whisper.ts`，是长音频转录实战中沉淀下来的数值。
 
 ## 输出文件 schema
 
@@ -87,7 +89,7 @@ work/merge.json                              (每 chunk 保留/丢弃 segment id
 |---|---|---|
 | `sourceId` | string | Remixr 的 source 标识，由 CLI `--source-id` 控制（默认 input 文件 stem） |
 | `segments[].id` | string | `seg_NNN`（1-based，3 位零填充） |
-| `segments[].speaker` | string | **总是 `"Speaker A"`** —— pre-diarization 占位；下游 diarize+align 阶段重写 |
+| `segments[].speaker` | string | 默认 `"Speaker A"`；传 `--with-diarization` 后写入 `Speaker 1/2/...` 或 `SPEAKER_00` 等真实标签 |
 | `segments[].start` / `.end` | number (s) | 绝对时间 |
 | `segments[].text` | string | 已合并的句段文本（segmenter 4 优先级边界产出） |
 | `segments[].subtitles` | string[] | **总是 `[]`** —— Remixr proofread agent 后续填充 |
@@ -98,12 +100,24 @@ work/merge.json                              (每 chunk 保留/丢弃 segment id
 注意：voxkit **故意不写** `rawText` 字段——那是 Remixr proofread 阶段产物，写了会污染
 Remixr 的「未校对」判定。
 
+#### `--with-diarization` 对 raw JSON 的影响
+
+不开启时，`transcript.raw.json` 保持 ASR-only 形态，`segments[].speaker` 使用 Remixr 兼容占位
+`"Speaker A"`。开启 `--with-diarization` 后，pipeline 会在 ASR merge 完成后运行 pyannote，
+按时间重叠把 speaker 注入每个 segment：
+
+- `--speaker-labels ranked`：输出 `Speaker 1/2/...`，按说话总时长排序，适合产品 UI。
+- `--speaker-labels raw`：输出 `SPEAKER_00` 等 pyannote 原始标签，适合调试或算法对比。
+- 未匹配到 diarization 的 segment 会标成 `Speaker ?`，并在 manifest / `_metadata.warnings` 中留下审计信息。
+
+`transcript.voxkit.json` 仍然不承载 speaker 字段；speaker 属于 Remixr 形态和字幕渲染层。
+
 可选 `_metadata` 顶层字段（Remixr 忽略未知 key，安全）：
 
 ```json
 {
   "_metadata": {
-    "voxkitVersion": "0.3.0",
+    "voxkitVersion": "0.4.0",
     "asrBackend": "whisper-cpp",
     "asrModel": "ggml-large-v3-turbo.bin",
     "language": "en",
@@ -225,7 +239,7 @@ Pydantic 模型见 `src/voxkit/io/schema.py::TranscriptionOutput`。
 
 ```jsonc
 {
-  "voxkitVersion": "0.3.0",
+  "voxkitVersion": "0.4.0",
   "schemaVersion": "1",
   "startedAt": "2026-04-28T04:29:30.819719+00:00",
   "finishedAt": "2026-04-28T04:32:32.646537+00:00",
@@ -274,7 +288,7 @@ Pydantic 模型见 `src/voxkit/io/schema.py::TranscriptionOutput`。
 每行一个 JSON 对象，记录全流程关键节点：
 
 ```jsonc
-{"event": "start",           "stage": "pipeline", "input": "...", "workdir": "...", "voxkit_version": "0.3.0", "started_at": "..."}
+{"event": "start",           "stage": "pipeline", "input": "...", "workdir": "...", "voxkit_version": "0.4.0", "started_at": "..."}
 {"event": "discover",        "whisper_cli": "...", "model": "...", "vad_model": "..."}
 {"event": "audio.normalize.start", "input": "..."}
 {"event": "audio.normalize.done",  "master_wav": "...", "duration_secs": 3821.61}

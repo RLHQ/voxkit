@@ -115,7 +115,7 @@ def write_remixr_json(
         t: Remixr transcript to write.
         path: Destination ``transcript.raw.json`` path.
         metadata: Optional voxkit-side audit metadata (e.g.
-            ``{"voxkitVersion": "0.3.0"}``).
+            ``{"voxkitVersion": "0.4.0"}``).
         indent: JSON indent level (default 2 to match Remixr prototype).
     """
     payload = t.model_dump(exclude_none=True)

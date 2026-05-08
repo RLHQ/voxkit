@@ -1,4 +1,4 @@
-"""voxkit — 独立 speaker diarization CLI。"""
+"""voxkit — speech-to-structured-data CLI toolkit."""
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 SCHEMA_VERSION = "1"

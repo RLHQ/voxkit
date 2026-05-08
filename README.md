@@ -1,7 +1,21 @@
 # voxkit
 
-「语音 → 结构化数据」工具集。基于 [whisper.cpp](https://github.com/ggerganov/whisper.cpp)（ASR）+
+把音频/视频一次性转成可审计、可恢复、可直接进产品工作流的结构化语音数据：
+转录、字幕、说话人、语义重切、Remixr 兼容 JSON。
+
+底层基于 [whisper.cpp](https://github.com/ggerganov/whisper.cpp)（ASR）+
 [pyannote.audio](https://github.com/pyannote/pyannote-audio)（speaker diarization）。
+
+## 几句话说清楚
+
+**这个是干什么的？**
+voxkit 是一个本地优先的「语音转结构化数据」CLI，把音频/视频处理成 transcript、SRT/VTT 字幕、说话人标签和可供下游系统直接读取的 JSON。
+
+**有什么优势？**
+它把 whisper.cpp 的高速本地转录、pyannote 的说话人切分、长音频 checkpoint、反幻觉过滤、语义字幕重切和 Remixr 兼容输出封装成一条可重复、可审计的流水线。
+
+**解决什么痛点？**
+它解决长音视频转录里最麻烦的工程问题：静音幻觉、长文件中断重跑、字幕切得碎/闪、说话人标签难对齐、SRT/JSON 反复转换，以及 ASR 结果很难安全接入产品数据结构。
 
 ## 故事
 
@@ -18,7 +32,7 @@ voxkit 把音频/视频里的语音处理成结构化、可消费的数据：转
 |---|---|
 | `voxkit doctor` | 自检 10 项依赖（uv / Python / models offline / HF token / 4 gated / ffmpeg / venv / whisper-cli / whisper model / VAD model） |
 | `voxkit setup` | 显式创建 venv + 装 pyannote.audio + 预下载模型 |
-| `voxkit transcribe` | ★ whisper.cpp 转录 → `transcript.raw.json` + SRT/VTT |
+| `voxkit transcribe` | ★ whisper.cpp 转录 → `transcript.raw.json` + SRT/VTT；可选说话人注入与语义字幕重切 |
 | `voxkit diarize` | pyannote 说话人切分 → `DiarizationOutput` JSON |
 | `voxkit align` | transcript + diarization → 带 Speaker N 的 SRT |
 | `voxkit build-bundle` | 打包模型为 tar.gz（4 个 pyannote HF repo + silero VAD） |
@@ -30,7 +44,7 @@ voxkit 把音频/视频里的语音处理成结构化、可消费的数据：转
 # 本地开发
 uv venv && uv pip install -e ".[worker,dev]"
 
-# 或 pipx 全局（v0.3.0 暂未发 PyPI，使用本地源码路径）
+# 或 pipx 全局（未发 PyPI 时使用本地源码路径）
 pipx install /path/to/voxkit
 ```
 
@@ -44,7 +58,7 @@ huggingface-cli download ggerganov/whisper.cpp ggml-large-v3-turbo.bin \
 
 `voxkit doctor` 会一次性把上述 10 项依赖全部探测一遍并给出修复提示，缺啥补啥即可。
 
-## 上手 — `transcribe`（v0.3.0 新增）
+## 上手 — `transcribe`
 
 ### 基本用法
 
@@ -52,9 +66,20 @@ huggingface-cli download ggerganov/whisper.cpp ggml-large-v3-turbo.bin \
 voxkit transcribe input.mp4 --workdir out/ --language en --json-events
 ```
 
+一站式产出带说话人标签、且更适合播放器展示的字幕：
+
+```bash
+voxkit transcribe input.mp4 --workdir out/ \
+  --language en \
+  --with-diarization \
+  --resegment=semantic
+```
+
 - 位置参数 `<input>`：单个音频或视频文件（不是目录；批处理用 shell 组合）
 - `--workdir` 必填，所有产物落在这一棵子树下，是数据正交的边界
 - `--json-events` 把 stderr 切到 NDJSON 事件流（机器消费），同时镜像写到 `events.ndjson`
+- `--with-diarization` 会在 ASR 后追加 pyannote 说话人切分，把 `Speaker 1/2/...` 写进 `transcript.raw.json` 与字幕
+- `--resegment=semantic` 只重切渲染层字幕，保留 ASR ground truth，同时写出机读的 `subtitles.cues.json`
 
 ### 工作目录布局（数据正交、过程产物可审计）
 
@@ -65,9 +90,11 @@ out/
 ├── transcript.voxkit.json     # voxkit 原生丰富格式
 ├── subtitles.srt
 ├── subtitles.vtt
+├── subtitles.cues.json        # --resegment=semantic 时输出，机读字幕 cue 流
 ├── events.ndjson              # 全流程 NDJSON 事件流
 └── work/                      # 中间产物，--no-keep-work 成功时清理
     ├── input.16khz.mono.wav   # ffmpeg 归一化主音频
+    ├── diarization.json       # --with-diarization 时输出，说话人切分审计文件
     ├── chunks/
     │   ├── chunk_000.wav
     │   ├── chunk_000.json     # whisper.cpp --output-json-full 原始
@@ -111,8 +138,11 @@ hallucinations:    0          (英文素材不触发中文黑名单)
 | `--blocklist PATH` | bundled JSON | 覆盖默认中文幻觉黑名单 |
 | `--emit-srt` / `--no-emit-srt` | on | 是否输出 SRT |
 | `--emit-vtt` / `--no-emit-vtt` | on | 是否输出 VTT |
+| `--with-diarization` / `--no-with-diarization` | off | ASR 后追加 pyannote diarization，把真实 speaker 标签注入 raw JSON 与字幕 |
+| `--speaker-labels ranked\|raw` | `ranked` | `ranked` 输出 `Speaker 1/2/...`；`raw` 保留 `SPEAKER_00` 等 pyannote 原始标签 |
+| `--resegment none\|semantic` | `none` | 语义字幕重切；仅影响 SRT/VTT/`subtitles.cues.json`，不改 `transcript.raw.json` |
 
-### 反幻觉策略（基于 Remixr 6 个月血泪）
+### 反幻觉策略（来自 Remixr 实战沉淀）
 
 1. **VAD**（`--vad --vad-model X`）— silero v5.1.2 屏蔽静音段，砍掉 whisper 在静默处的胡言
 2. **`--max-context 0`** — 切断 chunk 间 KV-cache 串扰，避免一段错的把后面带歪
@@ -127,6 +157,34 @@ voxkit transcribe input.mp4 --workdir out/ \
 ```
 
 被丢弃的条目会写到 `out/work/hallucinations.log`（NDJSON），可审计。
+
+### 说话人注入与语义字幕重切
+
+`--with-diarization` 把原本分开的 ASR 和 diarization 串成一条流水线：
+
+```bash
+voxkit transcribe interview.mp4 --workdir out/ \
+  --with-diarization \
+  --speaker-labels ranked
+```
+
+产物变化：
+
+- `transcript.raw.json` 的 `segments[].speaker` 从占位的 `Speaker A` 变成 `Speaker 1/2/...`
+- `subtitles.srt` / `subtitles.vtt` 使用真实 speaker 前缀
+- `out/work/diarization.json` 保留 pyannote 原始切分结果，方便审计
+- `manifest.json` 记录 diarization 模型、设备、耗时、说话人数和 speaker label 策略
+
+`--resegment=semantic` 专门解决字幕显示问题：英文按句子/子句边界重切，长 cue 拆短，过短 cue 合并；
+CJK 输入也会合并过短 cue，减少一闪而过的字幕。
+
+```bash
+voxkit transcribe podcast.mp4 --workdir out/ \
+  --resegment=semantic
+```
+
+语义重切只影响渲染层产物：`subtitles.srt`、`subtitles.vtt` 和 `subtitles.cues.json`。
+`transcript.raw.json` 保持 ASR ground truth，避免把播放器字幕决策反向污染 transcript。
 
 ### Resume / Force / 长视频 checkpoint
 
@@ -241,13 +299,23 @@ cp out/transcript.raw.json \
 `_metadata` 字段（`voxkitVersion` / `asrBackend` / `asrModel` / `rtf` / `perChunk` / `warnings` 等）
 Remixr 会忽略未知字段，对 voxkit 自己审计有用。
 
+如果下游需要播放器级字幕 cue，不建议反解 SRT；直接读取 `subtitles.cues.json`：
+
+```bash
+voxkit transcribe input.mp4 --workdir out/ \
+  --with-diarization \
+  --resegment=semantic
+
+cp out/subtitles.cues.json \
+   /path/to/Remixr/storage/projects/<projectId>/sources/<sourceId>/subtitles.cues.json
+```
+
 更深入的 transcribe 文档（数据流图、字段一览、调试技巧）见
 [`docs/transcribe.md`](docs/transcribe.md)。
 
 ## Roadmap
 
-- **Phase 2**：`voxkit transcribe --with-diarization` 一站式产出带 `Speaker N` 的 transcript
-  （链接 transcribe + diarize + align）
-- **Phase 2**：`vox-asr` provider（火山引擎云端 ASR），与 whisper.cpp 在 `whisper_exec.py`
+- `vox-asr` provider（火山引擎云端 ASR），与 whisper.cpp 在 `whisper_exec.py`
   内部接口隔离
-- **Phase 2**：Remixr 端切流到 `voxkit-adapter`，删除 `services/whisper.ts` 等约 1400 行 TS 代码
+- Remixr 端切流到 `voxkit-adapter`，删除 `services/whisper.ts` 等约 1400 行 TS 代码
+- 更多 subtitle resegment 策略与参数外露

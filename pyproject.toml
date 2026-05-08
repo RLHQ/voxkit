@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "voxkit"
 version = "0.4.0"
-description = "Standalone speaker diarization CLI built around pyannote.audio"
+description = "Speech-to-structured-data CLI for transcripts, subtitles, speaker labels, and Remixr-compatible JSON"
 requires-python = ">=3.10"
 authors = [{ name = "xsharp" }]
 license = { text = "MIT" }
