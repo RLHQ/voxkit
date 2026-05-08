@@ -30,8 +30,8 @@ voxkit 把音频/视频里的语音处理成结构化、可消费的数据：转
 
 | 命令 | 用途 |
 |---|---|
-| `voxkit doctor` | 自检 10 项依赖（uv / Python / models offline / HF token / 4 gated / ffmpeg / venv / whisper-cli / whisper model / VAD model） |
-| `voxkit setup` | 显式创建 venv + 装 pyannote.audio + 预下载模型 |
+| `voxkit doctor` | 按目标自检依赖；支持 `--profile transcribe` / `--profile diarize` |
+| `voxkit setup` | 显式创建 worker venv + 安装 pyannote.audio |
 | `voxkit transcribe` | ★ whisper.cpp 转录 → `transcript.raw.json` + SRT/VTT；可选说话人注入与语义字幕重切 |
 | `voxkit diarize` | pyannote 说话人切分 → `DiarizationOutput` JSON |
 | `voxkit align` | transcript + diarization → 带 Speaker N 的 SRT |
@@ -40,23 +40,69 @@ voxkit 把音频/视频里的语音处理成结构化、可消费的数据：转
 
 ## 安装
 
-```bash
-# 本地开发
-uv venv && uv pip install -e ".[worker,dev]"
+### 5 分钟跑通：只转录 + 出字幕
 
-# 或 pipx 全局（未发 PyPI 时使用本地源码路径）
-pipx install /path/to/voxkit
-```
-
-`transcribe` 子命令额外需要本机的 whisper.cpp 二进制 + 模型：
+如果你第一次接触 voxkit，建议先跑通最小路径：**音频/视频 → transcript + SRT/VTT**。
+这条路径不需要 Hugging Face token，也不需要 pyannote。
 
 ```bash
+# 1. 安装 CLI（本地源码）
+uv tool install --editable .
+
+# 2. 安装本地转录依赖
 brew install whisper-cpp ffmpeg-full
+
+# 3. 下载默认 whisper.cpp 模型
 huggingface-cli download ggerganov/whisper.cpp ggml-large-v3-turbo.bin \
   --local-dir ~/.cache/voxkit/models
+
+# 4. 只检查转录链路，避免被 diarization 依赖干扰
+voxkit doctor --profile transcribe
+
+# 5. 跑你的第一个文件
+voxkit transcribe input.mp4 --workdir out/ --language auto
 ```
 
-`voxkit doctor` 会一次性把上述 10 项依赖全部探测一遍并给出修复提示，缺啥补啥即可。
+成功后看 `out/subtitles.srt` 和 `out/transcript.raw.json`。这就是第一次“点亮”。
+
+> `huggingface-cli` 来自 `huggingface_hub`；如果本机没有，可先运行
+> `uv tool install huggingface_hub`，或用你自己的方式安装 Hugging Face CLI。
+
+### 想要说话人标签
+
+如果你需要 `Speaker 1/2/...`，再准备 pyannote 模型。3Craft 内部或有 bundle 权限的用户推荐：
+
+```bash
+gh auth login
+voxkit fetch-bundle
+voxkit doctor --profile diarize
+
+voxkit transcribe input.mp4 --workdir out/ \
+  --with-diarization \
+  --resegment=semantic
+```
+
+没有 bundle 权限时，走 Hugging Face token + gated model accept，见
+[diarize 上手](#上手--diarizev02x-旧功能保留)。
+
+### 开发者安装
+
+```bash
+uv venv
+uv pip install -e ".[dev]"
+
+# 需要跑 diarize / with-diarization 时再装 worker extra
+uv pip install -e ".[worker,dev]"
+voxkit setup
+```
+
+`voxkit doctor` 默认检查全部依赖；第一次跑通时更推荐按目标检查：
+
+```bash
+voxkit doctor --profile transcribe   # whisper.cpp + ffmpeg + ASR 模型
+voxkit doctor --profile diarize      # pyannote / HF bundle / ffmpeg
+voxkit doctor                        # 全量检查
+```
 
 ## 上手 — `transcribe`
 
@@ -208,7 +254,7 @@ voxkit transcribe long.mp4 --workdir out/ --force
 ```bash
 gh auth login                       # 一次性，对 3Craft/voxkit 有读权限即可
 voxkit fetch-bundle                 # 拉 latest release 中的模型 bundle
-voxkit doctor                       # 全绿（离线模式）
+voxkit doctor --profile diarize     # 全绿（离线模式）
 voxkit diarize input.mp4 -o out.json
 ```
 
@@ -228,7 +274,7 @@ voxkit diarize input.mp4 -o out.json
 ### diarize 用法速查
 
 ```bash
-voxkit doctor                                          # 10 项自检（自动识别离线/在线模式）
+voxkit doctor --profile diarize                        # 只检查 diarize 相关依赖
 voxkit setup                                           # 显式触发 venv + pyannote 安装
 voxkit diarize input.mp4 -o out.json                   # 主命令（自动从视频抽音频）
 voxkit diarize a.wav --model community-1 -o out.json   # 指定模型

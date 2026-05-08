@@ -1,4 +1,4 @@
-"""voxkit doctor — 6 项自检。
+"""voxkit doctor — 按目标自检依赖。
 
 每项独立函数返回 (ok: bool, label: str, fix_hint: str)。
 全绿 exit 0；任一失败 exit 2（HF）/ 3（环境）/ 1（其他）。
@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import argparse
 import concurrent.futures
 import platform
 import shutil
@@ -15,7 +16,7 @@ import urllib.request
 import urllib.error
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, List, Optional
+from typing import Callable, List, Literal, Optional
 
 from voxkit.core import env as core_env
 from voxkit.core import audio as core_audio
@@ -45,6 +46,9 @@ class CheckResult:
     fix: Optional[str] = None
     severity: str = "error"  # error | warn
     category: str = "generic"  # generic | hf | env — 决定 exit code 路由
+
+
+DoctorProfile = Literal["all", "transcribe", "diarize"]
 
 
 # ── 1. uv ───────────────────────────────────────────────────────
@@ -413,13 +417,35 @@ def _print_result(r: CheckResult) -> None:
             print(f"   ↳ {line}")
 
 
-def run() -> int:
-    """跑全部检查并打印；返回 exit code。
+def _required(r: CheckResult, *, category: str | None = None) -> CheckResult:
+    if r.ok:
+        return r
+    return CheckResult(
+        r.name,
+        r.ok,
+        r.detail,
+        fix=r.fix,
+        severity="error",
+        category=category or r.category,
+    )
 
-    模型离线就绪时，HF token + 4 个 gated HEAD 都视为非必要（降级为 info），
-    因为 pyannote 在 cache 命中时不发起任何网络请求。
-    """
-    # 先做离线检查决定后续模式
+
+def _extend(out: List[CheckResult], value: object) -> None:
+    if isinstance(value, list):
+        out.extend(value)
+    else:
+        out.append(value)
+
+
+def _run_checks(fns: List[Callable[[], object]]) -> List[CheckResult]:
+    results: List[CheckResult] = []
+    for fn in fns:
+        _extend(results, fn())
+    return results
+
+
+def _collect_all_profile() -> tuple[List[CheckResult], str]:
+    """Original broad doctor profile: everything, with transcribe checks as warn."""
     offline = check_models_offline()
     offline_ready = offline.ok
 
@@ -427,22 +453,63 @@ def run() -> int:
         check_uv,
         check_python,
     ]
-    # 离线就绪 → 跳过 HF token + gated repo（保留为 info 不阻断）
     if not offline_ready:
         all_checks += [check_hf_token, check_gated_repos]
     all_checks += [check_ffmpeg, check_venv]
-    # Round 2：transcribe 相关（永 WARN，不阻断 diarize-only 用户）
     all_checks += [check_whisper_cli, check_whisper_model, check_vad_model]
 
+    results = [offline]
+    results.extend(_run_checks(all_checks))
+    mode = "离线" if offline_ready else "在线"
+    return results, f"all / {mode}模式"
+
+
+def _collect_transcribe_profile() -> tuple[List[CheckResult], str]:
+    """Minimum checks needed for the first ASR → transcript/SRT run."""
+    results: List[CheckResult] = []
+    results.append(check_python())
+    results.extend(_required(r, category="env") for r in check_ffmpeg())
+    results.append(_required(check_whisper_cli(), category="env"))
+    results.append(_required(check_whisper_model(), category="env"))
+    results.append(check_vad_model())
+    return results, "transcribe"
+
+
+def _collect_diarize_profile() -> tuple[List[CheckResult], str]:
+    """Checks needed for speaker diarization, avoiding whisper-only noise."""
+    offline = check_models_offline()
     results: List[CheckResult] = [offline]
-    for fn in all_checks:
-        out = fn()
-        if isinstance(out, list):
-            results.extend(out)
-        else:
-            results.append(out)
+    results.append(check_uv())
+    results.append(check_python())
+    if offline.ok:
+        results.extend(check_ffmpeg())
+    else:
+        results.append(check_hf_token())
+        results.extend(check_gated_repos())
+        results.extend(check_ffmpeg())
+    results.append(check_venv())
+    return results, "diarize / 离线模式" if offline.ok else "diarize / 在线模式"
+
+
+def _collect_results(profile: DoctorProfile) -> tuple[List[CheckResult], str]:
+    if profile == "transcribe":
+        return _collect_transcribe_profile()
+    if profile == "diarize":
+        return _collect_diarize_profile()
+    return _collect_all_profile()
+
+
+def run(args: argparse.Namespace | None = None) -> int:
+    """跑全部检查并打印；返回 exit code。
+
+    模型离线就绪时，HF token + 4 个 gated HEAD 都视为非必要（降级为 info），
+    因为 pyannote 在 cache 命中时不发起任何网络请求。
+    """
+    profile: DoctorProfile = getattr(args, "profile", "all") if args else "all"
+    results, mode = _collect_results(profile)
 
     print("voxkit doctor")
+    print(f"profile: {mode}")
     print("=" * 50)
     for r in results:
         _print_result(r)
@@ -461,11 +528,9 @@ def run() -> int:
         print(f"\n❌ {len(failed)} 项失败")
         return ExitCode.GENERIC_FAIL
     if warned:
-        mode = "离线" if offline_ready else "在线"
-        print(f"\n⚠️  全部关键项通过（{mode}模式）；{len(warned)} 项警告（不阻断 diarize）")
+        print(f"\n⚠️  全部关键项通过（{mode}）；{len(warned)} 项警告")
         return ExitCode.OK
-    mode = "离线" if offline_ready else "在线"
-    print(f"\n✅ 全绿（{mode}模式）。")
+    print(f"\n✅ 全绿（{mode}）。")
     return ExitCode.OK
 
 

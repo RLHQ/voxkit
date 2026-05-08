@@ -20,9 +20,18 @@ def _build_parser() -> argparse.ArgumentParser:
     sub.required = True
 
     # ── doctor ──────────────────────────────────────────────
-    sub.add_parser(
+    p_doctor = sub.add_parser(
         "doctor",
-        help="自检 6 项依赖与环境配置（uv/Python/HF token/4 gated/ffmpeg/venv）",
+        help="按目标自检依赖与环境配置",
+    )
+    p_doctor.add_argument(
+        "--profile",
+        choices=["all", "transcribe", "diarize"],
+        default="all",
+        help=(
+            "检查目标：transcribe 只看转录必需项；diarize 只看说话人切分必需项；"
+            "all 检查全部（默认）"
+        ),
     )
 
     # ── setup ───────────────────────────────────────────────
@@ -98,7 +107,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # 延迟导入：保持 --help / 错误参数路径轻量
     if args.cmd == "doctor":
         from voxkit.commands.doctor import run as run_doctor
-        return run_doctor()
+        return run_doctor(args)
     if args.cmd == "setup":
         from voxkit.commands.setup import run as run_setup
         return run_setup()

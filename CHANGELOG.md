@@ -9,6 +9,10 @@ changes (with migration notes).
 
 ### Added
 
+- **`voxkit doctor --profile {transcribe,diarize,all}`** — first-run checks can now
+  focus on the user's goal. `transcribe` treats whisper-cli, ffmpeg, and the
+  ASR model as required while hiding pyannote/HF noise; `diarize` focuses on
+  pyannote model readiness, HF/bundle state, ffmpeg, and the worker venv.
 - **`subtitles.cues.json`** — render-layer machine-readable mirror of the
   semantic resegmenter output. Written only when `--resegment=semantic` and
   the resegment path actually produced cues (the diarized 1-cue-per-segment

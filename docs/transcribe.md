@@ -406,12 +406,12 @@ voxkit transcribe input.mp4 --workdir out/ --blocklist /path/to/custom.json
 
 ### 6. whisper-cli 版本兼容自检
 
-`voxkit doctor` 启动期 grep 5 个关键 flag（`--output-json-full` / `--max-context` /
+`voxkit doctor --profile transcribe` 启动期 grep 5 个关键 flag（`--output-json-full` / `--max-context` /
 `--vad` / `--split-on-word` / `--logprob-thold`）；transcribe 入口再 re-check 一次。
 缺任何 flag 都 fast-fail，不会跑到一半才报错。
 
 ```bash
-voxkit doctor 2>&1 | grep whisper
+voxkit doctor --profile transcribe 2>&1 | grep whisper
 ```
 
 如果你的 whisper-cli 太旧：

@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 
 from voxkit.commands import doctor as D
+from voxkit.cli import _build_parser
 
 
 # ── check_python ────────────────────────────────────────────────
@@ -218,6 +219,111 @@ def test_check_vad_model_missing(monkeypatch):
     assert not r.ok
     assert r.severity == "warn"
     assert r.fix
+
+
+# ── doctor --profile ───────────────────────────────────────────
+def test_doctor_profile_argparse_defaults_to_all():
+    parser = _build_parser()
+    args = parser.parse_args(["doctor"])
+    assert args.cmd == "doctor"
+    assert args.profile == "all"
+
+
+def test_doctor_profile_argparse_accepts_transcribe():
+    parser = _build_parser()
+    args = parser.parse_args(["doctor", "--profile", "transcribe"])
+    assert args.profile == "transcribe"
+
+
+def test_collect_transcribe_profile_promotes_required_checks(monkeypatch, tmp_path):
+    """For first-run ASR, missing whisper-cli/model must be actionable errors."""
+    monkeypatch.setattr(D, "check_python", lambda: D.CheckResult("Python ≥ 3.10", True, "3.12"))
+    monkeypatch.setattr(
+        D,
+        "check_ffmpeg",
+        lambda: [D.CheckResult("ffmpeg 可执行", True, "/opt/homebrew/bin/ffmpeg", category="env")],
+    )
+    monkeypatch.setattr(
+        D,
+        "check_whisper_cli",
+        lambda: D.CheckResult(
+            "whisper-cli 可用",
+            False,
+            "missing",
+            fix="brew install whisper-cpp",
+            severity="warn",
+        ),
+    )
+    monkeypatch.setattr(
+        D,
+        "check_whisper_model",
+        lambda: D.CheckResult(
+            "whisper 模型 (large-v3-turbo)",
+            False,
+            "missing",
+            fix="download model",
+            severity="warn",
+        ),
+    )
+    monkeypatch.setattr(
+        D,
+        "check_vad_model",
+        lambda: D.CheckResult(
+            "silero VAD 模型",
+            False,
+            "missing",
+            fix="optional",
+            severity="warn",
+        ),
+    )
+
+    results, mode = D._collect_results("transcribe")
+    by_name = {r.name: r for r in results}
+    assert mode == "transcribe"
+    assert by_name["whisper-cli 可用"].severity == "error"
+    assert by_name["whisper 模型 (large-v3-turbo)"].severity == "error"
+    assert by_name["silero VAD 模型"].severity == "warn"
+
+
+def test_collect_diarize_profile_skips_whisper_checks(monkeypatch):
+    """Diarize first-run guidance should not mention whisper-only dependencies."""
+    monkeypatch.setattr(
+        D,
+        "check_models_offline",
+        lambda: D.CheckResult("模型离线就绪", True, "ready", category="hf"),
+    )
+    monkeypatch.setattr(D, "check_uv", lambda: D.CheckResult("uv 已安装", True, "/opt/homebrew/bin/uv"))
+    monkeypatch.setattr(D, "check_python", lambda: D.CheckResult("Python ≥ 3.10", True, "3.12"))
+    monkeypatch.setattr(
+        D,
+        "check_ffmpeg",
+        lambda: [D.CheckResult("ffmpeg 可执行", True, "/opt/homebrew/bin/ffmpeg", category="env")],
+    )
+    monkeypatch.setattr(
+        D,
+        "check_venv",
+        lambda: D.CheckResult("voxkit venv 就绪", False, "not yet", severity="warn"),
+    )
+    monkeypatch.setattr(
+        D,
+        "check_whisper_cli",
+        lambda: pytest.fail("diarize profile should not call check_whisper_cli"),
+    )
+    monkeypatch.setattr(
+        D,
+        "check_whisper_model",
+        lambda: pytest.fail("diarize profile should not call check_whisper_model"),
+    )
+
+    results, mode = D._collect_results("diarize")
+    assert mode == "diarize / 离线模式"
+    assert {r.name for r in results} == {
+        "模型离线就绪",
+        "uv 已安装",
+        "Python ≥ 3.10",
+        "ffmpeg 可执行",
+        "voxkit venv 就绪",
+    }
 
 
 # ── Round 2: integration — full run() includes the 3 new checks ──
