@@ -13,9 +13,10 @@ Design notes:
 * ``write_cues_json`` uses ``open(path, "x")`` to match the same exclusive-
   create idempotency contract as :func:`voxkit.io.remixr_adapter.write_remixr_json`
   (``transcript.raw.json`` is immutable per workdir; cues mirror that).
-* ``params`` is an opaque ``dict[str, Any]`` here so this module stays independent
-  of :class:`~voxkit.core.semantic_resegment.ResegmentParams`. The pipeline is
-  responsible for snapshotting params via ``dataclasses.asdict``.
+* ``params`` and ``metrics`` are opaque ``dict[str, Any]`` values here so this
+  module stays independent of :class:`~voxkit.core.semantic_resegment.ResegmentParams`.
+  The pipeline is responsible for snapshotting params via ``dataclasses.asdict``
+  and computing render-layer quality metrics.
 * This file MUST NOT be confused with ``transcript.raw.json``: the former is
   a render-layer derivative; the latter is ASR ground truth. See
   ``docs/transcribe.md`` for the rationale.
@@ -43,6 +44,7 @@ def to_cues_output(
     source_id: str,
     resegment: str,
     params: Optional[dict[str, Any]] = None,
+    metrics: Optional[dict[str, Any]] = None,
 ) -> SubtitleCuesOutput:
     """Build a :class:`SubtitleCuesOutput` from in-memory cues.
 
@@ -62,6 +64,7 @@ def to_cues_output(
         sourceId=source_id,
         resegment=resegment,
         params=params,
+        metrics=metrics,
         cues=cue_models,
     )
 
@@ -73,6 +76,7 @@ def write_cues_json(
     source_id: str,
     resegment: str,
     params: Optional[dict[str, Any]] = None,
+    metrics: Optional[dict[str, Any]] = None,
     indent: int = 2,
 ) -> None:
     """Serialize ``cues`` to ``path`` exclusively.
@@ -81,7 +85,11 @@ def write_cues_json(
     workdir fails loudly (mirrors the ``transcript.raw.json`` contract).
     """
     out = to_cues_output(
-        cues, source_id=source_id, resegment=resegment, params=params
+        cues,
+        source_id=source_id,
+        resegment=resegment,
+        params=params,
+        metrics=metrics,
     )
     payload = out.model_dump(by_alias=True, exclude_none=True)
     text = json.dumps(payload, ensure_ascii=False, indent=indent) + "\n"

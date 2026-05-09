@@ -218,6 +218,7 @@ class SubtitleCuesOutput(BaseModel):
       - ``resegment``：产出 cues 的策略（``"semantic"`` / ``"none"`` 等），方便
         审计 cue 是怎么来的；当前只 ``"semantic"`` 模式真的会写这个文件
       - ``params``：重切参数快照，可复现；缺省字段不写入 JSON
+      - ``metrics``：字幕质量统计；缺省字段不写入 JSON
       - ``cues``：扁平的 ``SubtitleCueOut[]``
     """
 
@@ -227,6 +228,7 @@ class SubtitleCuesOutput(BaseModel):
     source_id: str = Field(..., alias="sourceId")
     resegment: str
     params: Optional[dict] = None
+    metrics: Optional[dict] = None
     cues: List[SubtitleCueOut]
 
 

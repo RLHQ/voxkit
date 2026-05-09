@@ -1,7 +1,7 @@
 """Unit tests for ``voxkit.io.cues_json`` — render-layer cues serializer.
 
 Covers:
-  - ``to_cues_output`` shape: schemaVersion / sourceId / resegment / params / cues
+  - ``to_cues_output`` shape: schemaVersion / sourceId / resegment / params / metrics / cues
   - ``write_cues_json`` produces parseable UTF-8 JSON with by_alias keys
   - exclusive-create contract: re-writing the same path raises FileExistsError
   - ``params=None`` and ``speaker=None`` are excluded by ``exclude_none``
@@ -45,11 +45,13 @@ def test_to_cues_output_basic_shape():
         source_id="abc123",
         resegment="semantic",
         params={"max_dur_s": 7.0},
+        metrics={"cueCount": 2},
     )
     assert out.schema_version == "1"
     assert out.source_id == "abc123"
     assert out.resegment == "semantic"
     assert out.params == {"max_dur_s": 7.0}
+    assert out.metrics == {"cueCount": 2}
     assert len(out.cues) == 2
     assert out.cues[0].speaker == "Speaker A"
     assert out.cues[1].text == "Yeah, exactly."
@@ -82,12 +84,14 @@ def test_write_cues_json_basic(tmp_path: Path):
         source_id="src1",
         resegment="semantic",
         params={"max_chars": 84},
+        metrics={"avgCueDurS": 5.38},
     )
     data = _roundtrip(p)
     assert data["schemaVersion"] == "1"
     assert data["sourceId"] == "src1"
     assert data["resegment"] == "semantic"
     assert data["params"] == {"max_chars": 84}
+    assert data["metrics"] == {"avgCueDurS": 5.38}
     assert data["cues"] == [
         {"start": 0.10, "end": 5.48, "speaker": "Speaker A", "text": "Hello world"}
     ]

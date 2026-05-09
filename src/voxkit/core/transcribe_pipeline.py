@@ -34,20 +34,14 @@ The module is import-clean (no side-effects beyond the function bodies)."""
 from __future__ import annotations
 
 import json
-import os
 import shutil
 import sys
 import time
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Literal
-
-if TYPE_CHECKING:
-    from voxkit.core.semantic_resegment import SubtitleCue
-
-ResegmentMode = Literal["none", "semantic"]
+from typing import TYPE_CHECKING, Any, Literal
 
 from voxkit import __version__
 from voxkit.core import env as core_env
@@ -63,7 +57,6 @@ from voxkit.core.audio import (
 )
 from voxkit.core.asr_merge import (
     ChunkResult,
-    MergeNote,
     merge_chunks,
     write_merge_log,
 )
@@ -104,12 +97,16 @@ from voxkit.io.schema import (
     DiarizationOutput,
     RemixrTranscript,
     TranscriptionOutput,
-    TranscriptSegment,
 )
 from voxkit.io.srt import (
     to_subtitles_srt,
     to_subtitles_vtt,
 )
+
+if TYPE_CHECKING:
+    from voxkit.core.semantic_resegment import SubtitleCue
+
+ResegmentMode = Literal["none", "semantic"]
 
 __all__ = [
     "PipelineError",
@@ -1054,6 +1051,7 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
             cues: "list[SubtitleCue] | None" = None
             cues_from_resegment = False
             resegment_params_snapshot: "dict | None" = None
+            subtitle_metrics_snapshot: "dict | None" = None
             if req.resegment == "semantic" and (req.emit_srt or req.emit_vtt):
                 try:
                     from dataclasses import asdict
@@ -1067,8 +1065,18 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                         language=language_for_output,
                         params=rp,
                     )
+                    from voxkit.core.subtitle_metrics import compute_subtitle_metrics
+
+                    subtitle_metrics_snapshot = compute_subtitle_metrics(
+                        cues, rp
+                    ).to_dict()
                     cues_from_resegment = True
                     resegment_params_snapshot = asdict(rp)
+                    resegment_params_snapshot["timebase"] = (
+                        "char-interpolated"
+                        if language_for_output in CJK_LANGUAGES
+                        else "word"
+                    )
                     _emit_event(
                         em,
                         {
@@ -1101,6 +1109,7 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                         source_id=req.source_id,
                         resegment="semantic",
                         params=resegment_params_snapshot,
+                        metrics=subtitle_metrics_snapshot,
                     )
                 except FileExistsError as exc:
                     raise PipelineError(
@@ -1124,6 +1133,18 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
             # implementation regardless of resegment / diarization combination.
             if cues is None and diarization_output is not None:
                 cues = _remixr_to_cues(remixr_t)
+
+            if (
+                subtitle_metrics_snapshot is None
+                and (req.emit_srt or req.emit_vtt)
+            ):
+                from voxkit.core.semantic_resegment import ResegmentParams
+                from voxkit.core.subtitle_metrics import compute_subtitle_metrics
+
+                metrics_cues = cues if cues is not None else _remixr_to_cues(remixr_t)
+                subtitle_metrics_snapshot = compute_subtitle_metrics(
+                    metrics_cues, ResegmentParams()
+                ).to_dict()
 
             if req.emit_srt:
                 if cues is not None:
@@ -1151,6 +1172,12 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                     {"event": "write.vtt", "path": str(ws.vtt_path)},
                     forward_to_stderr=forward_stderr,
                 )
+
+            subtitle_cue_count = (
+                int(subtitle_metrics_snapshot["cueCount"])
+                if subtitle_metrics_snapshot is not None
+                else None
+            )
 
             # 10. Manifest (single source of truth for run audit)
             manifest = {
@@ -1201,7 +1228,8 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                 # ── Phase 3: subtitle resegment metadata ─────────────
                 "subtitle": {
                     "resegment": req.resegment,
-                    "cueCount": len(cues) if cues is not None else None,
+                    "cueCount": subtitle_cue_count,
+                    "metrics": subtitle_metrics_snapshot,
                 },
             }
             write_manifest(ws, manifest)

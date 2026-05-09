@@ -610,6 +610,9 @@ def test_resegment_none_skips_cues_json(
     assert req.resegment == "none"
     run_pipeline(req)
     assert not ws.cues_json_path.exists()
+    manifest = json.loads(ws.manifest_path.read_text(encoding="utf-8"))
+    assert manifest["subtitle"]["metrics"]["cueCount"] == manifest["subtitle"]["cueCount"]
+    assert manifest["subtitle"]["metrics"]["avgCueDurS"] > 0
 
 
 def test_resegment_semantic_writes_cues_json(
@@ -640,6 +643,8 @@ def test_resegment_semantic_writes_cues_json(
     manifest = json.loads(ws.manifest_path.read_text(encoding="utf-8"))
     assert manifest["subtitle"]["resegment"] == "semantic"
     assert manifest["subtitle"]["cueCount"] == len(payload["cues"])
+    assert manifest["subtitle"]["metrics"] == payload["metrics"]
+    assert payload["metrics"]["cueCount"] == len(payload["cues"])
     assert "subtitle_cues_json" in manifest["artifacts"]
     assert manifest["artifacts"]["subtitle_cues_json"] == str(ws.cues_json_path)
 
@@ -659,6 +664,21 @@ def test_language_auto_resegment_uses_detected_language(
     assert ws.cues_json_path.exists()
     payload = json.loads(ws.cues_json_path.read_text(encoding="utf-8"))
     assert payload["resegment"] == "semantic"
+    assert payload["params"]["timebase"] == "word"
+
+
+def test_cjk_resegment_marks_char_interpolated_timebase(
+    tmp_path: Path, patched_pipeline: dict[str, Any]
+) -> None:
+    """CJK semantic cues use estimated char timing, so the artifact must say so."""
+    ws = open_workspace(tmp_path / "ws")
+    req = replace(_make_request(ws), language="zh", resegment="semantic")
+    run_pipeline(req)
+
+    payload = json.loads(ws.cues_json_path.read_text(encoding="utf-8"))
+    assert payload["resegment"] == "semantic"
+    assert payload["params"]["timebase"] == "char-interpolated"
+    assert payload["metrics"]["cueCount"] == len(payload["cues"])
 
 
 def test_resegment_semantic_force_rerun_unlinks_cues_json(
