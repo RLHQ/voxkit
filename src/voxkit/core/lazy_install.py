@@ -26,7 +26,6 @@ from voxkit.core.constants import (
     INSTALLED_MARKER as MARKER,
     PYANNOTE_VERSION_SPEC,
     VENV_DIR,
-    VENV_PYTHON,
 )
 
 
@@ -85,6 +84,20 @@ def _check_pyannote_version(py: Path) -> Optional[str]:
     return out.stdout.strip() or None
 
 
+def _check_voxkit_worker_importable(py: Path) -> bool:
+    """Return whether the worker entrypoint is importable inside the venv."""
+    try:
+        out = subprocess.run(
+            [str(py), "-c", "import voxkit.core.pipeline"],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return out.returncode == 0
+
+
 def _have_uv() -> str:
     """返回 uv 可执行路径；找不到抛 SetupError。"""
     p = shutil.which("uv")
@@ -103,25 +116,32 @@ def _create_venv(uv_bin: str, *, verbose: bool) -> None:
         raise SetupError(f"uv venv 失败: {(proc.stderr or '').strip()[:500]}")
 
 
+def _install_voxkit_package(uv_bin: str, py: Path, *, verbose: bool) -> None:
+    """Editable-install current voxkit source so the worker can run ``-m``."""
+    src_root = _voxkit_source_root()
+    if not src_root:
+        return
+
+    cmd = [uv_bin, "pip", "install", "--python", str(py), "-e", str(src_root)]
+    if verbose:
+        print(f"[setup] uv pip install -e {src_root}")
+    proc = subprocess.run(cmd, capture_output=not verbose, text=True)
+    if proc.returncode != 0:
+        raise SetupError(f"uv pip install -e voxkit 失败: {(proc.stderr or '').strip()[:500]}")
+
+
 def _install_packages(uv_bin: str, py: Path, *, verbose: bool) -> None:
     """先装 pyannote.audio；再 editable 装 voxkit 源码（让 worker 能 `-m`）。"""
     # 1) pyannote.audio + worker extras 已包含 torch/torchaudio
     cmd = [uv_bin, "pip", "install", "--python", str(py), PYANNOTE_VERSION_SPEC]
     if verbose:
-        print(f"[setup] uv pip install pyannote.audio …（首次约 1-3 分钟）")
+        print("[setup] uv pip install pyannote.audio …（首次约 1-3 分钟）")
     proc = subprocess.run(cmd, capture_output=not verbose, text=True)
     if proc.returncode != 0:
         raise SetupError(f"uv pip install pyannote.audio 失败: {(proc.stderr or '').strip()[:500]}")
 
     # 2) editable 装 voxkit（仅当源码可定位时；pipx 装的没源码 → 走 sys.path 注入兜底）
-    src_root = _voxkit_source_root()
-    if src_root:
-        cmd = [uv_bin, "pip", "install", "--python", str(py), "-e", str(src_root)]
-        if verbose:
-            print(f"[setup] uv pip install -e {src_root}")
-        proc = subprocess.run(cmd, capture_output=not verbose, text=True)
-        if proc.returncode != 0:
-            raise SetupError(f"uv pip install -e voxkit 失败: {(proc.stderr or '').strip()[:500]}")
+    _install_voxkit_package(uv_bin, py, verbose=verbose)
     # 没有 src_root 时，diarize 子命令会通过 PYTHONPATH 注入主包路径（见 _ensure_voxkit_importable）
 
 
@@ -140,7 +160,7 @@ def ensure_venv(*, verbose: bool = False) -> VenvInfo:
     if marker and PYANNOTE_VERSION_SPEC in marker and py.is_file():
         cached_version = _check_pyannote_version(py)
 
-    if cached_version:
+    if cached_version and _check_voxkit_worker_importable(py):
         if verbose:
             print(f"[setup] venv 已就绪（pyannote.audio={cached_version}）")
         return VenvInfo(
@@ -149,6 +169,23 @@ def ensure_venv(*, verbose: bool = False) -> VenvInfo:
             pyannote_version=cached_version,
             installed_marker=MARKER,
         )
+
+    # Existing venvs created before the current project path/name may have
+    # pyannote installed but no importable voxkit worker. Repair just the
+    # editable voxkit install instead of rebuilding the expensive pyannote env.
+    if cached_version:
+        uv_bin = _have_uv()
+        if verbose:
+            print("[setup] venv 缺少 voxkit worker，重新安装当前 voxkit 源码…")
+        _install_voxkit_package(uv_bin, py, verbose=verbose)
+        if _check_voxkit_worker_importable(py):
+            return VenvInfo(
+                venv_path=VENV_DIR,
+                venv_python=py,
+                pyannote_version=cached_version,
+                installed_marker=MARKER,
+            )
+        raise SetupError("venv 中仍无法 import voxkit.core.pipeline")
 
     uv_bin = _have_uv()
     if not VENV_DIR.is_dir():
