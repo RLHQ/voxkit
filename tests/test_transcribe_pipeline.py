@@ -122,6 +122,7 @@ def patched_pipeline(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
         "extract_calls": 0,
         "normalize_calls": 0,
         "vad_present": False,
+        "raw_result_language": None,
     }
     fake_entries = _stub_entries()
     fake_raw = _stub_raw_json(fake_entries)
@@ -181,6 +182,12 @@ def patched_pipeline(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
         progress_cb=None,
     ) -> WhisperRunResult:
         state["whisper_calls"] += 1
+        raw = dict(fake_raw)
+        raw_result_language = state.get("raw_result_language")
+        if raw_result_language is not None:
+            raw["result"] = {"language": raw_result_language}
+            raw["params"] = {"language": raw_result_language}
+
         # Persist the synthetic JSON to disk so resume sees a valid checkpoint.
         json_path = (
             Path(str(out_json))
@@ -189,7 +196,7 @@ def patched_pipeline(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
         )
         json_path.parent.mkdir(parents=True, exist_ok=True)
         json_path.write_text(
-            json.dumps(fake_raw, ensure_ascii=False), encoding="utf-8"
+            json.dumps(raw, ensure_ascii=False), encoding="utf-8"
         )
         # Optionally emit a progress beat so the event stream gets that event.
         if progress_cb is not None:
@@ -198,7 +205,7 @@ def patched_pipeline(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
             except Exception:
                 pass
         return WhisperRunResult(
-            raw_json=fake_raw, entries=list(fake_entries), elapsed_secs=0.42
+            raw_json=raw, entries=list(fake_entries), elapsed_secs=0.42
         )
 
     monkeypatch.setattr(pipeline_mod, "run_whisper", _fake_run_whisper)
@@ -635,6 +642,23 @@ def test_resegment_semantic_writes_cues_json(
     assert manifest["subtitle"]["cueCount"] == len(payload["cues"])
     assert "subtitle_cues_json" in manifest["artifacts"]
     assert manifest["artifacts"]["subtitle_cues_json"] == str(ws.cues_json_path)
+
+
+def test_language_auto_resegment_uses_detected_language(
+    tmp_path: Path, patched_pipeline: dict[str, Any]
+) -> None:
+    """``--language auto --resegment semantic`` must not pass ``auto`` to pysbd."""
+    pytest.importorskip("pysbd")
+    patched_pipeline["raw_result_language"] = "en"
+
+    ws = open_workspace(tmp_path / "ws")
+    req = replace(_make_request(ws), language="auto", resegment="semantic")
+    result = run_pipeline(req)
+
+    assert result.voxkit_output.language == "en"
+    assert ws.cues_json_path.exists()
+    payload = json.loads(ws.cues_json_path.read_text(encoding="utf-8"))
+    assert payload["resegment"] == "semantic"
 
 
 def test_resegment_semantic_force_rerun_unlinks_cues_json(

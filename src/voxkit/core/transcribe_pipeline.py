@@ -38,6 +38,7 @@ import os
 import shutil
 import sys
 import time
+from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -74,7 +75,7 @@ from voxkit.core.hallucination_filter import (
     load_blocklist,
     write_drop_log,
 )
-from voxkit.core.segmenter import segment_entries
+from voxkit.core.segmenter import detect_mode, segment_entries
 from voxkit.core.types import Entry
 from voxkit.core.whisper_exec import (
     CJK_LANGUAGES,
@@ -240,6 +241,64 @@ def _discover_binaries(
     return whisper_bin, model_path, vad_model
 
 
+def _normalize_detected_language(value: Any) -> str | None:
+    """Return a usable ISO-ish language code from whisper metadata."""
+    if not isinstance(value, str):
+        return None
+    lang = value.strip().lower()
+    if not lang or lang in {"auto", "unknown"}:
+        return None
+    return lang
+
+
+def _extract_detected_language(raw: dict) -> str | None:
+    """Read whisper.cpp's detected language from an ``-ojf`` JSON payload."""
+    result = raw.get("result")
+    if isinstance(result, dict):
+        lang = _normalize_detected_language(result.get("language"))
+        if lang:
+            return lang
+
+    # Older / synthetic fixtures may only expose params. Treat it as a
+    # best-effort fallback; "auto" is filtered by _normalize_detected_language.
+    params = raw.get("params")
+    if isinstance(params, dict):
+        return _normalize_detected_language(params.get("language"))
+    return None
+
+
+def _resolve_auto_language(
+    req_language: str,
+    detected_languages: list[str],
+    inferred_languages: list[str],
+    warnings: list[str],
+) -> str:
+    """Pick the downstream language for output + subtitle resegmentation.
+
+    ``--language auto`` is valid for whisper, but downstream sentence boundary
+    tools require a concrete language code. Prefer whisper.cpp's own detection;
+    fall back to the same word/phrase heuristic used by the segmenter.
+    """
+    if req_language != "auto":
+        return req_language
+
+    candidates = detected_languages or inferred_languages
+    if not candidates:
+        warnings.append("language=auto, no language evidence available")
+        return req_language
+
+    counts = Counter(candidates)
+    language, _ = counts.most_common(1)[0]
+    if len(counts) > 1:
+        detail = ", ".join(f"{lang}={count}" for lang, count in sorted(counts.items()))
+        warnings.append(
+            f"language=auto, multiple detected languages ({detail}); using {language}"
+        )
+    else:
+        warnings.append(f"language=auto, resolved language={language}")
+    return language
+
+
 def _prepare_master_wav(
     req: TranscribeRequest,
     em: EventMirror,
@@ -311,8 +370,11 @@ def _transcribe_chunk(
     blocklist: Blocklist,
     em: EventMirror,
     forward_stderr: bool,
-) -> tuple[list[Entry], list[DroppedEntry], float, bool]:
-    """Run (or resume) one chunk. Returns (kept_entries, dropped, elapsed, cached)."""
+) -> tuple[list[Entry], list[DroppedEntry], float, bool, str | None]:
+    """Run (or resume) one chunk.
+
+    Returns ``(kept_entries, dropped, elapsed, cached, detected_language)``.
+    """
     ws = req.workspace
     chunk_wav, chunk_json, _entries_json = chunk_paths(ws, spec.index)
 
@@ -391,6 +453,7 @@ def _transcribe_chunk(
         elapsed = result.elapsed_secs
 
     assert raw_dict is not None
+    detected_language = _extract_detected_language(raw_dict)
     entries = parse_whisper_json(raw_dict)
 
     # 3. Hallucination filter — entry-level, BEFORE segmentation.
@@ -405,7 +468,7 @@ def _transcribe_chunk(
             # log write failure is non-fatal — caller still has the in-memory list
             pass
 
-    return kept, dropped, elapsed, cached
+    return kept, dropped, elapsed, cached, detected_language
 
 
 def _build_audio_info(req: TranscribeRequest, duration_secs: float) -> AudioInfo:
@@ -673,10 +736,12 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
 
             chunk_results: list[ChunkResult] = []
             chunk_stats: list[ChunkStat] = []
+            detected_languages: list[str] = []
+            inferred_languages: list[str] = []
             total_drops = 0
 
             for spec in plan.chunks:
-                kept, dropped, elapsed, cached = _transcribe_chunk(
+                kept, dropped, elapsed, cached, detected_language = _transcribe_chunk(
                     req,
                     spec,
                     whisper_bin=whisper_bin,
@@ -686,8 +751,21 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                     em=em,
                     forward_stderr=forward_stderr,
                 )
+                chunk_language = req.language
+                if req.language == "auto":
+                    if detected_language is not None:
+                        detected_languages.append(detected_language)
+                        chunk_language = detected_language
+                    else:
+                        mode = detect_mode(kept)
+                        inferred_language = (
+                            "en" if mode == "english_word" else "zh"
+                        )
+                        inferred_languages.append(inferred_language)
+                        chunk_language = inferred_language
+
                 # Segment is chunk-relative (segment.start measured from chunk 0)
-                chunk_segments = segment_entries(kept, language=req.language)
+                chunk_segments = segment_entries(kept, language=chunk_language)
                 chunk_results.append(
                     ChunkResult(
                         chunk_index=spec.index,
@@ -753,29 +831,18 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
             rtf_total = (
                 elapsed_secs / duration_secs if duration_secs > 0 else 0.0
             )
-            language_for_output = req.language
-            if req.language == "auto":
-                # Add a best-effort hint by re-detecting from the first chunk
-                # if any segments were produced. Pure annotation; not a
-                # recovery path.
-                if merged_segments:
-                    has_leading_space = (
-                        sum(1 for s in merged_segments if s.text.startswith(" "))
-                    )
-                    detected = (
-                        "english_word"
-                        if has_leading_space >= len(merged_segments) / 2
-                        else "chinese_phrase"
-                    )
-                    warnings.append(
-                        f"language=auto, detected mode={detected}"
-                    )
+            language_for_output = _resolve_auto_language(
+                req.language,
+                detected_languages,
+                inferred_languages,
+                warnings,
+            )
 
             # Compute these once and reuse across the on-disk dict, the Remixr
             # metadata, and the manifest so the three artifacts stay in sync.
             asr_model_name = model_path.name if model_path else req.model
             word_ts_effective = (
-                req.word_timestamps and req.language not in CJK_LANGUAGES
+                req.word_timestamps and language_for_output not in CJK_LANGUAGES
             )
             chunk_stats_dump = [c.model_dump(by_alias=True) for c in chunk_stats]
 
