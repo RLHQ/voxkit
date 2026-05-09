@@ -184,6 +184,34 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
         dest="speaker_labels",
         help="ranked = 按时长排名（Speaker 1/2/3）；raw = pyannote 原始标签（SPEAKER_00 等）",
     )
+    p.add_argument(
+        "--num-speakers",
+        type=int,
+        default=None,
+        dest="num_speakers",
+        help="强制 pyannote 输出指定 speaker 数；与 --min/--max-speakers 互斥",
+    )
+    p.add_argument(
+        "--min-speakers",
+        type=int,
+        default=None,
+        dest="min_speakers",
+        help="pyannote 聚类下限（短语料 / 次说话人时长极短时建议设 2）",
+    )
+    p.add_argument(
+        "--max-speakers",
+        type=int,
+        default=None,
+        dest="max_speakers",
+        help="pyannote 聚类上限",
+    )
+    p.add_argument(
+        "--diarize-model",
+        choices=["sd-3.1", "community-1"],
+        default="sd-3.1",
+        dest="diarize_model",
+        help="pyannote pipeline 别名（默认 sd-3.1；短话语 / 录音不一致场景可试 community-1）",
+    )
     # ── Phase 3: semantic subtitle resegmentation ──────────────────
     p.add_argument(
         "--resegment",
@@ -281,6 +309,10 @@ def run(args: argparse.Namespace) -> int:
         emit_vtt=args.emit_vtt,
         with_diarization=args.with_diarization,
         speaker_labels=args.speaker_labels,
+        num_speakers=args.num_speakers,
+        min_speakers=args.min_speakers,
+        max_speakers=args.max_speakers,
+        diarize_model=args.diarize_model,
         resegment=args.resegment,
     )
 

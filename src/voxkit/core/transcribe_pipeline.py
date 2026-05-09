@@ -157,6 +157,13 @@ class TranscribeRequest:
     # ── Phase 2 — diarization integration ────────────────────────────
     with_diarization: bool = False
     speaker_labels: str = "ranked"
+    # Optional pyannote clustering hints; passed verbatim to run_diarize.
+    # Defaults (None) preserve unsupervised behaviour.
+    num_speakers: int | None = None
+    min_speakers: int | None = None
+    max_speakers: int | None = None
+    # pyannote pipeline alias from MODEL_ALIASES ("sd-3.1" / "community-1").
+    diarize_model: str = "sd-3.1"
     # ── Phase 3 — semantic subtitle resegmentation ───────────────────
     # "semantic" runs voxkit.core.semantic_resegment as a post-processor
     # (pysbd sentence boundaries + clause-aware splitting; CJK passthrough).
@@ -558,7 +565,7 @@ def _run_diarization_pass(
     )
     from voxkit.core.lazy_install import SetupError, ensure_venv
 
-    diarize_model = "sd-3.1"
+    diarize_model = req.diarize_model
     diarize_device = "auto"
 
     _emit_event(
@@ -590,6 +597,9 @@ def _run_diarization_pass(
             model=diarize_model,
             device=diarize_device,
             speaker_labels=req.speaker_labels,
+            num_speakers=req.num_speakers,
+            min_speakers=req.min_speakers,
+            max_speakers=req.max_speakers,
             extracted_from=req.input_path
             if req.input_path.suffix.lower() in _VIDEO_EXTS
             else None,
