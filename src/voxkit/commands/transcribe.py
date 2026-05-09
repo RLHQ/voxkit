@@ -107,6 +107,27 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
         help="毫秒；不传走 dynamic timeout",
     )
     p.add_argument(
+        "--chunk-threshold-secs",
+        type=float,
+        default=None,
+        dest="chunk_threshold_secs",
+        help="超过该时长才分块；默认使用内置值/VOXKIT_CHUNK_THRESHOLD_SECS",
+    )
+    p.add_argument(
+        "--chunk-secs",
+        type=float,
+        default=None,
+        dest="chunk_secs",
+        help="每个转录 chunk 的目标时长；默认使用内置值/VOXKIT_CHUNK_SECS",
+    )
+    p.add_argument(
+        "--chunk-overlap-secs",
+        type=float,
+        default=None,
+        dest="chunk_overlap_secs",
+        help="相邻 chunk 重叠时长；默认使用内置值/VOXKIT_CHUNK_OVERLAP_SECS",
+    )
+    p.add_argument(
         "--whisper-bin",
         default=None,
         dest="whisper_bin",
@@ -216,6 +237,20 @@ def run(args: argparse.Namespace) -> int:
     source_id = args.source_id or input_path.stem
     sys.stderr.write(f"voxkit transcribe: source_id={source_id}\n")
 
+    for name in ("chunk_threshold_secs", "chunk_secs", "chunk_overlap_secs"):
+        value = getattr(args, name, None)
+        if value is not None and value <= 0:
+            sys.stderr.write(f"error: --{name.replace('_', '-')} must be > 0\n")
+            return int(ExitCode.GENERIC_FAIL)
+
+    if (
+        args.chunk_secs is not None
+        and args.chunk_overlap_secs is not None
+        and args.chunk_overlap_secs >= args.chunk_secs
+    ):
+        sys.stderr.write("error: --chunk-overlap-secs must be smaller than --chunk-secs\n")
+        return int(ExitCode.GENERIC_FAIL)
+
     if not _PIPELINE_AVAILABLE:
         sys.stderr.write(
             "voxkit transcribe: pipeline module unavailable; install voxkit completely\n"
@@ -235,6 +270,9 @@ def run(args: argparse.Namespace) -> int:
         keep_work=args.keep_work,
         json_events=args.json_events,
         timeout_ms=args.timeout,
+        chunk_threshold_secs=args.chunk_threshold_secs,
+        chunk_secs=args.chunk_secs,
+        chunk_overlap_secs=args.chunk_overlap_secs,
         whisper_bin_override=Path(args.whisper_bin) if args.whisper_bin else None,
         vad_model_override=Path(args.vad_model) if args.vad_model else None,
         blocklist_path=Path(args.blocklist) if args.blocklist else None,

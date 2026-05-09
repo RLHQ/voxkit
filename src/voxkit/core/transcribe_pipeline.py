@@ -153,6 +153,10 @@ class TranscribeRequest:
     resume: bool
     emit_srt: bool
     emit_vtt: bool
+    # Optional chunk-planning overrides. Defaults preserve env/module constants.
+    chunk_threshold_secs: float | None = None
+    chunk_secs: float | None = None
+    chunk_overlap_secs: float | None = None
     # ── Phase 2 — diarization integration ────────────────────────────
     with_diarization: bool = False
     speaker_labels: str = "ranked"
@@ -707,6 +711,22 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
             # 3. Chunk plan
             # Thresholds 默认走模块常量；env vars (VOXKIT_CHUNK_*) 覆盖供 A/B 诊断。
             threshold_secs, chunk_secs, overlap_secs = chunk_thresholds_from_env()
+            if req.chunk_threshold_secs is not None:
+                threshold_secs = req.chunk_threshold_secs
+            if req.chunk_secs is not None:
+                chunk_secs = req.chunk_secs
+            if req.chunk_overlap_secs is not None:
+                overlap_secs = req.chunk_overlap_secs
+            if threshold_secs <= 0 or chunk_secs <= 0 or overlap_secs <= 0:
+                raise PipelineError(
+                    "chunk thresholds must be > 0",
+                    exit_code=int(ExitCode.GENERIC_FAIL),
+                )
+            if overlap_secs >= chunk_secs:
+                raise PipelineError(
+                    "chunk overlap must be smaller than chunk duration",
+                    exit_code=int(ExitCode.GENERIC_FAIL),
+                )
             plan: ChunkPlan = plan_chunks(
                 duration_secs,
                 ws.work,

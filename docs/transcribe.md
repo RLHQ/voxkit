@@ -56,6 +56,9 @@ work/merge.json                               (每 chunk 保留/丢弃 segment i
 | `dynamic timeout` | `max(30 min, duration*0.3)` | per-chunk |
 
 均移植自 Remixr `services/whisper.ts`，是长音频转录实战中沉淀下来的数值。
+chunk 相关默认值可用 `VOXKIT_CHUNK_*` 环境变量覆盖，也可以通过
+`--chunk-threshold-secs` / `--chunk-secs` / `--chunk-overlap-secs` 在 CLI
+单次运行中覆盖；这主要用于短音频测试和切分策略 A/B。
 
 ## 输出文件 schema
 

@@ -19,6 +19,7 @@ htmlcov/
 
 # 测试产物 / 本地缓存
 tests/fixtures/short.wav
+tests/fixtures/audio/generated/
 *.tmp.json
 /tmp/
 

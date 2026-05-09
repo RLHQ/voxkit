@@ -42,6 +42,9 @@ def test_default_flag_values():
     assert args.keep_work is True
     assert args.json_events is False
     assert args.timeout is None
+    assert args.chunk_threshold_secs is None
+    assert args.chunk_secs is None
+    assert args.chunk_overlap_secs is None
     assert args.whisper_bin is None
     assert args.vad_model is None
     assert args.resume is True
@@ -114,6 +117,17 @@ def test_keep_work_negation():
 def test_timeout_int():
     args = _parse("--timeout", "60000")
     assert args.timeout == 60000
+
+
+def test_chunk_overrides_parse_as_floats():
+    args = _parse(
+        "--chunk-threshold-secs", "18",
+        "--chunk-secs", "12",
+        "--chunk-overlap-secs", "2.5",
+    )
+    assert args.chunk_threshold_secs == pytest.approx(18.0)
+    assert args.chunk_secs == pytest.approx(12.0)
+    assert args.chunk_overlap_secs == pytest.approx(2.5)
 
 
 def test_whisper_bin_and_vad_model_paths():
@@ -191,6 +205,52 @@ def test_run_invokes_pipeline_with_parsed_args(tmp_path, monkeypatch):
     req = captured[0]
     assert req.input_path == inp
     assert req.source_id == "x"  # default = input stem
+    assert req.chunk_threshold_secs is None
+    assert req.chunk_secs is None
+    assert req.chunk_overlap_secs is None
+
+
+def test_run_invokes_pipeline_with_chunk_overrides(tmp_path, monkeypatch):
+    inp = tmp_path / "x.mp4"
+    inp.write_bytes(b"fake")
+    captured = _patch_run_pipeline(monkeypatch)
+
+    parser = _build_parser()
+    args = parser.parse_args(
+        [
+            "transcribe", str(inp),
+            "--workdir", str(tmp_path / "ws"),
+            "--chunk-threshold-secs", "18",
+            "--chunk-secs", "12",
+            "--chunk-overlap-secs", "2",
+        ]
+    )
+    rc = run(args)
+    assert rc == int(ExitCode.OK)
+    req = captured[0]
+    assert req.chunk_threshold_secs == pytest.approx(18.0)
+    assert req.chunk_secs == pytest.approx(12.0)
+    assert req.chunk_overlap_secs == pytest.approx(2.0)
+
+
+def test_run_rejects_invalid_chunk_override_values(tmp_path, monkeypatch, capsys):
+    inp = tmp_path / "x.mp4"
+    inp.write_bytes(b"fake")
+    captured = _patch_run_pipeline(monkeypatch)
+
+    parser = _build_parser()
+    args = parser.parse_args(
+        [
+            "transcribe", str(inp),
+            "--workdir", str(tmp_path / "ws"),
+            "--chunk-secs", "10",
+            "--chunk-overlap-secs", "10",
+        ]
+    )
+    rc = run(args)
+    assert rc == int(ExitCode.GENERIC_FAIL)
+    assert captured == []
+    assert "chunk-overlap-secs" in capsys.readouterr().err
 
 
 def test_run_source_id_default_is_input_stem(tmp_path, monkeypatch):

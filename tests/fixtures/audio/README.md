@@ -38,3 +38,42 @@ The pre-existing `tests/fixtures/short.wav` is a 60s recording — too long for
 fast e2e tests where we run whisper-cli end-to-end in CI/local matrix. We
 purposely keep these new fixtures at 5s so the gated `requires_whisper` tests
 stay snappy when whisper-cli + a model are installed.
+
+## Synthetic boundary fixtures
+
+`build_synthetic_audio.py` generates deterministic WAV files for segmentation
+experiments. These files are not committed by default because scaled variants
+can get large.
+
+```bash
+python tests/fixtures/audio/build_synthetic_audio.py
+```
+
+Default output goes to `tests/fixtures/audio/generated/` and uses a short
+12s chunk target:
+
+| Scenario | Purpose |
+|---|---|
+| `boundary_silence_near_target.wav` | silence candidates around the target boundary |
+| `boundary_no_silence.wav` | fallback when the search window contains no silence |
+| `boundary_multi_candidate.wav` | scoring tradeoff between distance and silence duration |
+| `cjk_phrase_cadence.wav` | cadence smoke fixture for CJK subtitle resegmentation experiments |
+
+Each WAV has a sidecar JSON manifest with suggested test parameters:
+
+- `suggested_chunk_threshold_secs`
+- `suggested_chunk_secs`
+- `suggested_chunk_overlap_secs`
+- `target_boundary_secs`
+- segment labels and exact tone/silence intervals
+
+For manual full-scale tests near the production 600s boundary:
+
+```bash
+python tests/fixtures/audio/build_synthetic_audio.py \
+  --out-dir /tmp/voxkit-synthetic-audio \
+  --scale 50
+```
+
+The short default scenarios are the ones intended for CI. Full-scale variants
+are useful for listening tests and end-to-end timing experiments.

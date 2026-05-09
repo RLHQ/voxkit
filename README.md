@@ -177,6 +177,9 @@ hallucinations:    0          (英文素材不触发中文黑名单)
 | `--keep-work` / `--no-keep-work` | keep | 失败时强制 keep，与标志无关 |
 | `--json-events` | off | stderr NDJSON + 镜像 `events.ndjson` |
 | `--timeout MS` | dynamic | 覆写 `max(30 min, duration*0.3)*1000` |
+| `--chunk-threshold-secs FLOAT` | env / built-in | 超过该时长才分块，便于测试短音频 chunk |
+| `--chunk-secs FLOAT` | env / built-in | 每个转录 chunk 的目标时长 |
+| `--chunk-overlap-secs FLOAT` | env / built-in | 相邻 chunk 的重叠时长，必须小于 `--chunk-secs` |
 | `--whisper-bin PATH` | 自动发现 | 覆盖 `which whisper-cli` |
 | `--vad-model PATH` | env / brew | silero VAD bin 路径 |
 | `--resume` / `--no-resume` | on | 命中 `chunk_NNN.json` 即跳过 |
