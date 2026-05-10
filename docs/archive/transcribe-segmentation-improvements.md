@@ -1,5 +1,10 @@
 # Whisper 转录切分改进方案
 
+> 归档说明：本文是历史设计记录，保留当时对 `voxkit transcribe` 切分问题的分析和路线图。
+> 其中字幕质量统计、CJK 语义重切、chunk 参数外露等内容已经部分或全部落地；VAD/静音对齐
+> chunk 边界、默认开启 semantic resegment、subtitle resegment 参数外露仍属于后续方向。
+> 当前行为以 `docs/transcribe.md` 和代码实现为准。
+
 本文整理 `voxkit transcribe` 在 Whisper 转录后切分、合并和字幕重切上的现状、风险点与后续改进方向。
 
 目标不是追求单一“最聪明”的切分算法，而是在三类产物之间保持清晰边界：

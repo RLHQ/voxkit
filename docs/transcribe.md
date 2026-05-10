@@ -139,10 +139,15 @@ Remixr 的「未校对」判定。
 与 `subtitles.srt/vtt` 同源——同一份 `SubtitleCue[]` 三处渲染：SRT、VTT、JSON。
 
 **英文路径**：pysbd 句子边界 → 长句 split_long → 短 cue 合并 → 单调钳位。
-**CJK 路径**：whisper.cpp 不输出 word timestamp 故跳过 pysbd，但 **短 cue 合并仍然生效**——
-将 < `min_dur_s`（默认 1.5s）的同 speaker 相邻 cue 合并以消除闪现字幕。实测某 106 min
-中文播客：4426 → 2721 cues（−38.5%），平均时长 1.43s → 2.33s，闪现率 58.8% → 0%。
-长 segment 在 CJK 不做拆分（segmenter 的 5s/100chars 上限已实务封顶）。
+**CJK 路径**：whisper.cpp 不输出 word timestamp 故跳过 pysbd；实现会先尊重 Whisper phrase
+边界，把 phrase 作为字幕打包原子，避免切进专名或短词内部；已有句末标点 / 分号会拆成更细
+atom，同 speaker 连续块再按字符数、时长、CPS 和 `min_dur_s` 打包。只有单个 phrase 自己超过
+硬约束时，才在该 phrase 内做字符时间插值拆分；插值只用于字幕渲染层，不写回
+`transcript.raw.json.words`。
+
+CJK cues 的 `params.timebase` 标记为 `"char-interpolated"`，表示字幕边界可能来自 phrase 内
+字符估算。英文 cues 则标记为 `"word"`。每次生成字幕时，pipeline 还会计算字幕质量统计并写入
+`manifest.subtitle.metrics`；`--resegment=semantic` 时同一份 metrics 也写进 `subtitles.cues.json`。
 
 ```jsonc
 {
@@ -157,7 +162,19 @@ Remixr 的「未校对」判定。
     "max_cps": 22.0,
     "prosody_gap_s": 0.25,
     "prosody_gap_weight": 7,
-    "soft_break_weights": { ";": 10, ":": 8, ",": 3, "but": 4 }
+    "soft_break_weights": { ";": 10, ":": 8, ",": 3, "but": 4 },
+    "timebase": "word"
+  },
+  "metrics": {
+    "cueCount": 920,
+    "avgCueDurS": 4.12,
+    "p50CueDurS": 3.84,
+    "p90CueDurS": 6.91,
+    "flashCueRate": 0.0,
+    "longCueRate": 0.02,
+    "avgChars": 48.5,
+    "overCharLimitRate": 0.01,
+    "overCpsRate": 0.03
   },
   "cues": [
     { "start": 0.10, "end": 5.48, "speaker": "Speaker A", "text": "Since last year..." },
@@ -171,7 +188,8 @@ Remixr 的「未校对」判定。
 | `schemaVersion` | string | 独立版本计数器，初始 `"1"` |
 | `sourceId` | string | 与 `transcript.raw.json` 中一致 |
 | `resegment` | string | 当前固定 `"semantic"`；预留扩展（pysbd 之外的策略） |
-| `params` | object \| 缺省 | `ResegmentParams` 快照，可复现 |
+| `params` | object \| 缺省 | `ResegmentParams` 快照，可复现；`timebase` 为 `"word"` 或 `"char-interpolated"` |
+| `metrics` | object \| 缺省 | cue 数、时长分位数、闪现率、超长率、超字符率、超 CPS 率 |
 | `cues[].start` / `.end` | number (s) | 绝对时间，浮点（不是 SRT 的 ms 取整） |
 | `cues[].speaker` | string \| null | diarization 跑过则填 ranked label，否则 `null` 或 `"Speaker A"` |
 | `cues[].text` | string | 已合并的子句文本 |

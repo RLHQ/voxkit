@@ -225,7 +225,7 @@ voxkit transcribe interview.mp4 --workdir out/ \
 - `manifest.json` 记录 diarization 模型、设备、耗时、说话人数和 speaker label 策略
 
 `--resegment=semantic` 专门解决字幕显示问题：英文按句子/子句边界重切，长 cue 拆短，过短 cue 合并；
-CJK 输入也会合并过短 cue，减少一闪而过的字幕。
+CJK 输入走 phrase-aware 打包，按标点、speaker、字符数、时长和 CPS 约束整理字幕，必要时只在单个超长 phrase 内做字符时间插值。
 
 ```bash
 voxkit transcribe podcast.mp4 --workdir out/ \
@@ -367,4 +367,5 @@ cp out/subtitles.cues.json \
 - `vox-asr` provider（火山引擎云端 ASR），与 whisper.cpp 在 `whisper_exec.py`
   内部接口隔离
 - Remixr 端切流到 `voxkit-adapter`，删除 `services/whisper.ts` 等约 1400 行 TS 代码
-- 更多 subtitle resegment 策略与参数外露
+- VAD/静音对齐 chunk 边界，减少固定网格切到句中或词中的概率
+- 更多 subtitle resegment 参数外露；当前 chunk 阈值、时长和 overlap 已支持 CLI 覆盖

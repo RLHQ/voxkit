@@ -167,8 +167,8 @@ CHUNK_OVERLAP_SECS = 5.0        # 相邻 chunk overlap 5s
 def chunk_thresholds_from_env() -> tuple[float, float, float]:
     """读取 chunk 切分参数，环境变量优先，缺省回退到模块常量。
 
-    诊断 hatch：仅供 transcribe_pipeline 调用，便于 A/B 实验时强制改 chunk
-    边界以复现"词被切成两半"类问题。生产 CLI 不暴露这些参数。
+    诊断 hatch：transcribe_pipeline 会先读取这里的默认/env 值，再让 CLI 显式参数
+    覆盖，便于 A/B 实验时强制改 chunk 边界以复现"词被切成两半"类问题。
 
     Env vars：
       - ``VOXKIT_CHUNK_THRESHOLD_SECS``

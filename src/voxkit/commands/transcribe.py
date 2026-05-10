@@ -219,7 +219,7 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
         default="none",
         help=(
             "字幕重切策略；semantic 用 pysbd 按句子边界 + 子句切分（仅影响 SRT/VTT，"
-            "不动 transcript JSON）；CJK 自动 pass-through。需安装 pysbd。"
+            "不动 transcript JSON）；CJK 走 phrase-aware 打包并在必要时做字符插值。需安装 pysbd。"
         ),
     )
 
