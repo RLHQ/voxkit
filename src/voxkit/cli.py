@@ -10,11 +10,19 @@ import argparse
 import sys
 from typing import Optional, Sequence
 
+from voxkit import __version__
+
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="voxkit",
         description="语音 → 结构化数据 toolkit（whisper.cpp + pyannote.audio）",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
+        help="显示版本号并退出",
     )
     sub = parser.add_subparsers(dest="cmd", metavar="<command>")
     sub.required = True
