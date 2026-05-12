@@ -333,6 +333,87 @@ class ProofreadOutput(BaseModel):
     metrics: ProofreadMetrics
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Translation — LLM cross-language artifact (subtitles.<lang>.json)
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# v1 限制：``cueMappingPolicy = "one-to-one"``。目标 cue 与源 cue 一对一，时间
+# 范围直接继承源 cue。group-within-speaker rewrap 留到后续版本。
+#
+# 输入选择：默认 ``subtitles.proofread.json``（state ∈ {draft, reviewed, final}
+# 都可接受），缺失则回落 ``subtitles.cues.json``。``inputArtifact`` 字段记录
+# 实际使用的输入。
+#
+# ``id`` 形如 ``trg_000001``：与源 cue id 区分（避免误以为它们等价）。
+
+
+class TranslationCueOut(BaseModel):
+    """单条目标语言 cue。"""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    id: str = Field(..., description='目标 cue id，例如 "trg_000001"')
+    source_cue_ids: List[str] = Field(..., alias="sourceCueIds")
+    start: float
+    end: float
+    speaker: Optional[str] = None
+    text: str  # 目标语言文本
+    mapping: Literal["one-to-one", "merged", "split"] = "one-to-one"
+    risk: RiskLevel = "low"
+    needs_human_review: bool = Field(False, alias="needsHumanReview")
+    notes: List[str] = Field(default_factory=list)
+
+
+class TranslationParams(BaseModel):
+    """translate 阶段输入参数快照。"""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    style: str  # literal / natural / subtitle / technical
+    length_policy: str = Field("preserve", alias="lengthPolicy")
+    cue_mapping_policy: str = Field("one-to-one", alias="cueMappingPolicy")
+    glossary_hash: Optional[str] = Field(None, alias="glossaryHash")
+
+
+class TranslationMetrics(BaseModel):
+    """translation 完成后的聚合指标。"""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    cue_count: int = Field(..., alias="cueCount")
+    over_char_limit_rate: float = Field(0.0, alias="overCharLimitRate")
+    over_cps_rate: float = Field(0.0, alias="overCpsRate")
+    glossary_miss_rate: float = Field(0.0, alias="glossaryMissRate")
+    prompt_tokens_total: int = Field(0, alias="promptTokensTotal")
+    completion_tokens_total: int = Field(0, alias="completionTokensTotal")
+
+
+class TranslationOutput(BaseModel):
+    """``subtitles.<lang>.json`` 顶层 schema。
+
+    与 ``ProofreadOutput`` 平行，但 ``sourceLanguage`` / ``targetLanguage`` 分离，
+    ``cues[]`` 用 ``sourceCueIds`` 反引源 cue（v1 始终 1 个，未来 merged/split
+    时可能多个）。
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    schema_version: str = Field("1", alias="schemaVersion")
+    state: ArtifactState = "draft"
+    source_id: str = Field(..., alias="sourceId")
+    input_artifact: str = Field(..., alias="inputArtifact")
+    input_hash: str = Field(..., alias="inputHash")
+    source_language: str = Field(..., alias="sourceLanguage")
+    target_language: str = Field(..., alias="targetLanguage")
+    provider: str
+    model: str
+    prompt_version: str = Field(..., alias="promptVersion")
+    prompt_hash: str = Field(..., alias="promptHash")
+    params: TranslationParams
+    cues: List[TranslationCueOut]
+    metrics: TranslationMetrics
+
+
 __all__ = [
     "AudioInfo",
     "SpeakerInfo",
@@ -358,4 +439,9 @@ __all__ = [
     "ProofreadParams",
     "ProofreadMetrics",
     "ProofreadOutput",
+    # translation — LLM cross-language artifact
+    "TranslationCueOut",
+    "TranslationParams",
+    "TranslationMetrics",
+    "TranslationOutput",
 ]

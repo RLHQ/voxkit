@@ -109,6 +109,10 @@ def _build_parser() -> argparse.ArgumentParser:
     from voxkit.commands import proofread
     proofread.add_subparser(sub)
 
+    # ── translate（LLM 字幕翻译）─────────────────────────────
+    from voxkit.commands import translate
+    translate.add_subparser(sub)
+
     return parser
 
 
@@ -141,6 +145,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.cmd == "proofread":
         from voxkit.commands.proofread import run as run_proofread
         return run_proofread(args)
+    if args.cmd == "translate":
+        from voxkit.commands.translate import run as run_translate
+        return run_translate(args)
 
     parser.error(f"未知子命令: {args.cmd}")
     return 1  # unreachable
