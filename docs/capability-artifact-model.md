@@ -63,18 +63,23 @@
 | 字幕质量统计 | cues | `ResegmentParams` | manifest subtitle metrics、`subtitles.cues.json.metrics` | cue count、时长、闪现率、CPS 等。 |
 | 事件流 | pipeline phases | `json_events` | `events.ndjson`、stderr NDJSON | 用于实时 UI、进度条、审计。 |
 | manifest 汇总 | 全部阶段 | source id、参数快照 | `manifest.json` | 产物索引、耗时、warnings、metrics。 |
+| **LLM 校对** (v0.4) | `subtitles.cues.json` (schemaVersion=2) | provider、model、edit_level、glossary、batch size、context | `subtitles.proofread.json` (state=draft)、checkpoint `work/proofread/batch_NNN.json` | 只改文本不改时间；按 cueId 反引源；DeepSeek/OpenAI compat；空文本拒收 + 1 次 repair。 |
+| **LLM 翻译** (v0.4) | `subtitles.proofread.json`（缺则回落 `cues.json`） | provider、model、target_language、style、length_policy、glossary、batch size、context | `subtitles.<lang>.json` (state=draft)、`subtitles.<lang>.srt`/`.vtt`、checkpoint `work/translate.<lang>/batch_NNN.json` | v1 强制 `cueMappingPolicy=one-to-one`；继承源时间/speaker；不跨 speaker；空文本拒收 + repair。 |
+| **生命周期推进** (v0.4) | `subtitles.proofread.json` 或 `subtitles.<lang>.json` | reviewer | 同 artifact 顶层 `state` / `reviewedBy` / `reviewedAt`；manifest 镜像 | `voxkit review confirm` (draft→reviewed) / `lock` (reviewed→final)；只能严格 +1 步。 |
+| **质量评估** (v0.4) | workdir 内任意子集 (cues / proofread / `<lang>`) | 无（自动扫描） | `quality.report.json` | 物理指标 + 风险直方图 + token 用量；缺失即跳过。 |
+| **批级断点续跑** (v0.5) | LLM batch + `work/<stage>/batch_NNN.{json,pending.json}` | （无 CLI flag；自动） | 成功批 → `batch_NNN.json`；transport 失败 → `batch_NNN.pending.json` | run 末若有 pending → 拒写稳定 artifact + raise；rerun 自动续做 pending。详见 §"重跑策略"。 |
+| **Force-gate** (v0.5) | 已存在 artifact 的顶层 `state` | `--force` / `--force-reviewed` / `--force-final` (CLI) 或 `force_level` (API) | 拒覆盖 / 允许覆盖 | 三档隐含覆盖：final ⊃ reviewed ⊃ draft。详见 :func:`voxkit.core.lifecycle.gate_force_overwrite`。 |
 
-### 拟新增能力
+### 未来扩展能力（尚未实现）
 
 | 能力 | 输入 | 主要参数 | 产物 | 备注 |
 |---|---|---|---|---|
-| LLM 校对 | `subtitles.cues.json` 或 `transcript.raw.json` | provider/model、language、domain glossary、edit policy、batch size、risk threshold | `subtitles.proofread.json`、diff、风险标记 | 默认只改文本，不改时间轴。 |
-| 术语归一 | raw/proofread text + glossary | glossary、case policy、protected terms | 可并入 proofread 产物或单独 `terms.applied.json` | 适合产品名、人名、技术词。 |
-| LLM 翻译 | proofread cues 或 raw cues | source/target language、style、glossary、length policy、subtitle-fit policy | `subtitles.<lang>.json`、`subtitles.<lang>.srt/vtt` | 翻译可以在同一时间范围内二次排版。 |
-| 人工校对回写 | proofread/translation draft + 人工编辑 | reviewer、review policy | `subtitles.reviewed.json` | 产品 UI 后续可接入。 |
+| 术语归一独立产物 | raw/proofread text + glossary | glossary、case policy、protected terms | `terms.applied.json` | 当前 protected term 检查内嵌在 proofread risk grading；独立产物可让 audit 更细。 |
+| 校对 diff 独立产物 | raw vs proofread | diff 策略 | `subtitles.proofread.diff.json` | 当前 diff 信息分散在 cue 的 `editLevel`/`risk`/`notes`；汇总成 diff 文件便于人工 review UI。 |
+| 人工校对回写 | proofread/translation draft + 人工编辑 | reviewer、review policy | `subtitles.reviewed.json`（独立文件） | 当前 reviewed/final 是 artifact 顶层 state；独立 reviewed.json 文件可解耦 UI 与 pipeline。 |
+| 翻译 group-within-speaker rewrap | translation cue 流 | `cueMappingPolicy=group-within-speaker` | merged `TranslationCueOut`（多 sourceCueIds） | 当前强制 one-to-one；目标语言自然换气与源语言不一致时（zh→en 长 / en→zh 短）需要重排。 |
 | 在线/实时转录 | 音频流 | window size、partial/final policy | partial events、final segments | 实时数据应先进入 event stream，再沉淀为稳定产物。 |
 | 多 provider ASR | audio/chunk | provider、model、timestamps mode、cost policy | provider-specific raw、normalized transcript | 需要统一 normalize schema。 |
-| 质量评估 | raw/proofread/translation | metrics profile、sampling policy | `quality.report.json` | 对比不同策略和模型。 |
 
 ## 参数面
 
@@ -195,44 +200,40 @@
 | `work/diarization.json` | 说话人切分 | speaker fact | 是，针对 speaker turns | pyannote 输出和 speaker 统计。 |
 | `transcript.voxkit.json` | ASR pipeline | voxkit 原生 transcript | 是 | 丰富审计字段，voxkit 内部主产物。 |
 | `transcript.raw.json` | Remixr adapter | Remixr transcript | 是 | 下游兼容主产物；不写 proofread 字段。 |
-| `subtitles.cues.json` | 语义重切 | 渲染层结构化 cue | 是，针对字幕展示 | SRT/VTT 的结构化同源产物。 |
+| `subtitles.cues.json` | 语义重切 | 渲染层结构化 cue (schemaVersion=2，含 cue.id) | 是，针对字幕展示 | SRT/VTT 的结构化同源产物。 |
 | `subtitles.srt` | 字幕渲染 | 展示格式 | 否 | 给播放器/人工查看。 |
 | `subtitles.vtt` | 字幕渲染 | 展示格式 | 否 | Web 播放器友好。 |
-| `events.ndjson` | 事件流 | 运行时观测 | 否 | 实时 UI 和 debug。 |
-| `manifest.json` | 汇总 | 索引与审计 | 否 | artifacts、warnings、metrics、参数快照。 |
-
-### 建议新增产物
-
-| 产物 | 来源能力 | 语义层级 | 是否 source of truth | 说明 |
-|---|---|---|---|---|
-| `subtitles.proofread.json` | LLM/人工校对 | 源语言文本增强 | 是，针对校对文本 | 引用 cue id，保留原时间轴。 |
-| `subtitles.proofread.diff.json` | 校对 diff | 审计 | 否 | raw/proofread 差异、风险分级。 |
-| `subtitles.<lang>.json` | 翻译 | 目标语言 cue 流 | 是，针对目标语言字幕 | 可 one-to-one，也可在同 speaker 时间范围内重排。 |
-| `subtitles.<lang>.srt` | 翻译渲染 | 展示格式 | 否 | 目标语言 SRT。 |
-| `subtitles.<lang>.vtt` | 翻译渲染 | 展示格式 | 否 | 目标语言 VTT。 |
-| `quality.report.json` | 质量评估 | 审计 | 否 | 多阶段指标、风险 cue、抽样建议。 |
-| `glossary.applied.json` | 术语归一 | 审计 | 否 | 哪些术语被保护或替换。 |
+| `subtitles.proofread.json` | LLM 校对 | 源语言文本增强 (state=draft/reviewed/final) | 是，针对校对文本 | 引用 cue id，保留原时间轴；schemaVersion=1。 |
+| `subtitles.<lang>.json` | LLM 翻译 | 目标语言 cue 流 (state=draft/reviewed/final) | 是，针对目标语言字幕 | sourceCueIds 反引；v1 强制 one-to-one；schemaVersion=1。 |
+| `subtitles.<lang>.srt` / `.vtt` | 翻译渲染 | 展示格式 | 否 | 从 `subtitles.<lang>.json` 渲染。 |
+| `quality.report.json` | 质量评估 | 审计 (schemaVersion=1) | 否 | 物理指标 + 风险直方图 + token 用量。 |
+| `work/proofread/batch_NNN.json` | LLM 校对 checkpoint | 内部 cache (cacheSchema=2) | 是，针对单 batch | 含 contentHash + policyHash；rerun 命中即跳过。 |
+| `work/translate.<lang>/batch_NNN.json` | LLM 翻译 checkpoint | 内部 cache (cacheSchema=2) | 是，针对单 batch | 同上。 |
+| `work/<stage>/batch_NNN.pending.json` | 批级失败 marker | 内部状态 | 否 | transport 失败时落盘；rerun 看到即重做该批。 |
+| `events.ndjson` | 事件流 | 运行时观测 | 否 | 实时 UI 和 debug；含 proofread/translate batch + partial 事件。 |
+| `manifest.json` | 汇总 | 索引与审计 | 否 | artifacts、warnings、metrics、参数快照；含顶层 `proofread` 与 `translations.<lang>` 段。 |
 
 ## 产物生命周期
 
 产物不只有“存在/不存在”，还应有状态。状态用于产品 UI、重跑策略、人工审核和缓存判断。
 
-| 状态 | 含义 | 典型产物 | 可被机器覆盖吗 |
+| 状态 | 含义 | 典型表达 | 可被机器覆盖吗 |
 |---|---|---|---|
-| `partial` | 实时或批处理中间结果，尚未稳定。 | ASR partial events、LLM batch partial events | 可以。 |
-| `draft` | 机器生成的完整候选结果。 | `subtitles.proofread.json`、`subtitles.<lang>.json` | 可以，但应保留旧版本或 diff。 |
-| `reviewed` | 人工确认或高置信规则确认过。 | `subtitles.reviewed.json` | 默认不覆盖，除非显式 force。 |
-| `final` | 被锁定用于发布、交付或外部系统消费。 | 发布版字幕、最终翻译 | 不允许自动覆盖。 |
-| `stale` | 上游输入、参数、模型、prompt 或 glossary 变了。 | 任意下游产物 | 不直接删除，但 UI 应提示过期。 |
-| `failed` | 阶段失败并留下错误信息。 | `manifest.json` 中的 stage status | 不应写半成品冒充成功。 |
+| `partial` | 实时或批处理中间结果，尚未稳定。 | events.ndjson 里的 `*.batch.start`、`asr.chunk.partial`、`*.batch.failed`；`work/<stage>/batch_NNN.pending.json` marker | **不进入稳定 artifact 顶层 state**——见下方规则 5。 |
+| `draft` | 机器生成的完整候选结果。 | `subtitles.proofread.json` / `subtitles.<lang>.json` 顶层 `state` | 可以；`--force`（≥draft 等级）覆盖。 |
+| `reviewed` | 人工确认。 | 同 artifact 顶层 `state`，附 `reviewedBy` / `reviewedAt` | 默认不覆盖；需 `--force-reviewed`（v0.5+）。 |
+| `final` | 锁定发布。 | 同上 | 不允许自动覆盖；需 `--force-final`（v0.5+，**销毁人工 lock 元数据，慎用**）。 |
+| `stale` | 上游 inputHash / policyHash 变化。 | UI 推导态（manifest 内的 inputHash 与现 cues.json 比对） | 不直接删除；提示过期。 |
+| `failed` | 阶段失败留下错误信息。 | run 抛 exception；manifest 不写新段（旧段保留） | 不写半成品 artifact。 |
+| `incomplete` (v0.5) | 部分 batch 传输失败 → 整个 stable artifact 拒写出 | `pending.json` marker + `LLMError("incomplete")` 异常 + `*.partial` 事件 | 不写顶层 state，靠 marker 表达；rerun 自动续做。 |
 
 生命周期规则：
 
-1. 上游 source of truth 变化时，下游 draft/reviewed/final 必须重新计算 freshness。
-2. `reviewed` 和 `final` 产物应有人工操作记录，例如 reviewer、reviewedAt、baseArtifact hash。
-3. 机器重跑默认只覆盖 `draft`；覆盖 `reviewed` / `final` 需要显式参数。
-4. `stale` 不是错误状态，它表示产物仍可查看，但不再代表当前输入和参数。
-5. 实时 `partial` 只服务 UI，不参与长期缓存和最终导出。
+1. 上游 source of truth 变化时，下游 draft/reviewed/final 必须重新计算 freshness（依赖 manifest 的 `inputHash`）。
+2. `reviewed` 和 `final` 产物的人工操作记录写在 artifact 顶层（`reviewedBy`/`reviewedAt`），manifest 镜像。
+3. 机器重跑默认只覆盖 `draft`；`--force` 三档（`draft`/`reviewed`/`final`）控制覆盖等级，高级隐含低级；详见 :func:`voxkit.core.lifecycle.gate_force_overwrite`。
+4. `stale` 不是错误状态，UI 比对 `manifest.<stage>.inputHash` 与当前 cues.json 字节 hash 即可推导。
+5. 实时 `partial` 只服务 events / pending marker，**不进入稳定 artifact 顶层 state**。`incomplete` 状态用 pending marker 文件表达，不持久化到 artifact —— rerun 看到 marker 就只重做该批，已成功批次自动 cache 命中（详见 §"重跑策略"）。
 
 ## 产物关系
 
@@ -418,6 +419,9 @@ flowchart TD
 | `overCharLimitRate` | cues/proofread/translation | 超过字符上限的比例。 |
 | `overCpsRate` | cues/proofread/translation | 超过阅读速度上限的比例。 |
 | `speakerSwitchCueRate` | cues/translation | cue 是否异常跨 speaker 或 speaker 变化过密。 |
+| `trailingBadWordRate` (v0.5.1) | cues/proofread/translation | 末尾停在介词/冠词/连词/助动词等"不完整成分"的 cue 比例。仅 Latin 主体启用（CJK 无词性概念）。带停顿标点 (`.!?,;:`) 的末尾豁免。 |
+| `singleWordCueRate` (v0.5.1) | cues/proofread/translation | 仅含单个 token 的 cue 比例。典型闪屏症状（"I'll" 0.17s）。 |
+| `crossCueRepeatRate` (v0.5.1) | cues/proofread | 相邻 cue 末尾 1-3 词与下一 cue 开头 1-3 词重复的比例。proofread 错误闭合切坏边界的典型征兆（如 cue N 末尾 "is it" + cue N+1 开头 "Is it"）。 |
 
 ### ASR 与时间轴风险
 
@@ -576,25 +580,42 @@ ASR、diarization 和 LLM 阶段的成本结构不同。设计上应允许每个
 
 ## 推荐实现顺序
 
-1. **冻结能力模型和不变量**：确认本文的层级和产物命名，尤其是 `raw` / `cues` / `proofread` / `translation` 的边界。
-2. **给 cue 补稳定 id**：`subtitles.cues.json` 当前只有 `start/end/speaker/text`，加入 `id` 会让 proofread/translation 更稳。
-3. **加入 artifact hash 与 freshness**：manifest 记录输入/输出 hash，用于 stale 判断和缓存。
-4. **实现 proofread draft**：从 `subtitles.cues.json` 读入，输出 `subtitles.proofread.json`，严格 schema 校验，不改时间。
-5. **实现 proofread diff/risk**：本地对比 source/corrected，标记数字、专名、长度异常、空文本等风险。
-6. **实现 translation draft**：优先从 proofread 输入，输出 `subtitles.<lang>.json`，再渲染目标语言 SRT/VTT。
-7. **统一 metrics**：raw cues、proofread cues、translated cues 都跑字幕物理指标。
-8. **把参数写入 manifest**：每个能力记录 provider、model、prompt/schema version、glossary version、metrics。
-9. **实现 preset 层**：把常用能力链封装成 `fast-transcript`、`subtitle`、`bilingual-subtitle` 等模式。
-10. **再考虑 UI/人工审核**：产品侧读取 proofread/translation JSON，人工编辑后写 reviewed/final 产物。
+| # | 项目 | 状态 | 实现引用 |
+|---|---|---|---|
+| 1 | 冻结能力模型和不变量 | ✓ v0.4 | 本文 |
+| 2 | cue 稳定 id | ✓ v0.4 | `subtitles.cues.json` schemaVersion=2，cue.id `cue_NNNNNN` |
+| 3 | artifact hash 与 freshness | ✓ v0.4-v0.5 | manifest 含 `inputHash` / `inputArtifact` / `outputArtifact` / `outputSchemaVersion`；checkpoint 含 `contentHash`/`policyHash`/`cacheSchema` |
+| 4 | proofread draft | ✓ v0.4 | `voxkit proofread` → `subtitles.proofread.json`；时间字段从源 cue 拷贝，validator 拒空白文本 |
+| 5 | proofread diff/risk | ✓ v0.4 | `voxkit.core.proofread_risk.grade_risk`：numeric_change / protected_term_change / empty_or_deleted / large_text_delta |
+| 6 | translation draft | ✓ v0.4 | `voxkit translate` 优先 proofread 输入；one-to-one；继承源时间/speaker；渲染 SRT/VTT |
+| 7 | 统一 metrics | ✓ v0.4 | `quality.report.json` 同时跑 cues / proofread cue / translation 物理指标 |
+| 8 | 参数全量写 manifest | ✓ v0.4-v0.5 | proofread/translations 段含 provider/model/promptVersion/promptHash/glossaryHash/cacheSchema/freshTokens vs cachedTokens |
+| 9 | preset 层 | ⏳ 未实现 | 文档 §"产品视角的能力组合"已设计；未来 `--preset bilingual-subtitle` 等 |
+| 10 | UI/人工审核 | ⏳ 部分 | `voxkit review confirm/lock` 已支持；UI 端待 Remixr 集成 |
 
-## 待定问题
+## v0.5+ 后续方向
 
-- 校对输入默认用 `subtitles.cues.json` 还是 `transcript.raw.json`？建议默认 cues，必要时可回看 raw words。
-- proofread 是否允许合并/拆分 cue？建议第一版不允许，只输出文本修正；重切建议单独产物。
-- 翻译是否强制 one-to-one？建议不要强制；默认允许同 speaker 连续 cue 在同一时间范围内重排。
-- `subtitles.cues.json` 是否升 schema version 来加入 cue id？建议升到 `"2"` 或允许兼容读取缺省 id。
-- glossary 是全局项目配置，还是每次任务输入？建议两者都支持，并把版本/hash 写 manifest。
-- 多 provider ASR 的 provider raw 是否落盘？建议落盘，方便审计和 normalize bug 排查。
-- reviewed/final 产物的覆盖权限放在 CLI 层、产品层，还是 workspace lock 层？建议至少在 workspace 层防误覆盖。
-- LLM 成本预算是按任务设置，还是按 workspace/project 设置？建议两者都支持，任务级覆盖项目默认值。
-- preset 是作为 CLI 参数 `--preset` 暴露，还是作为产品 API 的 job template 暴露？建议底层同一套配置，入口不同。
+| 项目 | 优先 | 说明 |
+|---|---|---|
+| `voxkit/core/llm_batch_runner.py` 通用化 | 中 | proofread/translate batch 主循环 ~110 行近似复制；抽 generic `BatchProcessor` 协议消除两边漂移风险（Codex H2） |
+| `voxkit/io/atomic.py` 整合 | 中 | 4 处 atomic write helper 散在 lifecycle/translate/workspace/quality_metrics；统一崩溃语义（Codex M1） |
+| 翻译 `cueMappingPolicy=group-within-speaker` | 中 | 当前强制 1:1；目标语言阅读速度与源差距大时（zh→en 长 / en→zh 短）需要同 speaker 连续区间重排 |
+| 翻译 `length_policy=subtitle-fit` | 中 | 当前 prompt 已支持 style 控制，但实际 LLM 没主动压缩；需要后处理验证 + 二次 prompt |
+| 校对 diff 独立产物 | 低 | 当前 diff 信息分散在 cue 字段；汇总成 `subtitles.proofread.diff.json` 便于审核 UI |
+| 在线/实时转录 | 低 | 用 `events.ndjson` 协议承载 partial；voxkit 当前架构已留口 |
+| 多 provider ASR | 低 | LLM 已是 multi-provider；ASR 仍 whisper.cpp only |
+
+## 已解决的待定问题
+
+- **校对输入默认** → 默认 `subtitles.cues.json`（schemaVersion=2 强制）；不回退 raw（保留单一 source of truth）
+- **proofread 合并/拆分 cue** → v1 不允许；只改文本；重切需要时走独立 stage
+- **翻译强制 one-to-one** → v1 强制 (`cueMappingPolicy="one-to-one"`)；`group-within-speaker` 留 v0.6+
+- **`subtitles.cues.json` schemaVersion 升 "2"** → 已升，强制；旧 workdir 重新生成
+- **glossary 配置** → 任务级 `--glossary path` 支持；项目级配置待 preset 实现
+- **reviewed/final 覆盖权限层级** → CLI 层 `--force`/`--force-reviewed`/`--force-final` 三档；workspace lock 仍用于并发互斥（不接管覆盖语义）
+
+## 仍待定的问题
+
+- LLM 成本预算（按任务 / workspace / project）尚未设计；当前只在 manifest 记录 fresh vs cached token，无预算控制
+- preset CLI 入口形态（`--preset` flag vs 子命令）
+- 多 provider ASR 的 provider raw 落盘策略

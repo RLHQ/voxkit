@@ -246,6 +246,121 @@ def test_monotonic_timestamps_enforced():
         assert cues[i + 1].start >= cues[i].end
 
 
+# ─────────────────────────────────────────────────────────────────────────
+# v0.5.1 切分质量回归（基于 e2e_test 真实 case）
+# ─────────────────────────────────────────────────────────────────────────
+
+
+def test_split_long_avoids_preposition_trailing():
+    """长句被 split_long 切分时，应避开介词/连词收尾的切点。
+
+    复现 e2e cue_000001-002 的 "...he's certainly got some / scars around..."
+    问题：原算法因 prosody gap 偏好把切点选在 "some" 后；新算法对 trailing-bad
+    token 减权，应选别处。
+    """
+    # 构造无句号的长句，迫使 split_long 走软切点路径
+    # "we built some great products and shipped them globally for our customers and partners"
+    # 95 chars, 5.6s, 14 words —— 必须 split (max_chars=70)
+    pieces = [
+        ("we", 0.0, 0.2),
+        ("built", 0.2, 0.5),
+        ("some", 0.5, 0.7),     # trailing-bad
+        ("great", 0.8, 1.1),    # 0.1s gap → prosody gap 让 "some" 后变诱人
+        ("products", 1.1, 1.6),
+        ("and", 1.6, 1.7),      # trailing-bad
+        ("shipped", 1.8, 2.2),
+        ("them", 2.2, 2.4),
+        ("globally", 2.4, 2.9),
+        ("for", 2.9, 3.0),      # trailing-bad
+        ("our", 3.1, 3.3),      # trailing-bad
+        ("customers", 3.3, 4.0),
+        ("and", 4.0, 4.1),      # trailing-bad
+        ("partners", 4.1, 4.7),
+    ]
+    words = [_w(w, s, e) for w, s, e in pieces]
+    text = " ".join(w for w, _, _ in pieces)
+    segs = [_seg("s1", 0.0, 4.7, text, words=words, speaker="A")]
+    p = ResegmentParams(max_chars=50, max_dur_s=10.0, min_dur_s=0.0)
+    cues = resegment_for_subtitles(segs, language="en", params=p)
+
+    assert len(cues) >= 2, f"long line must split; got {len(cues)} cues"
+    bad_endings = {"some", "and", "for", "our", "the", "of"}
+    for c in cues[:-1]:  # 末尾 cue 没有"下一个"，不计
+        last_token = c.text.rstrip().split()[-1].rstrip(".,!?;:").lower()
+        assert last_token not in bad_endings, (
+            f"cue ends in trailing-bad token {last_token!r}: {c.text!r}; "
+            f"all cues={[x.text for x in cues]}"
+        )
+
+
+def test_merge_too_short_handles_flash_cue_with_tight_cps():
+    """复现 e2e cue_000008 'I'll' 0.17s 闪屏 case。
+
+    原算法：合并后 cps 22.4 > max_cps 22 → 拒合并 → 0.17s 闪屏字幕保留。
+    新算法：< 0.5s flash cue 触发 cps/chars 放宽 1.5×/1.2×，必须吸入邻居。
+    """
+    # prev: 5.92s "long sentence one"，next: 2.46s "I'll be back at the end"
+    # 中间夹一个 0.17s "I'll" 闪屏；合并后 prev+flash = 6.09s, ~60 chars
+    # 原 max_cps=22 边缘卡住；放宽后 33 cps 容忍
+    segs = [
+        _seg(
+            "s1",
+            0.0,
+            8.55,
+            ("and he had some really interesting thoughts on the job of a "
+             "modern ceo So tune in. I'll be back at the end and give you "
+             "some further thoughts."),
+            words=(
+                # 第一段：长句 ~5.92s 收在 "in."
+                [_w("and", 0.0, 0.1), _w("he", 0.1, 0.2), _w("had", 0.2, 0.4),
+                 _w("really", 0.4, 0.7), _w("interesting", 0.7, 1.2),
+                 _w("thoughts.", 1.2, 1.6), _w("So", 4.0, 4.4),
+                 _w("tune", 4.4, 5.5), _w("in.", 5.5, 5.92)]
+                # 闪屏 word
+                + [_w("I'll", 5.92, 6.09)]
+                # 后续句子
+                + [_w("be", 6.09, 6.3), _w("back.", 6.3, 6.7),
+                   _w("End", 7.0, 7.5), _w("of", 7.5, 7.7),
+                   _w("thoughts.", 7.7, 8.55)]
+            ),
+            speaker="A",
+        ),
+    ]
+    p = ResegmentParams(min_dur_s=1.5)
+    cues = resegment_for_subtitles(segs, language="en", params=p)
+    # 关键断言：没有任何 cue 时长 < 0.5s（flash 应被合并掉）
+    flashes = [c for c in cues if (c.end - c.start) < 0.5]
+    assert not flashes, (
+        f"flash cue should be merged into neighbour; got: "
+        f"{[(c.text, c.end - c.start) for c in flashes]}"
+    )
+
+
+def test_split_long_prefers_clause_punctuation_over_prosody_gap():
+    """逗号 / 句末标点切点优先级保持高于 prosody gap（不被新词性折扣误伤）。"""
+    pieces = [
+        ("First", 0.0, 0.4),
+        ("clause,", 0.4, 0.8),  # 逗号 - 强切点
+        # 长 prosody gap 在介词后（应被压权），但同行有逗号 → 应优先选逗号
+        ("after", 1.5, 1.9),    # gap 0.7s
+        ("the", 1.9, 2.0),      # trailing-bad
+        ("comma", 3.0, 3.4),    # gap 1.0s + 介词收尾 → 应被压
+        ("we", 3.4, 3.6),
+        ("continue.", 3.6, 4.2),
+    ]
+    words = [_w(w, s, e) for w, s, e in pieces]
+    text = " ".join(w for w, _, _ in pieces)
+    segs = [_seg("s1", 0.0, 4.2, text, words=words, speaker="A")]
+    p = ResegmentParams(max_chars=20, max_dur_s=10.0, min_dur_s=0.0)
+    cues = resegment_for_subtitles(segs, language="en", params=p)
+
+    # 至少有一个切点；且第一个 cue 应该停在逗号后（"First clause,"）
+    assert len(cues) >= 2
+    assert cues[0].text.endswith(","), (
+        f"first cue should end at comma, got: {cues[0].text!r}"
+    )
+
+
 def test_pysbd_missing_raises_import_error(monkeypatch):
     """pysbd 不可用时模块直接抛 ImportError，由 caller 决定 fallback。"""
     import sys

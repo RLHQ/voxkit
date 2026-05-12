@@ -49,6 +49,57 @@ def test_compute_physical_metrics_basic() -> None:
     assert m.speaker_switch_cue_rate == 0.0
 
 
+def test_physical_metrics_trailing_bad_word_rate() -> None:
+    """末尾停在介词/连词的 cue 比例（仅 Latin 主体启用）。"""
+    cues = [
+        {"start": 0.0, "end": 2.0, "text": "we built some", "speaker": "A"},
+        {"start": 2.0, "end": 4.0, "text": "great products and", "speaker": "A"},
+        {"start": 4.0, "end": 6.0, "text": "shipped them globally", "speaker": "A"},
+        {"start": 6.0, "end": 8.0, "text": "for our customers and partners.", "speaker": "A"},
+        {"start": 8.0, "end": 10.0, "text": "Then it broke.", "speaker": "A"},
+    ]
+    m = compute_physical_metrics(cues)
+    # cue 1 ("some")、cue 2 ("and") 命中 → 2/5
+    assert m.trailing_bad_word_rate == 0.4
+
+
+def test_physical_metrics_single_word_cue_rate() -> None:
+    """单 token cue 的比例（典型闪屏症状）。"""
+    cues = [
+        {"start": 0.0, "end": 2.0, "text": "hello world", "speaker": "A"},
+        {"start": 2.0, "end": 2.2, "text": "I'll", "speaker": "A"},  # 单词 + 闪屏
+        {"start": 2.2, "end": 4.0, "text": "be back soon", "speaker": "A"},
+    ]
+    m = compute_physical_metrics(cues)
+    assert m.single_word_cue_rate == pytest.approx(1 / 3)
+
+
+def test_physical_metrics_cross_cue_repeat_rate() -> None:
+    """相邻 cue 末尾词与下一 cue 开头词重复（proofread 错误闭合切坏边界）。"""
+    cues = [
+        # cue 1 末尾 "is it" + cue 2 开头 "Is it" → 重复（大小写不敏感）
+        {"start": 0.0, "end": 2.0, "text": "Cash App versus Square. Is it", "speaker": "A"},
+        {"start": 2.0, "end": 5.0, "text": "Is it a good idea to be CEO?", "speaker": "A"},
+        # cue 3 末尾 "and" + cue 4 开头 "we" → 不重复
+        {"start": 5.0, "end": 7.0, "text": "Then we shipped it and", "speaker": "A"},
+        {"start": 7.0, "end": 9.0, "text": "we celebrated.", "speaker": "A"},
+    ]
+    m = compute_physical_metrics(cues)
+    # 4 cue → 3 个相邻对；1 对重复 → 1/4
+    assert m.cross_cue_repeat_rate == 0.25
+
+
+def test_physical_metrics_cjk_skips_trailing_bad() -> None:
+    """CJK 主体路径下 trailing/single-word 应永远为 0（中文无词性概念）。"""
+    cues = [
+        {"start": 0.0, "end": 2.0, "text": "我们做了一些", "speaker": "A"},
+        {"start": 2.0, "end": 4.0, "text": "产品", "speaker": "A"},
+    ]
+    m = compute_physical_metrics(cues)
+    assert m.trailing_bad_word_rate == 0.0
+    assert m.single_word_cue_rate == 0.0
+
+
 def test_compute_physical_metrics_cjk_threshold() -> None:
     """CJK 主体启用 25-char 限制；30 字必触发 overCharLimit。"""
     long_zh = "中" * 30

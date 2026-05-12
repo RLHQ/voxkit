@@ -40,6 +40,7 @@ from dataclasses import dataclass, field
 from typing import Literal, Sequence
 
 from voxkit.core.constants import CJK_LANGUAGES
+from voxkit.core.word_classes import is_trailing_bad
 from voxkit.io.schema import RemixrSegment
 
 
@@ -728,7 +729,13 @@ def _need_split(words: list[_Word], p: ResegmentParams) -> bool:
 
 
 def _compute_break_weights(words: list[_Word], p: ResegmentParams) -> list[float]:
-    """每个 word 之后的可切性权重；底分用 gap 实数让最长 gap 也能脱颖而出。"""
+    """每个 word 之后的可切性权重；底分用 gap 实数让最长 gap 也能脱颖而出。
+
+    `trailing-bad token`（介词 / 冠词 / 连词 / 助动词 / 缩略 will/would 等）
+    后面的切点会被打 0.2× 折扣——不完全禁止（偶尔仍是最优），但优先选别处。
+    标点 / 句末 gap 等高分切点不受此折扣影响（它们走 `max()` 路径，折扣只压
+    "底分 gap 救场" 一类弱切点）。
+    """
     n = len(words)
     weights = [0.0] * n
     wmap = p.soft_break_weights
@@ -744,8 +751,11 @@ def _compute_break_weights(words: list[_Word], p: ResegmentParams) -> list[float
             scaled = p.prosody_gap_weight * (1 + min(1.5, gap) / 1.5)
             weights[i] = max(weights[i], float(scaled))
         if gap > 0:
-            # 底分；远小于标点权重，仅在完全无标点段落里救场
             weights[i] = max(weights[i], gap * 1.0)
+        # trailing-bad 折扣：词 i 若是介词/连词/助词等，切到 i 之后会让当前
+        # cue 以 "of/the/is/will" 这种半截结尾，体感破碎。压 0.2×。
+        if is_trailing_bad(words[i].word):
+            weights[i] *= 0.2
     return weights
 
 
@@ -847,16 +857,36 @@ def _join_cue_text(a: str, b: str) -> str:
     return a + " " + b
 
 
+#: 极短 cue 阈值：低于这个时长用户读不到，必须合并；触发后放宽合并物理上限。
+_FLASH_CUE_DUR_S = 0.5
+_FLASH_RELAX_CPS = 1.5    # cps 上限放宽到 1.5×
+_FLASH_RELAX_CHARS = 1.2  # chars 上限放宽到 1.2×
+
+
 def _can_merge(a: SubtitleCue, b: SubtitleCue, p: ResegmentParams) -> bool:
+    """允许相邻 cue 合并的物理可行性。
+
+    跨 speaker 一律拒绝（speaker 不变量比物理舒适度高）。
+
+    极短 cue (< 0.5s) 必须合并——用户根本读不到 0.5s 闪屏，让合并后字幕略超
+    cps/chars 远好于继续闪屏。所以 ``a`` 或 ``b`` 任一为 flash 时放宽限。
+    `max_dur_s` 不放宽，否则可能合出 10s+ 的长字幕；同时 0.5s + 邻居也几乎
+    不会撞到 max_dur_s 真实边界。
+    """
     if a.speaker != b.speaker:
         return False
     merged_dur = b.end - a.start
     merged_chars = len(_join_cue_text(a.text, b.text))
     merged_cps = merged_chars / merged_dur if merged_dur > 0 else float("inf")
+
+    flash_present = (a.end - a.start) < _FLASH_CUE_DUR_S or (b.end - b.start) < _FLASH_CUE_DUR_S
+    cps_limit = p.max_cps * _FLASH_RELAX_CPS if flash_present else p.max_cps
+    chars_limit = int(p.max_chars * _FLASH_RELAX_CHARS) if flash_present else p.max_chars
+
     return (
         merged_dur <= p.max_dur_s
-        and merged_chars <= p.max_chars
-        and merged_cps <= p.max_cps
+        and merged_chars <= chars_limit
+        and merged_cps <= cps_limit
     )
 
 

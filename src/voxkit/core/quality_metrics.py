@@ -34,6 +34,7 @@ from typing import Any, Dict, List, Optional, Sequence
 from pydantic import BaseModel, ConfigDict, Field
 
 from voxkit.core.proofread_risk import is_cjk_char
+from voxkit.core.word_classes import is_trailing_bad
 
 __all__ = [
     "SubtitlePhysicalMetrics",
@@ -91,6 +92,11 @@ class SubtitlePhysicalMetrics(BaseModel):
     over_char_limit_rate: float = Field(..., alias="overCharLimitRate")
     over_cps_rate: float = Field(..., alias="overCpsRate")
     speaker_switch_cue_rate: float = Field(..., alias="speakerSwitchCueRate")
+    # v0.5.1 新增切分质量指标。CJK 主体路径下 trailing/single-word 永远为 0
+    # （中文没有词性概念）；cross-cue repeat 仍可计算。
+    trailing_bad_word_rate: float = Field(0.0, alias="trailingBadWordRate")
+    single_word_cue_rate: float = Field(0.0, alias="singleWordCueRate")
+    cross_cue_repeat_rate: float = Field(0.0, alias="crossCueRepeatRate")
 
 
 class ProofreadAggregateMetrics(BaseModel):
@@ -204,6 +210,9 @@ def compute_physical_metrics(
             overCharLimitRate=0.0,
             overCpsRate=0.0,
             speakerSwitchCueRate=0.0,
+            trailingBadWordRate=0.0,
+            singleWordCueRate=0.0,
+            crossCueRepeatRate=0.0,
         )
 
     texts = [str(c.get("text", "")) for c in cues]
@@ -237,6 +246,36 @@ def compute_physical_metrics(
             switch += 1
         prev = spk
 
+    # v0.5.1: 切分质量指标
+    # - trailing_bad / single_word：仅 Latin 主体启用（CJK 无 token 概念）
+    # - cross_cue_repeat：相邻 cue 末尾 1-3 词与下一 cue 开头 1-3 词相同
+    #   （proofread 错误闭合切坏边界的典型征兆，例如 "Is it / Is it"）
+    trailing_bad = 0
+    single_word = 0
+    if not cjk_majority:
+        for text in texts:
+            tokens = text.split()
+            if len(tokens) <= 1 and tokens:
+                single_word += 1
+            if tokens and is_trailing_bad(tokens[-1]):
+                trailing_bad += 1
+
+    cross_repeat = 0
+    if n >= 2:
+        for i in range(n - 1):
+            a_tail = [
+                t.lower().strip(".,!?;:\"'`()[]{}")
+                for t in texts[i].rstrip(".,!?；。，:;").split()[-3:]
+            ]
+            b_head = [
+                t.lower().strip(".,!?;:\"'`()[]{}")
+                for t in texts[i + 1].lstrip().split()[:3]
+            ]
+            for k in range(min(3, len(a_tail), len(b_head)), 0, -1):
+                if a_tail[-k:] == b_head[:k] and all(a_tail[-k:]):
+                    cross_repeat += 1
+                    break
+
     return SubtitlePhysicalMetrics(
         cueCount=n,
         avgCueDurS=statistics.fmean(durations),
@@ -248,6 +287,9 @@ def compute_physical_metrics(
         overCharLimitRate=over_char / n,
         overCpsRate=over_cps / n,
         speakerSwitchCueRate=switch / n,
+        trailingBadWordRate=trailing_bad / n,
+        singleWordCueRate=single_word / n,
+        crossCueRepeatRate=cross_repeat / n,
     )
 
 

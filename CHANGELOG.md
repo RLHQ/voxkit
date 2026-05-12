@@ -7,6 +7,44 @@ changes (with migration notes).
 
 ## [Unreleased]
 
+## [0.5.1] — 2026-05-12
+
+字幕切分质量修复。基于 `tmp/e2e_test/` 90 秒样本实测：
+trailing-bad 收尾 40% → 12%、闪屏 cue 4% → 0%、跨 cue "Is it" 重复 1 → 0。
+
+### Added
+
+- **`voxkit.core.word_classes`** — 共享词集 `ENGLISH_TRAILING_BAD`（~150 词，
+  涵盖介词/冠词/连词/助动词/缩略 will-would/弱代词/疑问代词），配合
+  `is_trailing_bad(token)` helper。任何带停顿标点（`.!?,;:`）的 token 都自动
+  豁免（标点 = 合法停顿点）。
+- **`SubtitlePhysicalMetrics` 新增 3 个切分质量指标**：
+  - `trailingBadWordRate` — 末尾停在介词/连词的 cue 比例（CJK 主体跳过）
+  - `singleWordCueRate` — 单 token cue 比例
+  - `crossCueRepeatRate` — 相邻 cue 末尾 1-3 词与下一 cue 开头 1-3 词重复的比例
+    （proofread 错误闭合切坏边界的典型征兆）
+- 7 个回归测试覆盖切分点偏好、闪屏合并、跨 cue 重复检测、CJK 路径不受影响。
+
+### Changed
+
+- **`semantic_resegment._compute_break_weights`** — 给 trailing-bad token 后的
+  软切点打 0.2× 折扣；标点/句末等强切点不受影响。结果：长句 split_long 优先
+  避开介词/连词后切分。
+- **`semantic_resegment._can_merge`** — 极短 cue (< 0.5s) 触发物理上限放宽
+  (cps × 1.5、chars × 1.2)。修复 e2e cue_000008 "I'll" 0.17s 闪屏因 cps 22.4
+  > 22.0 被拒合并的根因。`max_dur_s` 不放宽。
+- **`proofread.v1.md`** 加 3 条硬约束：保留切坏边界（不补造句末标点）、不在
+  相邻 cue 复制重叠词（修 "Is it" 重复）、不给被切断的子句各自加问号。
+  promptHash 自动失效旧 checkpoint，rerun 会全 batch 重做（属期望行为）。
+- **`translate.v1.md`** 加 2 条硬约束：保留源端切坏的不完整尾部、跨 cue 连读
+  自然（不强行画句号让两段割裂）。仍保持 `cueMappingPolicy=one-to-one`，
+  group-within-speaker 留 v0.6+。
+
+### 不在本版本
+
+- `cueMappingPolicy=group-within-speaker`（v0.6+，doc §未来扩展能力）
+- 未引入 spaCy / 重型 NLP（用户选定手写词表路线，覆盖 80% 真实场景）
+
 ## [0.5.0] — 2026-05-12
 
 LLM 安全性硬化：cache 失效完整化、批级 transport 容错、reviewed/final 防误覆盖。
