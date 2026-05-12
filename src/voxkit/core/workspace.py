@@ -8,8 +8,8 @@ Layout::
 
     <workdir>/
       manifest.json                       # run metadata (no lock entanglement)
-      transcript.raw.json                 # whisper.cpp pass-through
-      transcript.voxkit.json              # voxkit-native rich transcript
+      transcript.voxkit.json              # voxkit-native rich transcript (pipeline source of truth)
+      transcript.raw.json                 # Remixr-shaped adapter view (downstream contract; not ASR raw)
       subtitles.srt
       subtitles.vtt
       subtitles.cues.json                 # render-layer cues (only when --resegment=semantic)

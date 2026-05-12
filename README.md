@@ -233,7 +233,8 @@ voxkit transcribe podcast.mp4 --workdir out/ \
 ```
 
 语义重切只影响渲染层产物：`subtitles.srt`、`subtitles.vtt` 和 `subtitles.cues.json`。
-`transcript.raw.json` 保持 ASR ground truth，避免把播放器字幕决策反向污染 transcript。
+`transcript.raw.json`（Remixr 适配视图）与 `transcript.voxkit.json`（voxkit 主产物）保持 ASR
+层语义，避免把播放器字幕决策反向污染 transcript。
 
 ### Resume / Force / 长视频 checkpoint
 

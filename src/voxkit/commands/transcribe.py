@@ -39,7 +39,7 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
     """
     p = sub.add_parser(
         "transcribe",
-        help="对音频/视频跑 whisper.cpp 转录 → transcript.raw.json + SRT/VTT",
+        help="对音频/视频跑 whisper.cpp 转录 → transcript.voxkit.json (主产物) + transcript.raw.json (Remixr 适配) + SRT/VTT",
     )
 
     p.add_argument(
@@ -175,7 +175,7 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
         action=argparse.BooleanOptionalAction,
         default=False,
         dest="with_diarization",
-        help="ASR 完成后跑 pyannote diarization 并把 speaker 标签写进 transcript.raw.json",
+        help="ASR 完成后跑 pyannote diarization 并把 speaker 标签写进 transcript.raw.json (Remixr 适配视图)",
     )
     p.add_argument(
         "--speaker-labels",

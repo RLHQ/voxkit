@@ -18,8 +18,11 @@ Design notes:
   The pipeline is responsible for snapshotting params via ``dataclasses.asdict``
   and computing render-layer quality metrics.
 * This file MUST NOT be confused with ``transcript.raw.json``: the former is
-  a render-layer derivative; the latter is ASR ground truth. See
-  ``docs/transcribe.md`` for the rationale.
+  a render-layer derivative; the latter is a Remixr-shaped adapter view of
+  the ASR transcript (downstream contract, not whisper raw — that lives at
+  ``work/chunks/chunk_NNN.json``; the voxkit-native merged transcript lives at
+  ``transcript.voxkit.json``). See ``docs/capability-artifact-model.md`` for
+  the full layering.
 """
 
 from __future__ import annotations
