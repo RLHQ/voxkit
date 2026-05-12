@@ -199,9 +199,14 @@ class SubtitleCueOut(BaseModel):
     """单条字幕 cue 的可序列化形态；与 ``core.semantic_resegment.SubtitleCue``
     同形（start/end/speaker/text），但走 Pydantic 以确保 JSON 输出格式稳定。
 
+    ``id``：稳定 cue id（``"cue_NNNNNN"`` 6 位零填充顺序号），由 ``cues_json``
+    在序列化时按 1-based enumerate 顺序赋值。下游 proofread/translate 产物用
+    ``cueId`` 反引这里的 ``id``，**不要靠时间戳浮点匹配**。
+
     ``speaker`` 用 ``None`` 表示未跑 diarization（区别于占位 ``"Speaker A"``）。
     """
 
+    id: str = Field(..., description='稳定 cue id，例如 "cue_000001"')
     start: float
     end: float
     speaker: Optional[str] = None
@@ -213,18 +218,19 @@ class SubtitleCuesOutput(BaseModel):
 
     与 ``RemixrTranscript`` 平行的渲染层契约：
 
-      - ``schemaVersion``：独立计数器，初始 ``"1"``；下游消费者据此判断兼容性
+      - ``schemaVersion``：独立计数器，**当前 "2"**（v2 引入了 ``cues[].id``）。
+        本项目内部使用，不写 v1 → v2 兼容读，旧 workdir 重新生成即可
       - ``sourceId``：与 ``transcript.raw.json`` 中的 sourceId 一致，便于关联
       - ``resegment``：产出 cues 的策略（``"semantic"`` / ``"none"`` 等），方便
         审计 cue 是怎么来的；当前只 ``"semantic"`` 模式真的会写这个文件
       - ``params``：重切参数快照，可复现；缺省字段不写入 JSON
       - ``metrics``：字幕质量统计；缺省字段不写入 JSON
-      - ``cues``：扁平的 ``SubtitleCueOut[]``
+      - ``cues``：扁平的 ``SubtitleCueOut[]``，每条带稳定 ``id``
     """
 
     model_config = ConfigDict(populate_by_name=True)
 
-    schema_version: str = Field("1", alias="schemaVersion")
+    schema_version: str = Field("2", alias="schemaVersion")
     source_id: str = Field(..., alias="sourceId")
     resegment: str
     params: Optional[dict] = None

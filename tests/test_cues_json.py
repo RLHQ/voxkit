@@ -2,6 +2,7 @@
 
 Covers:
   - ``to_cues_output`` shape: schemaVersion / sourceId / resegment / params / metrics / cues
+  - cue id format (``cue_NNNNNN``) is 1-based, 6-digit zero-padded, and unique
   - ``write_cues_json`` produces parseable UTF-8 JSON with by_alias keys
   - exclusive-create contract: re-writing the same path raises FileExistsError
   - ``params=None`` and ``speaker=None`` are excluded by ``exclude_none``
@@ -47,14 +48,45 @@ def test_to_cues_output_basic_shape():
         params={"max_dur_s": 7.0},
         metrics={"cueCount": 2},
     )
-    assert out.schema_version == "1"
+    assert out.schema_version == "2"
     assert out.source_id == "abc123"
     assert out.resegment == "semantic"
     assert out.params == {"max_dur_s": 7.0}
     assert out.metrics == {"cueCount": 2}
     assert len(out.cues) == 2
+    assert out.cues[0].id == "cue_000001"
+    assert out.cues[1].id == "cue_000002"
     assert out.cues[0].speaker == "Speaker A"
     assert out.cues[1].text == "Yeah, exactly."
+
+
+def test_to_cues_output_cue_id_format_and_uniqueness():
+    """cue id 必须是 ``cue_NNNNNN`` 6 位零填充，1-based，且全局唯一。
+
+    这是 schemaVersion=2 的核心契约：proofread/translate 产物按 id 反引源 cue。
+    """
+    cues = [_Cue(float(i), float(i + 1), None, f"t{i}") for i in range(12)]
+    out = to_cues_output(cues, source_id="x", resegment="semantic")
+    ids = [c.id for c in out.cues]
+    assert ids[0] == "cue_000001"
+    assert ids[1] == "cue_000002"
+    assert ids[-1] == "cue_000012"
+    assert len(ids) == len(set(ids)), "cue ids must be unique"
+    # 格式 sanity：cue_<6 数字>
+    import re
+
+    pat = re.compile(r"^cue_\d{6}$")
+    assert all(pat.match(i) for i in ids)
+
+
+def test_to_cues_output_cue_id_persists_through_speaker_none():
+    """speaker=None 不影响 id 赋值 —— id 是序列化级别的关注点，与业务字段解耦。"""
+    out = to_cues_output(
+        [_Cue(0.0, 1.0, None, "a"), _Cue(1.0, 2.0, None, "b")],
+        source_id="x",
+        resegment="semantic",
+    )
+    assert [c.id for c in out.cues] == ["cue_000001", "cue_000002"]
 
 
 def test_to_cues_output_speaker_none_preserved_at_model_level():
@@ -87,13 +119,19 @@ def test_write_cues_json_basic(tmp_path: Path):
         metrics={"avgCueDurS": 5.38},
     )
     data = _roundtrip(p)
-    assert data["schemaVersion"] == "1"
+    assert data["schemaVersion"] == "2"
     assert data["sourceId"] == "src1"
     assert data["resegment"] == "semantic"
     assert data["params"] == {"max_chars": 84}
     assert data["metrics"] == {"avgCueDurS": 5.38}
     assert data["cues"] == [
-        {"start": 0.10, "end": 5.48, "speaker": "Speaker A", "text": "Hello world"}
+        {
+            "id": "cue_000001",
+            "start": 0.10,
+            "end": 5.48,
+            "speaker": "Speaker A",
+            "text": "Hello world",
+        }
     ]
 
 

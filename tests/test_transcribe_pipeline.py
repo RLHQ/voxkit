@@ -630,11 +630,16 @@ def test_resegment_semantic_writes_cues_json(
     assert ws.cues_json_path.exists(), "subtitles.cues.json must be written"
     payload = json.loads(ws.cues_json_path.read_text(encoding="utf-8"))
 
-    # Schema invariants
-    assert payload["schemaVersion"] == "1"
+    # Schema invariants (schemaVersion bumped to "2" — cue id required)
+    assert payload["schemaVersion"] == "2"
     assert payload["sourceId"] == "fake_src"
     assert payload["resegment"] == "semantic"
     assert isinstance(payload["cues"], list)
+    # Every cue carries a stable ``cue_NNNNNN`` id, 1-based and unique.
+    cue_ids = [c["id"] for c in payload["cues"]]
+    if cue_ids:
+        assert cue_ids[0] == "cue_000001"
+        assert len(set(cue_ids)) == len(cue_ids)
     # Params snapshot is present so downstream can audit how cues were sliced.
     assert "params" in payload and isinstance(payload["params"], dict)
     assert "max_dur_s" in payload["params"]

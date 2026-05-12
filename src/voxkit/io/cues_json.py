@@ -54,14 +54,17 @@ def to_cues_output(
     No filesystem side effects; useful in tests and when the pipeline wants to
     embed the cues elsewhere (e.g. inside ``transcript.voxkit.json``).
     """
+    # cue id 在序列化边界赋值，不污染内部 SubtitleCue 数据流；格式与 schemaVersion=2
+    # 契约绑定（见 SubtitleCueOut docstring）。1-based 6 位零填充，最高支持百万 cue。
     cue_models = [
         SubtitleCueOut(
+            id=f"cue_{i + 1:06d}",
             start=float(c.start),
             end=float(c.end),
             speaker=c.speaker,
             text=c.text,
         )
-        for c in cues
+        for i, c in enumerate(cues)
     ]
     return SubtitleCuesOutput(
         sourceId=source_id,
