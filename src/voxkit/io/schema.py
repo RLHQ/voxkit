@@ -331,6 +331,9 @@ class ProofreadOutput(BaseModel):
     params: ProofreadParams
     cues: List[ProofreadCueOut]
     metrics: ProofreadMetrics
+    # Reviewer 元数据：``voxkit review confirm`` 设值；``draft`` 时为 None。
+    reviewed_by: Optional[str] = Field(None, alias="reviewedBy")
+    reviewed_at: Optional[str] = Field(None, alias="reviewedAt")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -412,6 +415,8 @@ class TranslationOutput(BaseModel):
     params: TranslationParams
     cues: List[TranslationCueOut]
     metrics: TranslationMetrics
+    reviewed_by: Optional[str] = Field(None, alias="reviewedBy")
+    reviewed_at: Optional[str] = Field(None, alias="reviewedAt")
 
 
 __all__ = [

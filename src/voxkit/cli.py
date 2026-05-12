@@ -113,6 +113,14 @@ def _build_parser() -> argparse.ArgumentParser:
     from voxkit.commands import translate
     translate.add_subparser(sub)
 
+    # ── review（artifact lifecycle）─────────────────────────
+    from voxkit.commands import review
+    review.add_subparser(sub)
+
+    # ── quality（聚合指标报告）──────────────────────────────
+    from voxkit.commands import quality
+    quality.add_subparser(sub)
+
     return parser
 
 
@@ -148,6 +156,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.cmd == "translate":
         from voxkit.commands.translate import run as run_translate
         return run_translate(args)
+    if args.cmd == "review":
+        from voxkit.commands.review import run as run_review
+        return run_review(args)
+    if args.cmd == "quality":
+        from voxkit.commands.quality import run as run_quality
+        return run_quality(args)
 
     parser.error(f"未知子命令: {args.cmd}")
     return 1  # unreachable
