@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "language": "zh",
+  "terms": [
+    {"source": "Claude", "protected": true},
+    {"source": "Anthropic", "protected": true},
+    {"source": "agent", "target": "智能体", "casePolicy": "smart"},
+    {"source": "MCP", "target": "MCP", "protected": true, "casePolicy": "strict"}
+  ]
+}

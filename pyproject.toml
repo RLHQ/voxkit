@@ -12,9 +12,12 @@ license = { text = "MIT" }
 dependencies = [
     "pydantic>=2",
     "pysbd>=0.3.4",
+    "httpx>=0.27",
     # 主 CLI 仅依赖轻量库；pyannote/torch 走 [worker] extra，由 lazy_install 装到独立 venv
     # pysbd 是纯 Python 规则化句子分割器（~1MB），仅在 --resegment semantic 时调用，
     # 默认 import 路径不触发，零开销。
+    # httpx 是 LLM 客户端依赖（sync mode），proofread/translate 阶段调用
+    # OpenAI 兼容 endpoint；轻量且无传染性依赖。
 ]
 
 [project.optional-dependencies]
@@ -26,6 +29,7 @@ worker = [
 dev = [
     "pytest>=7",
     "pytest-mock>=3",
+    "respx>=0.21",
 ]
 
 [project.scripts]
