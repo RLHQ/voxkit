@@ -263,15 +263,17 @@ def _accumulate_risk_and_notes(
 ) -> tuple[Dict[str, int], Dict[str, int]]:
     """遍历 cue 列表，累加 ``risk`` 桶与 ``notes`` 出现次数。
 
-    未知 risk 值默认归入 ``low``（最保守），保证 histogram key 集稳定。同一条 cue
-    出现重复 note tag 视为多次（这个频次能反映"密集疑点"）。
+    缺失或未知 ``risk`` 值默认归入 ``"blocking"``：宁可 over-report 风险，也不要
+    silently 把损坏 / malformed LLM 输出当 ``low`` 通过。这是 Codex P3 修复点
+    （docs §"质量指标"——unknown 应被显著标记）。
+    同一条 cue 出现重复 note tag 视为多次（频次能反映"密集疑点"）。
     """
     risk_hist = _empty_risk_histogram()
     note_hist: Dict[str, int] = {}
     for cue in cues:
-        risk = cue.get("risk") or "low"
-        if risk not in risk_hist:
-            risk = "low"
+        risk = cue.get("risk")
+        if risk is None or risk not in risk_hist:
+            risk = "blocking"
         risk_hist[risk] += 1
         for note in cue.get("notes") or []:
             note_hist[note] = note_hist.get(note, 0) + 1

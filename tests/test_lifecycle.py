@@ -51,7 +51,7 @@ def _proofread_raw(cues: List[Dict[str, Any]] | None = None, **overrides: Any) -
         "inputHash": "sha256:abc",
         "language": "zh",
         "provider": "deepseek",
-        "model": "deepseek-chat",
+        "model": "deepseek-v4-flash",
         "promptVersion": "proofread.v1",
         "promptHash": "x" * 64,
         "params": {"editLevel": "standard", "allowRetiming": False, "glossaryHash": None},
@@ -92,7 +92,7 @@ def _translation_raw(cues: List[Dict[str, Any]] | None = None, **overrides: Any)
         "sourceLanguage": "zh",
         "targetLanguage": "en",
         "provider": "deepseek",
-        "model": "deepseek-chat",
+        "model": "deepseek-v4-flash",
         "promptVersion": "translate.v1",
         "promptHash": "x" * 64,
         "params": {

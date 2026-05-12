@@ -458,7 +458,9 @@ flowchart TD
 | `low` | 普通修改，自动接受。 | 进入 draft。 |
 | `medium` | 可能影响理解。 | UI 标记，可抽样复核。 |
 | `high` | 可能引入事实错误。 | 默认人工复核。 |
-| `blocking` | 违反 schema、不变量或覆盖关系。 | 拒绝写稳定产物。 |
+| `blocking` | 违反 schema、不变量或覆盖关系。 | 在 cue 层强制 `needsHumanReview=true`。**当前实现仍写入 stable draft（cue 仍可被人工修复），但 `quality.report.json` 风险直方图会单独凸显** —— 严格 "拒绝写产物" 只在批级 transport 失败时触发（写 `pending` marker，整批 artifact 不落盘）。 |
+
+> **未知/缺失 risk** 在 `quality.report.json` 聚合时会被强制归入 `blocking` 桶（保守路线），避免 malformed LLM 输出悄悄按 `low` 通过审核。
 
 ## 实时数据与稳定产物
 
@@ -497,10 +499,31 @@ ASR、diarization 和 LLM 阶段的成本结构不同。设计上应允许每个
 | chunk ASR | chunk audio hash、ASR provider、model、language、word timestamp mode、VAD 参数、logprob 阈值。 |
 | diarization | audio hash、diarize model、speaker hints、device 无关模型参数。 |
 | semantic resegment | input transcript hash、language、`ResegmentParams`。 |
-| proofread | input cue hash、provider、model、prompt version、schema version、glossary hash、edit policy。 |
-| translation | input proofread/cue hash、provider、model、prompt version、target language、style、glossary hash、mapping policy。 |
+| proofread | `contentHash` = sha256(id, text, start, end, speaker)；`policyHash` = sha256(provider, model, promptVersion, promptHash, editLevel, glossaryHash, cacheSchema)；命中需两者都相等且 cacheSchema 与当前实现一致。 |
+| translation | `contentHash` 与 proofread 同形；`policyHash` 含 (provider, model, promptVersion, promptHash, style, lengthPolicy, cueMappingPolicy, glossaryHash, sourceLanguage, targetLanguage, cacheSchema)。 |
+
+> **content hash 必须含 start/end/speaker**：上游 source cue 改了时间或 speaker 但 id+text 没变时，cache 必须失效——否则下游 proofread/translation 会按旧时间轴回写，污染"时间轴不变量"。
 
 ### Manifest 应记录的信息
+
+实际实现采用**顶层** `proofread` 与 `translations.<lang>` 两个段（不是 `stages.<name>` 命名空间），用于减少嵌套深度。下游消费者（含 `voxkit review` 镜像写入路径）必须从这两个 key 读：
+
+```jsonc
+{
+  "proofread": { "state": "...", "provider": "...", "model": "...",
+                 "promptVersion": "proofread.v1", "promptHash": "...",
+                 "inputArtifact": "subtitles.cues.json", "inputHash": "sha256:...",
+                 "outputArtifact": "subtitles.proofread.json", "outputSchemaVersion": "1",
+                 "freshPromptTokens": ..., "cachedPromptTokens": ...,
+                 "promptTokens": ..., "completionTokens": ..., ... },
+  "translations": {
+    "zh": { "state": "...", "sourceLanguage": "...", "targetLanguage": "zh",
+            "outputArtifact": "subtitles.zh.json", "outputSchemaVersion": "1",
+            "style": "...", "lengthPolicy": "...", "cueMappingPolicy": "one-to-one",
+            "freshPromptTokens": ..., "cachedPromptTokens": ..., ... }
+  }
+}
+```
 
 | 字段 | 作用 |
 |---|---|
@@ -508,17 +531,24 @@ ASR、diarization 和 LLM 阶段的成本结构不同。设计上应允许每个
 | provider/model | 排查模型升级影响。 |
 | prompt/schema version | LLM 行为变化可追踪。 |
 | glossary version/hash | 术语变化可追踪。 |
-| elapsed/rtf/token usage | 评估性能和成本。 |
+| elapsed/rtf/token usage | 评估性能和成本（fresh vs cached 拆分）。 |
 | warnings/errors | 产品 UI 和自动复核入口。 |
 | metrics | 策略比较和质量门禁。 |
 
 ### 重跑策略
 
 - 默认重跑只更新缺失或 stale 的 draft 产物。
-- `--force` 可以重建机器产物，但不应静默覆盖 reviewed/final。
-- LLM batch 应允许局部重试，避免一个 cue 失败导致整段长视频全部重跑。
+- `--force` 三档（与 `voxkit proofread` / `voxkit translate` CLI 同名）：
+  - `--force`：只覆盖 draft；遇 reviewed/final 拒绝。
+  - `--force-reviewed`：允许覆盖 reviewed；隐含 `--force`。
+  - `--force-final`：允许覆盖 final；销毁人工 lock 元数据，慎用。
+- 任一 force 档都**只清空 `work/proofread/` 或 `work/translate.<lang>/` checkpoint 目录**；旧 stable artifact **不预先 unlink**，仅在新批次全部完成后通过 `os.replace` 原子替换。LLM 中途失败时旧 artifact 完整保留。
+- LLM batch 失败分两类：
+  - 内容层（`LLMSchemaError` / `LLMRefusal`）：本批 fallback 写 risk=blocking + needsHumanReview，落 checkpoint，run 继续。
+  - 传输/限流（`LLMTimeout` / `LLMRateLimit` / 5xx 耗尽）：本批写 `batch_NNN.pending.json` marker，run 继续；末尾若有任何 pending → **拒绝写稳定 artifact** + 抛 `LLMError("incomplete")`。rerun（无需 --force）只重做 pending 批，已完成 checkpoint 自动复用。
 - 旧版本产物应至少保留 hash 和 manifest 记录；是否保留完整文件可由 artifact retention policy 控制。
 - 当 provider/model 不可用时，应明确失败，不要静默切换到另一个模型生成不可比较的产物。
+- 成本审计：manifest 中 `freshPromptTokens` / `freshCompletionTokens` 记录本轮真的花掉的 token；`cachedPromptTokens` / `cachedCompletionTokens` 来自 checkpoint。两者之和（`promptTokens` / `completionTokens`）保留兼容旧消费者。
 
 ## 产品视角的能力组合
 

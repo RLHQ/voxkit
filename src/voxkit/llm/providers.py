@@ -46,7 +46,7 @@ PROVIDERS: Dict[str, ProviderSpec] = {
         name="deepseek",
         base_url="https://api.deepseek.com",
         api_key_env="DEEPSEEK_API_KEY",
-        default_model="deepseek-chat",
+        default_model="deepseek-v4-flash",
         max_context_tokens=64000,
     ),
 }

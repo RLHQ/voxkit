@@ -26,9 +26,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, field_validator
 
-from voxkit.core.proofread_risk import estimate_tokens, is_cjk_char
+from voxkit.core.lifecycle import ForceLevel, gate_force_overwrite
+from voxkit.core.proofread_risk import SYSTEM_OVERHEAD_TOKENS, estimate_tokens, is_cjk_char
 from voxkit.core.workspace import (
     EventMirror,
     Workspace,
@@ -50,7 +51,7 @@ from voxkit.io.schema import (
 )
 from voxkit.io.srt import format_srt_time, format_vtt_time
 from voxkit.llm import ChatResult, LLMClient
-from voxkit.llm.errors import LLMError, LLMRefusal, LLMSchemaError
+from voxkit.llm.errors import LLMError, LLMRateLimit, LLMRefusal, LLMSchemaError, LLMTimeout
 from voxkit.llm.prompts import load_prompt
 
 __all__ = [
@@ -64,6 +65,8 @@ __all__ = [
 
 @dataclass(frozen=True)
 class TranslateRequest:
+    """``force_level`` 与 :class:`ProofreadRequest.force_level` 同义。"""
+
     workdir: Path
     target_language: str
     source_language: Optional[str] = None  # None → 从输入 artifact 推断
@@ -78,9 +81,16 @@ class TranslateRequest:
     context_next: int = 2
     emit_srt: bool = True
     emit_vtt: bool = True
-    force: bool = False
+    force_level: ForceLevel = None
     json_events: bool = False
     timeout_s: float = 60.0
+
+    # 兼容旧调用：force=True ⇔ force_level="draft"
+    force: bool = False
+
+    def __post_init__(self) -> None:
+        if self.force and self.force_level is None:
+            object.__setattr__(self, "force_level", "draft")
 
 
 # ── normalized source cue (input-agnostic) ──────────────────────────────────
@@ -114,9 +124,18 @@ class _BatchResult:
 
 
 class _TranslatedCue(BaseModel):
+    """LLM 译文契约。``translatedText`` 必须含非空白字符；空译文走 repair 兜底。"""
+
     cueId: str
     translatedText: str
     needsHumanReview: bool = False
+
+    @field_validator("translatedText")
+    @classmethod
+    def _non_blank(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("translatedText must contain non-whitespace characters")
+        return v
 
 
 class _TranslatedBatch(BaseModel):
@@ -126,8 +145,10 @@ class _TranslatedBatch(BaseModel):
 # ── input loading ──────────────────────────────────────────────────────────
 
 
-def _load_source(ws: Workspace) -> Tuple[List[_SrcCue], str, str, Dict[str, Any]]:
-    """优先读 proofread，回落 cues。返回 (cues, source_lang, input_artifact, raw_dict)。"""
+def _load_source(
+    ws: Workspace,
+) -> Tuple[List[_SrcCue], str, str, Dict[str, Any], str]:
+    """优先读 proofread，回落 cues。返回 (cues, source_lang, input_artifact, raw_meta, source_id)。"""
     if ws.proofread_json_path.is_file():
         raw_bytes = ws.proofread_json_path.read_bytes()
         doc = ProofreadOutput.model_validate(json.loads(raw_bytes))
@@ -141,7 +162,7 @@ def _load_source(ws: Workspace) -> Tuple[List[_SrcCue], str, str, Dict[str, Any]
             )
             for c in doc.cues
         ]
-        return src_cues, doc.language, "subtitles.proofread.json", {"bytes": raw_bytes}
+        return src_cues, doc.language, "subtitles.proofread.json", {"bytes": raw_bytes}, doc.source_id
 
     if ws.cues_json_path.is_file():
         raw_bytes = ws.cues_json_path.read_bytes()
@@ -156,7 +177,7 @@ def _load_source(ws: Workspace) -> Tuple[List[_SrcCue], str, str, Dict[str, Any]
             _SrcCue(id=c.id, start=c.start, end=c.end, speaker=c.speaker, text=c.text)
             for c in doc2.cues
         ]
-        return src_cues, lang, "subtitles.cues.json", {"bytes": raw_bytes}
+        return src_cues, lang, "subtitles.cues.json", {"bytes": raw_bytes}, doc2.source_id
 
     raise FileNotFoundError(
         f"no translation input in {ws.root}: need subtitles.proofread.json "
@@ -175,29 +196,42 @@ def _build_batches(
     context_prev: int,
     context_next: int,
 ) -> List[_BatchSpec]:
+    """与 :func:`voxkit.core.proofread_pipeline._build_batches` 同形规则：
+
+      - 不跨 speaker
+      - 预算 ``max_tokens − SYSTEM_OVERHEAD_TOKENS`` 含 context_prev/next cue tokens
+      - 单 cue 超预算独占一批
+    """
     n = len(cues)
     if n == 0:
         return []
+    effective_budget = max(max_tokens - SYSTEM_OVERHEAD_TOKENS, 1)
+    tok = [estimate_tokens(c.text) for c in cues]
+
     batches: List[_BatchSpec] = []
     i = 0
     bi = 0
     while i < n:
         speaker = cues[i].speaker
+        prev_start = max(0, i - context_prev)
+        prev_idxs = list(range(prev_start, i))
+        prev_tokens = sum(tok[prev_start:i])
+
         target_idxs = [i]
-        tokens = estimate_tokens(cues[i].text)
+        tokens = tok[i]
         j = i + 1
         while j < n:
             if cues[j].speaker != speaker:
                 break
-            t = estimate_tokens(cues[j].text)
-            if tokens + t > max_tokens:
+            next_window_end = min(n, j + 1 + context_next)
+            next_tokens = sum(tok[j + 1:next_window_end])
+            if prev_tokens + tokens + tok[j] + next_tokens > effective_budget:
                 break
             if len(target_idxs) >= max_cues:
                 break
             target_idxs.append(j)
-            tokens += t
+            tokens += tok[j]
             j += 1
-        prev_idxs = list(range(max(0, i - context_prev), i))
         next_idxs = list(range(j, min(n, j + context_next)))
         batches.append(_BatchSpec(index=bi, target_idxs=target_idxs, prev_idxs=prev_idxs, next_idxs=next_idxs))
         bi += 1
@@ -436,8 +470,67 @@ def _translation_paths(ws: Workspace, lang: str) -> Tuple[Path, Path, Path]:
     )
 
 
+# Cache key 与 proofread 同形（详见 proofread_pipeline._content_hash 注释）：
+#   contentHash = (id, text, start, end, speaker)
+#   policyHash  = (provider, model, promptVersion, promptHash, style, lengthPolicy,
+#                  cueMappingPolicy, glossaryHash, sourceLanguage, targetLanguage,
+#                  cacheSchema)
+#   命中要求 contentHash AND policyHash 都相等，cacheSchema=current。
+
+#: cache schema 版本；语义改了就 bump，老 checkpoint 自动作废。
+TRANSLATE_CACHE_SCHEMA = 2
+
+
 def _content_hash(cues: Sequence[_SrcCue]) -> str:
-    payload = json.dumps([(c.id, c.text) for c in cues], ensure_ascii=False, separators=(",", ":"))
+    payload = json.dumps(
+        [
+            {
+                "id": c.id,
+                "text": c.text,
+                "start": round(float(c.start), 6),
+                "end": round(float(c.end), 6),
+                "speaker": c.speaker,
+            }
+            for c in cues
+        ],
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _policy_hash(
+    *,
+    provider: str,
+    model: str,
+    prompt_version: str,
+    prompt_hash: str,
+    style: str,
+    length_policy: str,
+    cue_mapping_policy: str,
+    glossary_hash: Optional[str],
+    source_language: str,
+    target_language: str,
+) -> str:
+    payload = json.dumps(
+        {
+            "cacheSchema": TRANSLATE_CACHE_SCHEMA,
+            "provider": provider,
+            "model": model,
+            "promptVersion": prompt_version,
+            "promptHash": prompt_hash,
+            "style": style,
+            "lengthPolicy": length_policy,
+            "cueMappingPolicy": cue_mapping_policy,
+            "glossaryHash": glossary_hash,
+            "sourceLanguage": source_language,
+            "targetLanguage": target_language,
+        },
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -445,26 +538,26 @@ def _checkpoint_path(work_dir: Path, batch_index: int) -> Path:
     return work_dir / f"batch_{batch_index:03d}.json"
 
 
+def _pending_path(work_dir: Path, batch_index: int) -> Path:
+    """传输/限流失败 batch 的占位文件。"""
+    return work_dir / f"batch_{batch_index:03d}.pending.json"
+
+
 def _try_load_checkpoint(
     path: Path,
     *,
     expect_content_hash: str,
-    expect_prompt_version: str,
-    expect_model: str,
-    expect_target_language: str,
+    expect_policy_hash: str,
 ) -> Optional[_BatchResult]:
-    if not path.is_file():
-        return None
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    except (FileNotFoundError, OSError, json.JSONDecodeError):
         return None
-    if (
-        data.get("contentHash") != expect_content_hash
-        or data.get("promptVersion") != expect_prompt_version
-        or data.get("model") != expect_model
-        or data.get("targetLanguage") != expect_target_language
-    ):
+    if int(data.get("cacheSchema", 1)) != TRANSLATE_CACHE_SCHEMA:
+        return None
+    if data.get("contentHash") != expect_content_hash:
+        return None
+    if data.get("policyHash") != expect_policy_hash:
         return None
     cues = [TranslationCueOut.model_validate(c) for c in data.get("cues", [])]
     return _BatchResult(
@@ -480,17 +573,14 @@ def _write_checkpoint(
     *,
     batch_index: int,
     content_hash: str,
-    prompt_version: str,
-    model: str,
-    target_language: str,
+    policy_hash: str,
     result: _BatchResult,
 ) -> None:
     payload = {
+        "cacheSchema": TRANSLATE_CACHE_SCHEMA,
         "batchIndex": batch_index,
         "contentHash": content_hash,
-        "promptVersion": prompt_version,
-        "model": model,
-        "targetLanguage": target_language,
+        "policyHash": policy_hash,
         "promptTokens": result.prompt_tokens,
         "completionTokens": result.completion_tokens,
         "cues": [c.model_dump(by_alias=True) for c in result.out_cues],
@@ -500,7 +590,31 @@ def _write_checkpoint(
     tmp.replace(path)
 
 
+def _write_pending_marker(
+    path: Path,
+    *,
+    batch_index: int,
+    error_kind: str,
+    error_message: str,
+) -> None:
+    payload = {
+        "batchIndex": batch_index,
+        "errorKind": error_kind,
+        "errorMessage": error_message[:500],
+    }
+    tmp = path.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    tmp.replace(path)
+
+
 # ── SRT/VTT rendering ──────────────────────────────────────────────────────
+
+
+def _atomic_write_text(path: Path, body: str) -> None:
+    """tmp + ``Path.replace`` 原子覆写文本文件；写失败时旧文件保留。"""
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(body, encoding="utf-8")
+    tmp.replace(path)
 
 
 def _render_translated(cues: Sequence[TranslationCueOut], *, time_fmt) -> str:
@@ -536,25 +650,24 @@ def run_translate(
     work_dir = _translate_work_dir(ws, req.target_language)
     json_path, srt_path, vtt_path = _translation_paths(ws, req.target_language)
     try:
-        # 1. 拒覆盖
-        if json_path.exists() and not req.force:
-            raise FileExistsError(
-                f"refusing to overwrite {json_path}; pass --force"
-            )
+        # 1. 拒覆盖（reviewed/final 必须显式 --force-reviewed/--force-final）
+        gate_force_overwrite(
+            json_path,
+            force_level=req.force_level,
+            artifact_label=f"subtitles.{req.target_language}.json",
+        )
 
         # 2. 输入
-        src_cues, src_lang, input_artifact, raw_meta = _load_source(ws)
+        src_cues, src_lang, input_artifact, raw_meta, source_id = _load_source(ws)
         input_hash = "sha256:" + hashlib.sha256(raw_meta["bytes"]).hexdigest()
         source_language = req.source_language or src_lang or "auto"
 
-        # 3. force：清空目标语言 work + 删旧 artifact / srt / vtt
-        if req.force and work_dir.exists():
+        # 3. force：清空目标语言 work checkpoints。
+        # **不要** 预先 unlink 旧 artifact / srt / vtt —— 改成最后 atomic replace；
+        # LLM 失败时旧 artifact 仍然完整可用。
+        if req.force_level is not None and work_dir.exists():
             shutil.rmtree(work_dir)
         work_dir.mkdir(parents=True, exist_ok=True)
-        if req.force:
-            for p in (json_path, srt_path, vtt_path):
-                if p.exists():
-                    p.unlink()
 
         # 4. glossary
         gloss: Optional[Glossary] = None
@@ -582,6 +695,20 @@ def run_translate(
         )
         used_model = client._model  # noqa: SLF001
 
+        # 6a. policy hash：所有影响 LLM 输出的策略集中计 hash。
+        policy_h = _policy_hash(
+            provider=req.provider,
+            model=used_model,
+            prompt_version=prompt_version,
+            prompt_hash=prompt_hash,
+            style=req.style,
+            length_policy=req.length_policy,
+            cue_mapping_policy="one-to-one",
+            glossary_hash=gloss_hash,
+            source_language=source_language,
+            target_language=req.target_language,
+        )
+
         # 7. batches
         batches = _build_batches(
             src_cues,
@@ -605,11 +732,15 @@ def run_translate(
                 "batchCount": len(batches),
             }, to_stderr=req.json_events)
 
+            # cost 拆 fresh vs cached（同 proofread 形态）：
             all_out: List[TranslationCueOut] = []
             all_flags: List[Dict[str, bool]] = []
-            prompt_tok_total = 0
-            completion_tok_total = 0
+            fresh_pt = 0
+            fresh_ct = 0
+            cached_pt = 0
+            cached_ct = 0
             cached_count = 0
+            pending_batches: List[Dict[str, Any]] = []
 
             try:
                 next_trg_id = 1
@@ -617,6 +748,7 @@ def run_translate(
                     target_cues = [src_cues[i] for i in batch.target_idxs]
                     chash = _content_hash(target_cues)
                     cp_path = _checkpoint_path(work_dir, batch.index)
+                    pending_path = _pending_path(work_dir, batch.index)
 
                     _emit(emit, {
                         "event": "translate.batch.start",
@@ -627,9 +759,7 @@ def run_translate(
                     cached = _try_load_checkpoint(
                         cp_path,
                         expect_content_hash=chash,
-                        expect_prompt_version=prompt_version,
-                        expect_model=used_model,
-                        expect_target_language=req.target_language,
+                        expect_policy_hash=policy_h,
                     )
                     if cached is not None:
                         all_out.extend(cached.out_cues)
@@ -639,10 +769,11 @@ def run_translate(
                                 "", cue.text, glossary=gloss
                             )
                             all_flags.append(flags)
-                        prompt_tok_total += cached.prompt_tokens
-                        completion_tok_total += cached.completion_tokens
+                        cached_pt += cached.prompt_tokens
+                        cached_ct += cached.completion_tokens
                         cached_count += 1
                         next_trg_id += len(cached.out_cues)
+                        pending_path.unlink(missing_ok=True)
                         _emit(emit, {
                             "event": "translate.batch.done",
                             "batchIndex": batch.index,
@@ -677,12 +808,36 @@ def run_translate(
                         result_pt = lr.prompt_tokens
                         result_ct = lr.completion_tokens
                     except (LLMSchemaError, LLMRefusal) as e:
+                        # 内容层失败：fallback 标 blocking + needsHumanReview，
+                        # 视为本批已完结（写 checkpoint）。
                         reason = "provider_refusal" if isinstance(e, LLMRefusal) else "schema_fail"
                         out_cues, flags = _fallback_batch(
                             batch, src_cues, reason=reason, start_id=next_trg_id
                         )
                         result_pt = 0
                         result_ct = 0
+                    except (LLMTimeout, LLMRateLimit) as e:
+                        # 仅捕获传输层失败；其它 LLMError 子类视为 bug 向上抛。
+                        kind = type(e).__name__
+                        _write_pending_marker(
+                            pending_path,
+                            batch_index=batch.index,
+                            error_kind=kind,
+                            error_message=str(e),
+                        )
+                        pending_batches.append({
+                            "batchIndex": batch.index,
+                            "errorKind": kind,
+                            "errorMessage": str(e)[:200],
+                        })
+                        _emit(emit, {
+                            "event": "translate.batch.failed",
+                            "batchIndex": batch.index,
+                            "errorKind": kind,
+                            "errorMessage": str(e)[:200],
+                            "willRetryOnRerun": True,
+                        }, to_stderr=req.json_events)
+                        continue
 
                     next_trg_id += len(out_cues)
                     br = _BatchResult(out_cues=out_cues, prompt_tokens=result_pt, completion_tokens=result_ct)
@@ -690,15 +845,14 @@ def run_translate(
                         cp_path,
                         batch_index=batch.index,
                         content_hash=chash,
-                        prompt_version=prompt_version,
-                        model=used_model,
-                        target_language=req.target_language,
+                        policy_hash=policy_h,
                         result=br,
                     )
+                    pending_path.unlink(missing_ok=True)
                     all_out.extend(br.out_cues)
                     all_flags.extend(flags)
-                    prompt_tok_total += br.prompt_tokens
-                    completion_tok_total += br.completion_tokens
+                    fresh_pt += br.prompt_tokens
+                    fresh_ct += br.completion_tokens
 
                     _emit(emit, {
                         "event": "translate.batch.done",
@@ -710,6 +864,25 @@ def run_translate(
             finally:
                 if owns_client:
                     client.close()
+
+            # 7a. pending batch 存在 → 拒绝写稳定 artifact，让 rerun 补做
+            if pending_batches:
+                _emit(emit, {
+                    "event": "translate.partial",
+                    "completedBatches": len(batches) - len(pending_batches),
+                    "pendingBatches": len(pending_batches),
+                    "details": pending_batches,
+                }, to_stderr=req.json_events)
+                first_kind = pending_batches[0]["errorKind"]
+                raise LLMError(
+                    f"translate incomplete: {len(pending_batches)}/{len(batches)} "
+                    f"batches failed (first error: {first_kind}). "
+                    f"Completed batches were checkpointed; rerun without --force "
+                    f"to retry only the pending batches."
+                )
+
+            prompt_tok_total = fresh_pt + cached_pt
+            completion_tok_total = fresh_ct + cached_ct
 
             # 8. metrics
             cue_count = len(all_out)
@@ -733,7 +906,7 @@ def run_translate(
             )
             artifact = TranslationOutput(
                 state="draft",
-                sourceId=_resolve_source_id(ws),
+                sourceId=source_id,
                 inputArtifact=input_artifact,
                 inputHash=input_hash,
                 sourceLanguage=source_language,
@@ -747,17 +920,22 @@ def run_translate(
                 metrics=metrics,
             )
 
-            # 9. 写 JSON
+            # 9. 写 JSON（atomic replace；旧 artifact 未删，失败时不丢）
             payload = artifact.model_dump(by_alias=True, exclude_none=False)
             tmp = json_path.with_suffix(".json.tmp")
             tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
             tmp.replace(json_path)
 
-            # 10. 渲染 SRT/VTT
+            # 10. 渲染 SRT/VTT（同样 atomic，避免半截字幕被播放器读到）
             if req.emit_srt:
-                srt_path.write_text(_render_translated(all_out, time_fmt=format_srt_time), encoding="utf-8")
+                _atomic_write_text(
+                    srt_path, _render_translated(all_out, time_fmt=format_srt_time)
+                )
             if req.emit_vtt:
-                vtt_path.write_text("WEBVTT\n\n" + _render_translated(all_out, time_fmt=format_vtt_time), encoding="utf-8")
+                _atomic_write_text(
+                    vtt_path,
+                    "WEBVTT\n\n" + _render_translated(all_out, time_fmt=format_vtt_time),
+                )
 
             elapsed = time.monotonic() - started
 
@@ -776,6 +954,8 @@ def run_translate(
                 "sourceLanguage": source_language,
                 "inputArtifact": input_artifact,
                 "inputHash": input_hash,
+                "outputArtifact": f"subtitles.{req.target_language}.json",
+                "outputSchemaVersion": "1",
                 "provider": req.provider,
                 "model": used_model,
                 "promptVersion": prompt_version,
@@ -790,6 +970,10 @@ def run_translate(
                 "overCharLimitRate": metrics.over_char_limit_rate,
                 "overCpsRate": metrics.over_cps_rate,
                 "glossaryMissRate": metrics.glossary_miss_rate,
+                "freshPromptTokens": fresh_pt,
+                "freshCompletionTokens": fresh_ct,
+                "cachedPromptTokens": cached_pt,
+                "cachedCompletionTokens": cached_ct,
                 "promptTokens": prompt_tok_total,
                 "completionTokens": completion_tok_total,
                 "elapsedSecs": elapsed,
@@ -814,22 +998,3 @@ def run_translate(
         release_lock(ws)
 
 
-def _resolve_source_id(ws: Workspace) -> str:
-    """优先从 proofread 拿 sourceId，否则 cues。"""
-    if ws.proofread_json_path.is_file():
-        try:
-            doc = json.loads(ws.proofread_json_path.read_text(encoding="utf-8"))
-            sid = doc.get("sourceId")
-            if sid:
-                return sid
-        except (OSError, json.JSONDecodeError):
-            pass
-    if ws.cues_json_path.is_file():
-        try:
-            doc = json.loads(ws.cues_json_path.read_text(encoding="utf-8"))
-            sid = doc.get("sourceId")
-            if sid:
-                return sid
-        except (OSError, json.JSONDecodeError):
-            pass
-    return "unknown"

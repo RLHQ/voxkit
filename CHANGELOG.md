@@ -7,6 +7,67 @@ changes (with migration notes).
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-05-12
+
+LLM 安全性硬化：cache 失效完整化、批级 transport 容错、reviewed/final 防误覆盖。
+端到端跑通 deepseek-v4-flash（默认 model）。Codex 独立审查 + 工程师 review 合并修复。
+
+### Added
+
+- **`voxkit.core.lifecycle.gate_force_overwrite` + `ForceLevel`** — proofread/translate
+  共用的 force-gate；按 artifact `state` 分三档拒覆盖（draft/reviewed/final）。
+- **`--force-reviewed` / `--force-final`** CLI flag —— 必须显式声明才能覆盖人工
+  confirm/lock 的产物（`--force` 默认只覆盖 draft）。
+- **批级 transport 错误处理** —— `LLMTimeout` / `LLMRateLimit` 单批失败写
+  `batch_NNN.pending.json` marker；run 末尾若有 pending → 拒绝写稳定 artifact，
+  rerun 只补失败批，已完成 checkpoint 自动复用。
+- **manifest cost 拆分** —— 新增 `freshPromptTokens` / `freshCompletionTokens` /
+  `cachedPromptTokens` / `cachedCompletionTokens`，区分本轮真的花掉 vs checkpoint
+  复用；`promptTokens` / `completionTokens` 总和保留兼容旧消费者。
+- **manifest `outputArtifact` / `outputSchemaVersion`** — proofread / translations.<lang>
+  各自补上输出 artifact 路径 + schema 版本，便于 freshness 判断。
+- **`SYSTEM_OVERHEAD_TOKENS = 600`** — `_build_batches` 在切批时扣掉 system prompt /
+  context cue / completion 余量，防止 batch 撞 context window。
+- 4 处回归测试覆盖 force gate / cache key 失效条件 / 空文本拒收 / transport 续跑。
+
+### Changed
+
+- **proofread/translate cache key 改成 `(contentHash, policyHash, cacheSchema)`** —
+  `contentHash` 入键 `(id, text, start, end, speaker)`（之前只有 id+text，会让 stale
+  时间轴/speaker 被旧 cache 覆盖）；`policyHash` 集中所有影响 LLM 输出的策略
+  （provider/model/promptVersion/promptHash/editLevel 或 style/lengthPolicy/
+  cueMappingPolicy/glossaryHash/sourceLanguage/targetLanguage）。任一变化即让
+  checkpoint 失效。`cacheSchema=2` 老 checkpoint 自动作废。
+- **`--force` 不再预先 unlink 旧 artifact** —— 只清 `work/proofread/` 或
+  `work/translate.<lang>/` checkpoint 目录；新批次全部完成后才 `os.replace` 原子
+  替换。LLM 中途失败时旧 stable artifact 完整保留。
+- **token 估算保守化** —— CJK 0.5 → 1.0 token/char（贴近 DeepSeek BPE 实际值），
+  Latin 0.25 → 0.3。`_build_batches` 把 `context_prev/next` 实际 token 也算进预算
+  （之前只看 cue 数量，长 CJK context 会撑爆）。
+- **`quality.report.json` 的未知/缺失 `risk` → `blocking` 桶**（之前默认 `low`，
+  malformed LLM 输出会悄悄通过审核）。
+- **`subtitles.<lang>.srt` / `.vtt` 改原子写**（同 JSON 一致），失败时旧字幕保留。
+- **proofread / translate 默认 LLM model** → `deepseek-v4-flash`（`deepseek-chat`
+  2026-07-24 deprecated）。
+- **`docs/capability-artifact-model.md`** —— 缓存键 / manifest 顶层布局 /
+  blocking 语义 / `--force` 三档全部对齐当前实现。
+
+### Fixed
+
+- **schema validator 拒收空白 `correctedText` / `translatedText`** —— LLM 返回 `""`
+  或纯空白会被 Pydantic 拒收 → 触发一次 repair → 仍空白则 fallback 标 `risk=blocking`
+  + `needsHumanReview`，不再悄悄落到 stable draft。
+- **`peek_artifact_state`** 用 try/except 替代 stat 预检查，消除 TOCTOU。
+- **批级 transport except 收窄到 `(LLMTimeout, LLMRateLimit)`** —— 之前 catch 了
+  `LLMError` 基类，会吞掉未来其它 LLM 子类异常。
+
+### 已知遗留
+
+- proofread/translate batch 主循环仍存在 ~110 行高度近似复制；`llm_batch_runner.py`
+  通用化留作后续 PR（工程量较大）。
+- `_atomic_write_text` / `_atomic_write_json` / `write_manifest` / `write_quality_report`
+  应整合到 `voxkit/io/atomic.py`（Codex M1）；本轮未做。
+
 ### Added
 
 - **`voxkit doctor --profile {transcribe,diarize,all}`** — first-run checks can now

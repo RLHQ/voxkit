@@ -23,6 +23,9 @@ tests/fixtures/audio/generated/
 *.tmp.json
 /tmp/
 
+# codex / agent session metadata（per-clone，不入库）
+.context/
+
 # IDE
 .idea/
 .vscode/

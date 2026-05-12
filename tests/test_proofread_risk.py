@@ -32,19 +32,19 @@ def test_estimate_tokens_empty_returns_zero() -> None:
     assert estimate_tokens("") == 0
 
 
-def test_estimate_tokens_cjk_uses_05_coef() -> None:
-    # 10 个 CJK 字符 → ~5 tokens（保守上限，不要求精确）
-    assert estimate_tokens("中" * 10) == 5
+def test_estimate_tokens_cjk_uses_10_coef() -> None:
+    # CJK ≈ 1 token/char（DeepSeek BPE 实际值；之前 0.5 会撞 context window）
+    assert estimate_tokens("中" * 10) == 10
 
 
-def test_estimate_tokens_latin_uses_025_coef() -> None:
-    # 16 个 ASCII → 4 tokens
+def test_estimate_tokens_latin_uses_03_coef() -> None:
+    # Latin 0.3 token/char：16 字符 ≈ 4 token（int(16*0.3)=4）
     assert estimate_tokens("a" * 16) == 4
 
 
 def test_estimate_tokens_mixed_is_sum() -> None:
-    # 4 CJK (2 tok) + 8 ASCII (2 tok) = 4
-    assert estimate_tokens("中文中文" + "a" * 8) == 4
+    # 4 CJK (4 tok) + 8 ASCII (2 tok) = 6
+    assert estimate_tokens("中文中文" + "a" * 8) == 6
 
 
 def test_estimate_tokens_min_one() -> None:

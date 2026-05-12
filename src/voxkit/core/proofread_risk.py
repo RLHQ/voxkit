@@ -26,7 +26,20 @@ __all__ = [
     "grade_risk",
     "infer_edit_level",
     "is_cjk_char",
+    "SYSTEM_OVERHEAD_TOKENS",
 ]
+
+
+# ── batching overhead 常量 ─────────────────────────────────────────────────
+
+
+#: system prompt + JSON 包装结构 + completion 头的固定预留 token 上限。
+#: pipelines 在切 batch 时把 (max_input_tokens − SYSTEM_OVERHEAD_TOKENS) 当作真正
+#: 可放 target+context 的预算，避免提示词膨胀把 batch 撑出 context window。
+#:
+#: 经验值：proofread/translate v1 prompt 约 350 token，加 JSON 结构 padding ~100，
+#: 完成 token 头 ~50。留 600 token 余量。
+SYSTEM_OVERHEAD_TOKENS: int = 600
 
 
 # ── token 估算 ─────────────────────────────────────────────────────────────
@@ -51,18 +64,19 @@ def is_cjk_char(ch: str) -> bool:
 
 
 def estimate_tokens(text: str) -> int:
-    """估算 LLM tokens。CJK 0.5 token/char、其它 0.25 token/char（即 4 chars/token）。
+    """估算 LLM tokens。CJK 1.0 token/char、其它 0.3 token/char。
 
-    意图是 *保守上限*（不至于把 batch 切得太小）。真实 DeepSeek BPE 对 CJK 大致是
-    1 token/char，对 Latin 大致是 0.25 token/char；这里 CJK 系数取 0.5 兼顾"留
-    余量"和"别把 batch 切得太小拖低成本效率"。
+    意图是 *保守上限*。真实 DeepSeek BPE 对 CJK 接近 1 token/char、对 Latin 略超
+    0.25 token/char；之前 CJK 用 0.5 会让长 CJK batch 撞 context window（Codex
+    P2 修复点）。改成 1.0 + 0.3 即便偶尔高估，也只是把 batch 切得稍小、付
+    incremental LLM call cost，没有正确性风险。
     """
     if not text:
         return 0
     cjk = sum(1 for c in text if is_cjk_char(c))
     other = len(text) - cjk
     # 至少 1 token，避免 batch 估算时整批为 0 触发死循环。
-    return max(1, int(cjk * 0.5 + other * 0.25))
+    return max(1, int(cjk * 1.0 + other * 0.3))
 
 
 # ── 风险评级 ───────────────────────────────────────────────────────────────

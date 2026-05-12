@@ -16,7 +16,9 @@ import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Literal, Tuple
+from typing import Any, Literal, Optional, Tuple
+
+# Re-exported below for tooling/IDE completion.
 
 from pydantic import ValidationError
 
@@ -26,11 +28,14 @@ from voxkit.io.schema import ProofreadOutput, TranslationOutput
 __all__ = [
     "LifecycleError",
     "LIFECYCLE_ORDER",
+    "ForceLevel",
     "detect_artifact_kind",
     "load_artifact",
     "validate_self_consistency",
     "transition_state",
     "mirror_to_manifest",
+    "peek_artifact_state",
+    "gate_force_overwrite",
 ]
 
 
@@ -38,6 +43,9 @@ __all__ = [
 
 #: 生命周期顺序；数值越大越靠后。``stale`` 不在此处（计算态不持久化）。
 LIFECYCLE_ORDER: dict[str, int] = {"draft": 0, "reviewed": 1, "final": 2}
+
+#: ``--force`` 等级；高级隐含覆盖低级。``None`` = 不覆盖任何已存在的 artifact。
+ForceLevel = Optional[Literal["draft", "reviewed", "final"]]
 
 #: ``subtitles.<lang>.json`` 文件名里抽取语言代码。
 _TRANSLATION_NAME_RE = re.compile(r"^subtitles\.([A-Za-z][A-Za-z0-9_-]*)\.json$")
@@ -105,6 +113,64 @@ def load_artifact(path: Path) -> Tuple[str, dict]:
             f"artifact {path} fails {kind} schema: {exc}"
         ) from exc
     return kind, raw
+
+
+# ── 轻量 state peek（force gate 用） ────────────────────────────────────────
+
+
+def peek_artifact_state(path: Path) -> Optional[str]:
+    """读 artifact 顶层 ``state`` 字段；文件不存在或损坏返回 ``None``。
+
+    **故意不走 Pydantic 全量校验**：半损坏 artifact 也要能被读出 state，否则
+    ``--force`` 永远救不回来。直接 try/except 替代预 stat（避免 TOCTOU）。
+    """
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(raw, dict):
+        return None
+    state = raw.get("state")
+    if isinstance(state, str):
+        return state
+    return None
+
+
+def gate_force_overwrite(
+    path: Path,
+    *,
+    force_level: ForceLevel,
+    artifact_label: str,
+) -> None:
+    """Reviewed/Final artifact 防误覆盖；被 proofread/translate pipeline 共用。
+
+    规则：
+      - artifact 不存在 → 直通
+      - force_level=None → 拒绝
+      - force_level 等级必须 ≥ existing.state（未知 state 视为 ``draft``）
+
+    raise FileExistsError 当被拒绝时；消息里告诉用户该传哪个 flag。
+    """
+    existing_state = peek_artifact_state(path)
+    if existing_state is None:
+        return  # 不存在 / 损坏到读不出 state；force gate 直通
+    existing_rank = LIFECYCLE_ORDER.get(existing_state, 0)
+    if force_level is None:
+        raise FileExistsError(
+            f"refusing to overwrite {path} (state={existing_state!r}); "
+            f"pass --force / --force-reviewed / --force-final"
+        )
+    force_rank = LIFECYCLE_ORDER.get(force_level, 0)
+    if force_rank < existing_rank:
+        next_flag = {
+            "reviewed": "--force-reviewed",
+            "final": "--force-final",
+        }.get(existing_state, "--force")
+        raise FileExistsError(
+            f"refusing to overwrite {artifact_label} in state {existing_state!r}; "
+            f"current --force level only covers ≤ {force_level!r}. "
+            f"Pass {next_flag} to acknowledge the destructive intent."
+        )
 
 
 # ── 自洽性校验 ──────────────────────────────────────────────────────────────

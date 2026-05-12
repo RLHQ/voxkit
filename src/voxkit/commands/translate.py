@@ -57,9 +57,34 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
         default=True,
         help="输出目标语言 VTT（默认 on）",
     )
-    p.add_argument("--force", action="store_true", help="清空 work/translate.<lang>/ 并删旧 artifact")
+    # --force 三档（语义见 TranslateRequest.force_level）
+    p.add_argument(
+        "--force",
+        action="store_true",
+        help="覆盖 draft 的 subtitles.<lang>.json 并清空 work/translate.<lang>/；遇 reviewed/final 仍会拒绝",
+    )
+    p.add_argument(
+        "--force-reviewed",
+        action="store_true",
+        help="允许覆盖 reviewed 状态（隐含 --force）",
+    )
+    p.add_argument(
+        "--force-final",
+        action="store_true",
+        help="允许覆盖 final 状态（隐含 --force-reviewed）。**销毁人工 lock 产物，慎用**",
+    )
     p.add_argument("--json-events", action="store_true", help="stderr NDJSON 事件协议")
     p.add_argument("--timeout", type=float, default=60.0)
+
+
+def _resolve_force_level(args: argparse.Namespace) -> str | None:
+    if getattr(args, "force_final", False):
+        return "final"
+    if getattr(args, "force_reviewed", False):
+        return "reviewed"
+    if args.force:
+        return "draft"
+    return None
 
 
 def run(args: argparse.Namespace) -> int:
@@ -78,7 +103,7 @@ def run(args: argparse.Namespace) -> int:
         context_next=args.context_next,
         emit_srt=args.emit_srt,
         emit_vtt=args.emit_vtt,
-        force=args.force,
+        force_level=_resolve_force_level(args),
         json_events=args.json_events,
         timeout_s=args.timeout,
     )

@@ -52,10 +52,24 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
     )
     p.add_argument("--context-prev", type=int, default=8, help="batch 上文 cue 数（默认 8）")
     p.add_argument("--context-next", type=int, default=4, help="batch 下文 cue 数（默认 4）")
+    # --force 三档（语义见 ProofreadRequest.force_level）：
+    #   --force          → 只覆盖 draft（默认安全档）
+    #   --force-reviewed → 也覆盖 reviewed（确认要丢人工 confirm 的产物）
+    #   --force-final    → 也覆盖 final（确认要丢人工锁定的产物）
     p.add_argument(
         "--force",
         action="store_true",
-        help="清空 work/proofread/ 并删旧 artifact，重跑整轮",
+        help="覆盖 draft 状态的 subtitles.proofread.json 并清空 work/proofread/；遇 reviewed/final 仍会拒绝",
+    )
+    p.add_argument(
+        "--force-reviewed",
+        action="store_true",
+        help="允许覆盖 reviewed 状态（隐含 --force）。注意会丢失人工 confirm 元数据",
+    )
+    p.add_argument(
+        "--force-final",
+        action="store_true",
+        help="允许覆盖 final 状态（隐含 --force-reviewed）。**销毁人工 lock 产物，慎用**",
     )
     p.add_argument(
         "--json-events",
@@ -63,6 +77,17 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
         help="stderr 改为 NDJSON 事件协议（机器消费）",
     )
     p.add_argument("--timeout", type=float, default=60.0, help="单次 LLM 请求超时（秒）")
+
+
+def _resolve_force_level(args: argparse.Namespace) -> str | None:
+    """三档 force 旗标 → ``ForceLevel`` 字符串。任一高级位隐含低级。"""
+    if getattr(args, "force_final", False):
+        return "final"
+    if getattr(args, "force_reviewed", False):
+        return "reviewed"
+    if args.force:
+        return "draft"
+    return None
 
 
 def run(args: argparse.Namespace) -> int:
@@ -77,7 +102,7 @@ def run(args: argparse.Namespace) -> int:
         max_cues_per_batch=args.max_cues_per_batch,
         context_prev=args.context_prev,
         context_next=args.context_next,
-        force=args.force,
+        force_level=_resolve_force_level(args),
         json_events=args.json_events,
         timeout_s=args.timeout,
     )

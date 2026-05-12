@@ -27,9 +27,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, field_validator
 
+from voxkit.core.lifecycle import ForceLevel, gate_force_overwrite
 from voxkit.core.proofread_risk import (
+    SYSTEM_OVERHEAD_TOKENS,
     estimate_tokens,
     grade_risk,
     infer_edit_level,
@@ -53,7 +55,7 @@ from voxkit.io.schema import (
     SubtitleCuesOutput,
 )
 from voxkit.llm import ChatResult, LLMClient
-from voxkit.llm.errors import LLMError, LLMRefusal, LLMSchemaError
+from voxkit.llm.errors import LLMError, LLMRateLimit, LLMRefusal, LLMSchemaError, LLMTimeout
 from voxkit.llm.prompts import load_prompt
 
 __all__ = [
@@ -67,7 +69,15 @@ __all__ = [
 
 @dataclass(frozen=True)
 class ProofreadRequest:
-    """CLI / 程序化调用都用这一个不可变 dataclass。"""
+    """CLI / 程序化调用都用这一个不可变 dataclass。
+
+    ``force_level`` 是 reviewed/final 防误覆盖的关键。语义：
+
+    - ``None``：拒绝任何已存在 artifact
+    - ``"draft"``：只覆盖 draft，遇 reviewed/final 仍拒绝（旧 ``--force``）
+    - ``"reviewed"``：覆盖 draft 或 reviewed
+    - ``"final"``：覆盖任意 state（包括 final）
+    """
 
     workdir: Path
     provider: str = "deepseek"
@@ -79,9 +89,17 @@ class ProofreadRequest:
     max_cues_per_batch: int = 40
     context_prev: int = 8
     context_next: int = 4
-    force: bool = False
+    force_level: ForceLevel = None
     json_events: bool = False
     timeout_s: float = 60.0
+
+    # 兼容旧调用：旧测试 / 程序化用 ``force=True``，等同于 ``force_level="draft"``。
+    # 在 ``__post_init__`` 里映射，避免 ``frozen=True`` 直接赋值。
+    force: bool = False
+
+    def __post_init__(self) -> None:
+        if self.force and self.force_level is None:
+            object.__setattr__(self, "force_level", "draft")
 
 
 # ── internal types ──────────────────────────────────────────────────────────
@@ -106,15 +124,28 @@ class _BatchResult:
 
 
 class _CorrectedCue(BaseModel):
-    """LLM 返回的单条 cue 的最小契约。"""
+    """LLM 返回的单条 cue 的最小契约。
+
+    ``correctedText`` 必须含非空白字符——空 / 纯空白触发 ValidationError，由
+    ``_call_llm_with_repair`` 走一次 repair；repair 仍失败 → 上层 fallback 标 blocking。
+    """
 
     cueId: str
     correctedText: str
     needsHumanReview: bool = False
 
+    @field_validator("correctedText")
+    @classmethod
+    def _non_blank(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("correctedText must contain non-whitespace characters")
+        return v
+
 
 class _CorrectedBatch(BaseModel):
     cues: List[_CorrectedCue]
+
+
 
 
 # ── batching ────────────────────────────────────────────────────────────────
@@ -132,34 +163,51 @@ def _build_batches(
 
     规则：
       - target 段是连续区间；不跨 speaker
-      - token 预算只算 targets（context 用 cue 数量界）
+      - **token 预算 = max_tokens − SYSTEM_OVERHEAD_TOKENS**，且要把
+        context_prev/next cue 的 token 也算进去（context 实际也送进 LLM；只用
+        cue 数量限界会让长 CJK context 撞 context window，Codex P2）
       - 单 cue 即使超 token 预算也独占一个 batch（边界保底）
+
+    若 ``max_tokens`` 小于 SYSTEM_OVERHEAD_TOKENS（异常用户输入），保底用
+    ``max_tokens`` 自身作预算，最坏只是把 batch 切碎。
     """
     n = len(cues)
     if n == 0:
         return []
+
+    # 预算 = max_tokens 减掉 system prompt + 完成 token 余量；max_tokens 太小时
+    # 至少留 1（保证内循环能推进），保护 batch 始终能形成。
+    effective_budget = max(max_tokens - SYSTEM_OVERHEAD_TOKENS, 1)
+
+    # 一次性预计算每条 cue 的 token 数，避免内循环对 context_next 窗口反复求和
+    # （O(n × context_next) → O(n)）。estimate_tokens 是纯函数，缓存安全。
+    tok = [estimate_tokens(c.text) for c in cues]
 
     batches: List[_BatchSpec] = []
     i = 0
     batch_idx = 0
     while i < n:
         speaker = cues[i].speaker
+        prev_start = max(0, i - context_prev)
+        prev_idxs = list(range(prev_start, i))
+        prev_tokens = sum(tok[prev_start:i])
+
         target_idxs = [i]
-        tokens = estimate_tokens(cues[i].text)
+        tokens = tok[i]
         j = i + 1
         while j < n:
             if cues[j].speaker != speaker:
                 break
-            cue_tok = estimate_tokens(cues[j].text)
-            if tokens + cue_tok > max_tokens:
+            next_window_end = min(n, j + 1 + context_next)
+            next_tokens = sum(tok[j + 1:next_window_end])
+            if prev_tokens + tokens + tok[j] + next_tokens > effective_budget:
                 break
             if len(target_idxs) >= max_cues:
                 break
             target_idxs.append(j)
-            tokens += cue_tok
+            tokens += tok[j]
             j += 1
 
-        prev_idxs = list(range(max(0, i - context_prev), i))
         next_idxs = list(range(j, min(n, j + context_next)))
         batches.append(
             _BatchSpec(
@@ -334,14 +382,73 @@ def _fallback_batch(
 
 
 # ── checkpoint ──────────────────────────────────────────────────────────────
+#
+# Cache key 设计（修正 docs §"缓存键"未实现的问题）：
+#
+#   1. ``contentHash``：源 cue 语义身份。包含 (id, text, start, end, speaker,
+#      schemaVersion="2")。**必须** 含 start/end/speaker，因为下游会原样继承时间轴
+#      和 speaker；上游 source 改了这些字段而 id+text 没变，旧 cache 复用就会写出
+#      stale 时间轴。
+#
+#   2. ``policyHash``：影响 LLM 输出的所有策略 + provider/model + prompt + glossary。
+#      包括 (provider, model, promptVersion, promptHash, editLevel, glossaryHash,
+#      schemaVersion=PROOFREAD_CACHE_SCHEMA)。任一变化都让 checkpoint 失效。
+#
+#   3. checkpoint 命中要求 contentHash AND policyHash 都一致。
+#
+# 老 checkpoint 缺 policyHash → 视为 miss → 自动重跑（不破坏数据）。
+
+#: 缓存 schema 自身的版本号；改了 cache 字段语义就 bump 一下，老 checkpoint 自动作废。
+PROOFREAD_CACHE_SCHEMA = 2
 
 
 def _content_hash(cues: Sequence[SubtitleCueOut]) -> str:
-    """对一组 cue 的 id+text 计算稳定 hash，用作 checkpoint resume key。"""
+    """语义层 source cue 身份 hash：(id, text, start, end, speaker)。
+
+    时间字段 round 到 6 位小数，避免浮点回写引起虚假失效。speaker None 与缺省
+    都序列化成 ``null``，保持稳定。
+    """
     payload = json.dumps(
-        [(c.id, c.text) for c in cues],
+        [
+            {
+                "id": c.id,
+                "text": c.text,
+                "start": round(float(c.start), 6),
+                "end": round(float(c.end), 6),
+                "speaker": c.speaker,
+            }
+            for c in cues
+        ],
         ensure_ascii=False,
         separators=(",", ":"),
+        sort_keys=True,
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _policy_hash(
+    *,
+    provider: str,
+    model: str,
+    prompt_version: str,
+    prompt_hash: str,
+    edit_level: str,
+    glossary_hash: Optional[str],
+) -> str:
+    """所有影响 LLM 输出的策略字段集中计 hash。改任意一个 → checkpoint 失效。"""
+    payload = json.dumps(
+        {
+            "cacheSchema": PROOFREAD_CACHE_SCHEMA,
+            "provider": provider,
+            "model": model,
+            "promptVersion": prompt_version,
+            "promptHash": prompt_hash,
+            "editLevel": edit_level,
+            "glossaryHash": glossary_hash,
+        },
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
     )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
@@ -350,25 +457,30 @@ def _checkpoint_path(ws: Workspace, batch_index: int) -> Path:
     return ws.proofread_work_dir / f"batch_{batch_index:03d}.json"
 
 
+def _pending_path(ws: Workspace, batch_index: int) -> Path:
+    """传输/限流失败的 batch 占位文件（rerun 时被覆写或转正）。"""
+    return ws.proofread_work_dir / f"batch_{batch_index:03d}.pending.json"
+
+
 def _try_load_checkpoint(
     path: Path,
     *,
     expect_content_hash: str,
-    expect_prompt_version: str,
-    expect_model: str,
+    expect_policy_hash: str,
 ) -> Optional[_BatchResult]:
-    """命中 checkpoint 时返回 cached ``_BatchResult``，不一致则忽略（不删旧文件）。"""
-    if not path.is_file():
-        return None
+    """命中 checkpoint 时返回 cached ``_BatchResult``，不一致则忽略（不删旧文件）。
+
+    比对 ``contentHash`` AND ``policyHash`` AND ``cacheSchema``。任一不符即失效。
+    """
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    except (FileNotFoundError, OSError, json.JSONDecodeError):
         return None
-    if (
-        data.get("contentHash") != expect_content_hash
-        or data.get("promptVersion") != expect_prompt_version
-        or data.get("model") != expect_model
-    ):
+    if int(data.get("cacheSchema", 1)) != PROOFREAD_CACHE_SCHEMA:
+        return None
+    if data.get("contentHash") != expect_content_hash:
+        return None
+    if data.get("policyHash") != expect_policy_hash:
         return None
     cues = [ProofreadCueOut.model_validate(c) for c in data.get("cues", [])]
     return _BatchResult(
@@ -384,18 +496,35 @@ def _write_checkpoint(
     *,
     batch_index: int,
     content_hash: str,
-    prompt_version: str,
-    model: str,
+    policy_hash: str,
     result: _BatchResult,
 ) -> None:
     payload = {
+        "cacheSchema": PROOFREAD_CACHE_SCHEMA,
         "batchIndex": batch_index,
         "contentHash": content_hash,
-        "promptVersion": prompt_version,
-        "model": model,
+        "policyHash": policy_hash,
         "promptTokens": result.prompt_tokens,
         "completionTokens": result.completion_tokens,
         "cues": [c.model_dump(by_alias=True) for c in result.out_cues],
+    }
+    tmp = path.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    tmp.replace(path)
+
+
+def _write_pending_marker(
+    path: Path,
+    *,
+    batch_index: int,
+    error_kind: str,
+    error_message: str,
+) -> None:
+    """写 ``batch_NNN.pending.json``，告诉 rerun "这一批没成功，请重试"。"""
+    payload = {
+        "batchIndex": batch_index,
+        "errorKind": error_kind,
+        "errorMessage": error_message[:500],  # 截断避免日志爆
     }
     tmp = path.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -430,11 +559,13 @@ def run_proofread(
                 f"missing input: {ws.cues_json_path}; run `voxkit transcribe "
                 f"--resegment=semantic` first"
             )
-        if ws.proofread_json_path.exists() and not req.force:
-            raise FileExistsError(
-                f"refusing to overwrite {ws.proofread_json_path}; pass --force "
-                "to rebuild (also wipes work/proofread/)"
-            )
+
+        # 1a. force-gate：reviewed/final 必须显式 --force-reviewed/--force-final
+        gate_force_overwrite(
+            ws.proofread_json_path,
+            force_level=req.force_level,
+            artifact_label="subtitles.proofread.json",
+        )
 
         raw_bytes = ws.cues_json_path.read_bytes()
         input_hash = "sha256:" + hashlib.sha256(raw_bytes).hexdigest()
@@ -445,12 +576,12 @@ def run_proofread(
                 "rebuild with current voxkit transcribe"
             )
 
-        # 2. force：清空 work/proofread/，再确保目录在
-        if req.force and ws.proofread_work_dir.exists():
+        # 2. force：清空 work/proofread/ checkpoints，让 rerun 完全重做。
+        # 注意 **不要** 预先 unlink 旧 artifact —— 改成只在最后 atomic replace；
+        # LLM 失败时旧 artifact 仍能保留（修 Codex P2 race）。
+        if req.force_level is not None and ws.proofread_work_dir.exists():
             shutil.rmtree(ws.proofread_work_dir)
         ws.proofread_work_dir.mkdir(parents=True, exist_ok=True)
-        if req.force and ws.proofread_json_path.exists():
-            ws.proofread_json_path.unlink()
 
         # 3. glossary
         gloss: Optional[Glossary] = None
@@ -477,6 +608,18 @@ def run_proofread(
         )
         used_model = client._model  # noqa: SLF001 — 内部字段，文档化访问点
 
+        # 5a. policy hash：影响 LLM 输出的所有策略（provider/model/prompt/edit
+        # level/glossary/cacheSchema）汇总成一个 hash，配合 contentHash 决定
+        # checkpoint 是否命中。
+        policy_h = _policy_hash(
+            provider=req.provider,
+            model=used_model,
+            prompt_version=prompt_version,
+            prompt_hash=prompt_hash,
+            edit_level=req.edit_level,
+            glossary_hash=gloss_hash,
+        )
+
         # 6. 切 batch
         batches = _build_batches(
             cues_doc.cues,
@@ -502,16 +645,26 @@ def run_proofread(
             }, to_stderr=req.json_events)
 
             # 7. 处理 batch
+            #
+            # cost 拆 fresh vs cached：
+            #   - fresh_*：本轮真的调了 LLM 的 token 用量
+            #   - cached_*：从 checkpoint 复用的历史 token 用量（resumed run 时不
+            #     代表本次 spend，但仍写进 manifest 作为 audit 总览）
+            # 老消费者（manifest.proofread.promptTokens）保留为 fresh+cached 的总和。
             all_out: List[ProofreadCueOut] = []
-            prompt_tok_total = 0
-            completion_tok_total = 0
+            fresh_pt = 0
+            fresh_ct = 0
+            cached_pt = 0
+            cached_ct = 0
             cached_count = 0
+            pending_batches: List[Dict[str, Any]] = []
 
             try:
                 for batch in batches:
                     target_cues = [cues_doc.cues[i] for i in batch.target_idxs]
                     chash = _content_hash(target_cues)
                     cp_path = _checkpoint_path(ws, batch.index)
+                    pending_path = _pending_path(ws, batch.index)
 
                     _emit(emit, {
                         "event": "proofread.batch.start",
@@ -522,14 +675,15 @@ def run_proofread(
                     cached = _try_load_checkpoint(
                         cp_path,
                         expect_content_hash=chash,
-                        expect_prompt_version=prompt_version,
-                        expect_model=used_model,
+                        expect_policy_hash=policy_h,
                     )
                     if cached is not None:
                         all_out.extend(cached.out_cues)
-                        prompt_tok_total += cached.prompt_tokens
-                        completion_tok_total += cached.completion_tokens
+                        cached_pt += cached.prompt_tokens
+                        cached_ct += cached.completion_tokens
                         cached_count += 1
+                        # 命中后清掉残留 pending marker
+                        pending_path.unlink(missing_ok=True)
                         _emit(emit, {
                             "event": "proofread.batch.done",
                             "batchIndex": batch.index,
@@ -569,11 +723,37 @@ def run_proofread(
                         result_pt = llm_result.prompt_tokens
                         result_ct = llm_result.completion_tokens
                     except (LLMSchemaError, LLMRefusal) as e:
-                        # fallback：整批标人工，不抛
+                        # 内容层失败：保留 fallback batch（标 blocking + needsHumanReview），
+                        # 写 checkpoint，本批就此完结，不阻塞别的 batch。
                         reason = "provider_refusal" if isinstance(e, LLMRefusal) else "schema_fail"
                         out_cues = _fallback_batch(batch, cues_doc.cues, reason=reason)
                         result_pt = 0
                         result_ct = 0
+                    except (LLMTimeout, LLMRateLimit) as e:
+                        # 仅捕获**传输层**失败（超时 + 限流）：写 pending marker，
+                        # 让 rerun 重做本批，不阻塞其他 batch（docs §"批级断点续跑"）。
+                        # **故意不 catch LLMError 基类**——内容层错误（schema/refusal）
+                        # 已在前一 except 处理；其它未知 LLMError 子类视为 bug，向上抛。
+                        kind = type(e).__name__
+                        _write_pending_marker(
+                            pending_path,
+                            batch_index=batch.index,
+                            error_kind=kind,
+                            error_message=str(e),
+                        )
+                        pending_batches.append({
+                            "batchIndex": batch.index,
+                            "errorKind": kind,
+                            "errorMessage": str(e)[:200],
+                        })
+                        _emit(emit, {
+                            "event": "proofread.batch.failed",
+                            "batchIndex": batch.index,
+                            "errorKind": kind,
+                            "errorMessage": str(e)[:200],
+                            "willRetryOnRerun": True,
+                        }, to_stderr=req.json_events)
+                        continue
 
                     br = _BatchResult(
                         out_cues=out_cues,
@@ -584,13 +764,14 @@ def run_proofread(
                         cp_path,
                         batch_index=batch.index,
                         content_hash=chash,
-                        prompt_version=prompt_version,
-                        model=used_model,
+                        policy_hash=policy_h,
                         result=br,
                     )
+                    # 写成功后顺手清掉旧 pending marker
+                    pending_path.unlink(missing_ok=True)
                     all_out.extend(br.out_cues)
-                    prompt_tok_total += br.prompt_tokens
-                    completion_tok_total += br.completion_tokens
+                    fresh_pt += br.prompt_tokens
+                    fresh_ct += br.completion_tokens
 
                     _emit(emit, {
                         "event": "proofread.batch.done",
@@ -602,6 +783,26 @@ def run_proofread(
             finally:
                 if owns_client:
                     client.close()
+
+            # 7a. 如果有 pending batch，**拒绝写稳定 artifact**：用户 rerun 时只补
+            # 这些批就行，已完成的 checkpoint 自动复用。
+            if pending_batches:
+                _emit(emit, {
+                    "event": "proofread.partial",
+                    "completedBatches": len(batches) - len(pending_batches),
+                    "pendingBatches": len(pending_batches),
+                    "details": pending_batches,
+                }, to_stderr=req.json_events)
+                first_kind = pending_batches[0]["errorKind"]
+                raise LLMError(
+                    f"proofread incomplete: {len(pending_batches)}/{len(batches)} "
+                    f"batches failed (first error: {first_kind}). "
+                    f"Completed batches were checkpointed; rerun without --force "
+                    f"to retry only the pending batches."
+                )
+
+            prompt_tok_total = fresh_pt + cached_pt
+            completion_tok_total = fresh_ct + cached_ct
 
             # 8. 聚合 metrics + 写 artifact
             cue_count = len(all_out)
@@ -659,6 +860,8 @@ def run_proofread(
                 "glossaryHash": gloss_hash,
                 "inputArtifact": "subtitles.cues.json",
                 "inputHash": input_hash,
+                "outputArtifact": "subtitles.proofread.json",
+                "outputSchemaVersion": "1",
                 "batchCount": len(batches),
                 "cachedBatchCount": cached_count,
                 "batchSize": {
@@ -667,6 +870,14 @@ def run_proofread(
                 },
                 "changedCueRate": metrics.changed_cue_rate,
                 "reviewCueRate": metrics.review_cue_rate,
+                # cost 拆分（修 Codex P3 audit 误差）：
+                # - freshPromptTokens / freshCompletionTokens：本轮真的花掉的 token
+                # - cachedPromptTokens / cachedCompletionTokens：从 checkpoint 复用的历史用量
+                # - promptTokens / completionTokens（总和）保留兼容旧消费者
+                "freshPromptTokens": fresh_pt,
+                "freshCompletionTokens": fresh_ct,
+                "cachedPromptTokens": cached_pt,
+                "cachedCompletionTokens": cached_ct,
                 "promptTokens": prompt_tok_total,
                 "completionTokens": completion_tok_total,
                 "elapsedSecs": elapsed,

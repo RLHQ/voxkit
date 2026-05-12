@@ -39,7 +39,7 @@ class _FakeCall:
 
 
 class FakeLLMClient:
-    def __init__(self, responses: List[str], *, model: str = "deepseek-chat") -> None:
+    def __init__(self, responses: List[str], *, model: str = "deepseek-v4-flash") -> None:
         self._responses = list(responses)
         self._model = model
         self.calls: List[_FakeCall] = []
@@ -86,7 +86,7 @@ def _write_proofread(path: Path, *, source_id: str = "fake_src") -> None:
         "inputHash": "sha256:abc",
         "language": "zh",
         "provider": "deepseek",
-        "model": "deepseek-chat",
+        "model": "deepseek-v4-flash",
         "promptVersion": "proofread.v1",
         "promptHash": "x" * 64,
         "params": {"editLevel": "standard", "allowRetiming": False, "glossaryHash": None},
@@ -306,3 +306,140 @@ def test_run_translate_emit_flags_skip_outputs(tmp_path: Path) -> None:
     assert (ws.root / "subtitles.en.json").exists()
     assert not (ws.root / "subtitles.en.srt").exists()
     assert not (ws.root / "subtitles.en.vtt").exists()
+
+
+# ── 回归测试：Codex 审查暴露的不变量 ──────────────────────────────────────
+
+
+def test_run_translate_force_refuses_final_without_explicit_flag(tmp_path: Path) -> None:
+    """Codex P1: --force 默认只覆盖 draft；final 状态需要 --force-final。"""
+    from voxkit.core.lifecycle import transition_state
+
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues(ws.cues_json_path, cues=[
+        {"id": "cue_000001", "start": 0.0, "end": 2.0, "speaker": "A", "text": "x"},
+    ])
+    fake1 = FakeLLMClient([_mock_translate_for(["cue_000001"], ["v1"])])
+    run_translate(TranslateRequest(workdir=ws.root, target_language="en"), llm_client=fake1)
+
+    json_path = ws.root / "subtitles.en.json"
+    transition_state(json_path, to="reviewed", reviewer="alice")
+    transition_state(json_path, to="final")
+    assert json.loads(json_path.read_text(encoding="utf-8"))["state"] == "final"
+
+    # 默认 --force 应被拒
+    with pytest.raises(FileExistsError) as exc:
+        run_translate(
+            TranslateRequest(workdir=ws.root, target_language="en", force=True),
+            llm_client=FakeLLMClient([_mock_translate_for(["cue_000001"], ["v2"])]),
+        )
+    assert "final" in str(exc.value)
+    assert json.loads(json_path.read_text(encoding="utf-8"))["cues"][0]["text"] == "v1"
+
+    # --force-reviewed 也应被拒（覆盖等级不够）
+    with pytest.raises(FileExistsError):
+        run_translate(
+            TranslateRequest(workdir=ws.root, target_language="en", force_level="reviewed"),
+            llm_client=FakeLLMClient([_mock_translate_for(["cue_000001"], ["v2"])]),
+        )
+
+    # --force-final 才能覆盖
+    fake2 = FakeLLMClient([_mock_translate_for(["cue_000001"], ["v2"])])
+    run_translate(
+        TranslateRequest(workdir=ws.root, target_language="en", force_level="final"),
+        llm_client=fake2,
+    )
+    assert json.loads(json_path.read_text(encoding="utf-8"))["cues"][0]["text"] == "v2"
+
+
+def test_run_translate_checkpoint_invalidates_on_style_change(tmp_path: Path) -> None:
+    """Codex P1: style 变化必须让 cache 失效。"""
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues(ws.cues_json_path, cues=[
+        {"id": "cue_000001", "start": 0.0, "end": 2.0, "speaker": "A", "text": "x"},
+    ])
+    fake1 = FakeLLMClient([_mock_translate_for(["cue_000001"], ["v1"])])
+    run_translate(
+        TranslateRequest(workdir=ws.root, target_language="en", style="subtitle"),
+        llm_client=fake1,
+    )
+
+    (ws.root / "subtitles.en.json").unlink()
+    fake2 = FakeLLMClient([_mock_translate_for(["cue_000001"], ["v2"])])
+    run_translate(
+        TranslateRequest(workdir=ws.root, target_language="en", style="literal"),
+        llm_client=fake2,
+    )
+    assert len(fake2.calls) == 1, "style 变了 cache 必须失效"
+    artifact = json.loads((ws.root / "subtitles.en.json").read_text(encoding="utf-8"))
+    assert artifact["cues"][0]["text"] == "v2"
+
+
+def test_run_translate_empty_text_marks_blocking(tmp_path: Path) -> None:
+    """Codex P2: 空 translatedText → repair → fallback blocking。"""
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues(ws.cues_json_path, cues=[
+        {"id": "cue_000001", "start": 0.0, "end": 2.0, "speaker": "A", "text": "你好"},
+    ])
+    empty_response = json.dumps({
+        "cues": [{"cueId": "cue_000001", "translatedText": "", "needsHumanReview": False}]
+    }, ensure_ascii=False)
+    fake = FakeLLMClient([empty_response, empty_response])
+    run_translate(TranslateRequest(workdir=ws.root, target_language="en"), llm_client=fake)
+
+    artifact = json.loads((ws.root / "subtitles.en.json").read_text(encoding="utf-8"))
+    cue = artifact["cues"][0]
+    assert cue["risk"] == "blocking"
+    assert cue["needsHumanReview"] is True
+    assert cue["text"] == "你好"
+    assert "schema_fail" in cue["notes"]
+
+
+def test_run_translate_transport_failure_writes_pending_marker(tmp_path: Path) -> None:
+    """Codex P2: transport 错误 → pending marker，不写 artifact / SRT / VTT。"""
+    from voxkit.llm.errors import LLMError, LLMRateLimit
+
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues(ws.cues_json_path, cues=[
+        {"id": "cue_000001", "start": 0.0, "end": 2.0, "speaker": "A", "text": "x"},
+        {"id": "cue_000002", "start": 2.0, "end": 4.0, "speaker": "B", "text": "y"},
+    ])
+
+    class _RateLimitOnSecondBatch:
+        def __init__(self) -> None:
+            self._batch = 0
+            self._model = "deepseek-v4-flash"
+            self.calls = 0
+
+        def chat(self, messages, **kw):  # type: ignore[no-untyped-def]
+            self.calls += 1
+            self._batch += 1
+            if self._batch == 1:
+                return ChatResult(
+                    text=_mock_translate_for(["cue_000001"], ["hello"]),
+                    prompt_tokens=10, completion_tokens=5,
+                    model=self._model, raw={},
+                )
+            raise LLMRateLimit("rate limited", retry_after_secs=1.0)
+
+        def close(self) -> None:
+            pass
+
+    fake = _RateLimitOnSecondBatch()
+    work_dir = ws.work / "translate.en"
+    with pytest.raises(LLMError, match="incomplete"):
+        run_translate(TranslateRequest(workdir=ws.root, target_language="en"), llm_client=fake)
+
+    assert (work_dir / "batch_000.json").exists()
+    pending = work_dir / "batch_001.pending.json"
+    assert pending.exists()
+    assert not (ws.root / "subtitles.en.json").exists()
+    assert not (ws.root / "subtitles.en.srt").exists()
+
+    # rerun：第一批命中 cache，第二批 LLM
+    fake2 = FakeLLMClient([_mock_translate_for(["cue_000002"], ["world"])])
+    run_translate(TranslateRequest(workdir=ws.root, target_language="en"), llm_client=fake2)
+    assert len(fake2.calls) == 1
+    assert not pending.exists()
+    artifact = json.loads((ws.root / "subtitles.en.json").read_text(encoding="utf-8"))
+    assert [c["text"] for c in artifact["cues"]] == ["hello", "world"]

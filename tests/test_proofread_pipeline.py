@@ -47,7 +47,7 @@ class FakeLLMClient:
         self,
         responses: List[str],
         *,
-        model: str = "deepseek-chat",
+        model: str = "deepseek-v4-flash",
         prompt_tokens: int = 100,
         completion_tokens: int = 50,
     ) -> None:
@@ -328,3 +328,181 @@ def test_run_proofread_glossary_protects_terms(tmp_path: Path) -> None:
     assert cue["needsHumanReview"] is True
     assert any("protected_term_change:Claude" in n for n in cue["notes"])
     assert artifact["params"]["glossaryHash"] is not None
+
+
+# ── 回归测试：Codex 审查暴露的不变量 ──────────────────────────────────────
+
+
+def test_run_proofread_force_refuses_reviewed_without_explicit_flag(tmp_path: Path) -> None:
+    """Codex P1: --force 默认只覆盖 draft；reviewed 状态需要 --force-reviewed。"""
+    from voxkit.core.lifecycle import transition_state
+
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues_v2(
+        ws.cues_json_path,
+        cues=[
+            {"id": "cue_000001", "start": 0.0, "end": 2.0, "speaker": "A", "text": "x"},
+        ],
+    )
+    fake1 = FakeLLMClient([_mock_response_for(["cue_000001"])])
+    run_proofread(ProofreadRequest(workdir=ws.root), llm_client=fake1)
+
+    # 推到 reviewed
+    transition_state(ws.proofread_json_path, to="reviewed", reviewer="alice")
+    artifact = json.loads(ws.proofread_json_path.read_text(encoding="utf-8"))
+    assert artifact["state"] == "reviewed"
+
+    # 默认 --force（force_level="draft"）应被拒绝
+    with pytest.raises(FileExistsError) as exc:
+        run_proofread(
+            ProofreadRequest(workdir=ws.root, force=True),
+            llm_client=FakeLLMClient([_mock_response_for(["cue_000001"], suffix=":v2")]),
+        )
+    assert "reviewed" in str(exc.value)
+    # 旧 artifact 仍存在且未被改
+    after = json.loads(ws.proofread_json_path.read_text(encoding="utf-8"))
+    assert after["state"] == "reviewed"
+    assert after["cues"][0]["correctedText"] == artifact["cues"][0]["correctedText"]
+
+    # --force-reviewed 应通过
+    fake2 = FakeLLMClient([_mock_response_for(["cue_000001"], suffix=":v2")])
+    run_proofread(
+        ProofreadRequest(workdir=ws.root, force_level="reviewed"),
+        llm_client=fake2,
+    )
+    after = json.loads(ws.proofread_json_path.read_text(encoding="utf-8"))
+    assert "v2" in after["cues"][0]["correctedText"]
+    assert after["state"] == "draft"
+
+
+def test_run_proofread_checkpoint_invalidates_on_policy_change(tmp_path: Path) -> None:
+    """Codex P1: edit_level 变化必须让 checkpoint 失效（policyHash 入键）。"""
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues_v2(
+        ws.cues_json_path,
+        cues=[
+            {"id": "cue_000001", "start": 0.0, "end": 2.0, "speaker": "A", "text": "x"},
+        ],
+    )
+    fake1 = FakeLLMClient([_mock_response_for(["cue_000001"], suffix=":v1")])
+    run_proofread(
+        ProofreadRequest(workdir=ws.root, edit_level="standard"),
+        llm_client=fake1,
+    )
+    assert len(fake1.calls) == 1
+
+    # 删 artifact 保留 checkpoint，改 edit_level → 应该重新调 LLM
+    ws.proofread_json_path.unlink()
+    fake2 = FakeLLMClient([_mock_response_for(["cue_000001"], suffix=":v2")])
+    run_proofread(
+        ProofreadRequest(workdir=ws.root, edit_level="strict"),
+        llm_client=fake2,
+    )
+    assert len(fake2.calls) == 1, "policy 变了 checkpoint 必须失效"
+    artifact = json.loads(ws.proofread_json_path.read_text(encoding="utf-8"))
+    assert ":v2" in artifact["cues"][0]["correctedText"]
+
+
+def test_run_proofread_checkpoint_invalidates_on_source_time_change(tmp_path: Path) -> None:
+    """Codex P1: source cue 时间/speaker 改变必须让 checkpoint 失效（contentHash 入键）。"""
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues_v2(
+        ws.cues_json_path,
+        cues=[
+            {"id": "cue_000001", "start": 0.0, "end": 2.0, "speaker": "A", "text": "hello"},
+        ],
+    )
+    fake1 = FakeLLMClient([_mock_response_for(["cue_000001"])])
+    run_proofread(ProofreadRequest(workdir=ws.root), llm_client=fake1)
+
+    # 删 artifact，把 cue 的 start/end/speaker 都改了，text 不变
+    ws.proofread_json_path.unlink()
+    _write_cues_v2(
+        ws.cues_json_path,
+        cues=[
+            {"id": "cue_000001", "start": 5.0, "end": 7.0, "speaker": "B", "text": "hello"},
+        ],
+    )
+    fake2 = FakeLLMClient([_mock_response_for(["cue_000001"])])
+    run_proofread(ProofreadRequest(workdir=ws.root), llm_client=fake2)
+    assert len(fake2.calls) == 1, "source time/speaker 变了 cache 必须失效"
+    artifact = json.loads(ws.proofread_json_path.read_text(encoding="utf-8"))
+    assert artifact["cues"][0]["sourceStart"] == 5.0
+    assert artifact["cues"][0]["speaker"] == "B"
+
+
+def test_run_proofread_empty_corrected_text_marks_blocking(tmp_path: Path) -> None:
+    """Codex P2: LLM 返回空 correctedText → repair → 仍空 → fallback blocking。"""
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues_v2(
+        ws.cues_json_path,
+        cues=[
+            {"id": "cue_000001", "start": 0.0, "end": 2.0, "speaker": "A", "text": "x"},
+        ],
+    )
+    empty_response = json.dumps({
+        "cues": [{"cueId": "cue_000001", "correctedText": "", "needsHumanReview": False}]
+    }, ensure_ascii=False)
+    fake = FakeLLMClient([empty_response, empty_response])
+    run_proofread(ProofreadRequest(workdir=ws.root), llm_client=fake)
+
+    artifact = json.loads(ws.proofread_json_path.read_text(encoding="utf-8"))
+    cue = artifact["cues"][0]
+    assert cue["risk"] == "blocking"
+    assert cue["needsHumanReview"] is True
+    assert cue["correctedText"] == cue["sourceText"]
+    assert "schema_fail" in cue["notes"]
+
+
+def test_run_proofread_transport_failure_writes_pending_marker(tmp_path: Path) -> None:
+    """Codex P2: LLM transport 错误 → pending marker，不写稳定 artifact，rerun 续做。"""
+    from voxkit.llm.errors import LLMError, LLMRateLimit
+
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues_v2(
+        ws.cues_json_path,
+        cues=[
+            {"id": "cue_000001", "start": 0.0, "end": 2.0, "speaker": "A", "text": "x"},
+            {"id": "cue_000002", "start": 2.0, "end": 4.0, "speaker": "B", "text": "y"},
+        ],
+    )
+
+    class _RateLimitOnSecondBatch:
+        def __init__(self) -> None:
+            self._batch = 0
+            self._model = "deepseek-v4-flash"
+            self.calls = 0
+
+        def chat(self, messages, **kw):  # type: ignore[no-untyped-def]
+            self.calls += 1
+            self._batch += 1
+            if self._batch == 1:
+                return ChatResult(
+                    text=_mock_response_for(["cue_000001"]),
+                    prompt_tokens=10, completion_tokens=5,
+                    model=self._model, raw={},
+                )
+            raise LLMRateLimit("rate limited", retry_after_secs=1.0)
+
+        def close(self) -> None:
+            pass
+
+    fake = _RateLimitOnSecondBatch()
+    with pytest.raises(LLMError, match="incomplete"):
+        run_proofread(ProofreadRequest(workdir=ws.root), llm_client=fake)
+
+    assert (ws.proofread_work_dir / "batch_000.json").exists()
+    pending = ws.proofread_work_dir / "batch_001.pending.json"
+    assert pending.exists()
+    pdata = json.loads(pending.read_text(encoding="utf-8"))
+    assert pdata["errorKind"] == "LLMRateLimit"
+    # 关键：稳定 artifact 不应被写出（旧 artifact 也未被预先 unlink）
+    assert not ws.proofread_json_path.exists()
+
+    # rerun 无 force：第一批命中 cache，第二批走 LLM
+    fake2 = FakeLLMClient([_mock_response_for(["cue_000002"])])
+    run_proofread(ProofreadRequest(workdir=ws.root), llm_client=fake2)
+    assert len(fake2.calls) == 1
+    assert not pending.exists(), "成功后清理 pending marker"
+    artifact = json.loads(ws.proofread_json_path.read_text(encoding="utf-8"))
+    assert len(artifact["cues"]) == 2

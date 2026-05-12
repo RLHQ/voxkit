@@ -13,7 +13,7 @@ def test_deepseek_spec_shape() -> None:
     assert spec.name == "deepseek"
     assert spec.base_url == "https://api.deepseek.com"
     assert spec.api_key_env == "DEEPSEEK_API_KEY"
-    assert spec.default_model == "deepseek-chat"
+    assert spec.default_model == "deepseek-v4-flash"
     assert spec.max_context_tokens == 64000
 
 

@@ -98,7 +98,7 @@ def _proofread_doc(cues: List[Dict[str, Any]]) -> Dict[str, Any]:
         "inputHash": "sha256:abc",
         "language": "zh",
         "provider": "deepseek",
-        "model": "deepseek-chat",
+        "model": "deepseek-v4-flash",
         "promptVersion": "proofread.v1",
         "promptHash": "x" * 64,
         "params": {"editLevel": "standard", "allowRetiming": False},
@@ -135,6 +135,25 @@ def test_aggregate_proofread_risk_histogram() -> None:
     assert agg.review_cue_rate == 0.25
     assert agg.prompt_tokens_total == 100
     assert agg.completion_tokens_total == 50
+
+
+def test_aggregate_proofread_unknown_risk_goes_to_blocking_bucket() -> None:
+    """Codex P3 修正：缺失/未知 risk → blocking（不是悄悄归 low）。"""
+    cues = [
+        {"cueId": "cue_000001", "sourceStart": 0, "sourceEnd": 1,
+         "sourceText": "a", "correctedText": "a", "editLevel": "none",
+         "notes": []},  # risk 缺失
+        {"cueId": "cue_000002", "sourceStart": 1, "sourceEnd": 2,
+         "sourceText": "b", "correctedText": "B", "editLevel": "minor",
+         "risk": "weird-value", "notes": []},  # risk 未知值
+        {"cueId": "cue_000003", "sourceStart": 2, "sourceEnd": 3,
+         "sourceText": "c", "correctedText": "C", "editLevel": "minor",
+         "risk": "low", "notes": []},  # 已知合法值
+    ]
+    agg = aggregate_proofread(_proofread_doc(cues))
+    assert agg.risk_histogram["blocking"] == 2
+    assert agg.risk_histogram["low"] == 1
+    assert agg.risk_histogram["medium"] == 0
 
 
 def test_aggregate_proofread_note_histogram_counts_duplicates() -> None:
@@ -177,7 +196,7 @@ def _translation_doc(
         "sourceLanguage": "zh",
         "targetLanguage": "en",
         "provider": "deepseek",
-        "model": "deepseek-chat",
+        "model": "deepseek-v4-flash",
         "promptVersion": "translate.v1",
         "promptHash": "y" * 64,
         "params": {"style": "subtitle", "lengthPolicy": "preserve",
