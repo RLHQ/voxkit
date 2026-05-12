@@ -13,6 +13,7 @@ Layout::
       subtitles.srt
       subtitles.vtt
       subtitles.cues.json                 # render-layer cues (only when --resegment=semantic)
+      subtitles.proofread.json            # LLM proofread artifact (only when `voxkit proofread` ran)
       events.ndjson                       # mirrored progress events
       .lock                               # PID lock (separate from manifest)
       work/
@@ -21,6 +22,8 @@ Layout::
           chunk_NNN.wav
           chunk_NNN.json
           chunk_NNN.entries.json
+        proofread/
+          batch_NNN.json                  # per-batch LLM checkpoint (resume key inside)
         hallucinations.log
         merge.json
         timeline_validation.log
@@ -87,6 +90,8 @@ class Workspace:
     srt_path: Path
     vtt_path: Path
     cues_json_path: Path
+    proofread_json_path: Path
+    proofread_work_dir: Path
     events_path: Path
     hallucinations_log: Path
     merge_log: Path
@@ -108,6 +113,8 @@ def _build_workspace(root: Path) -> Workspace:
         srt_path=root / "subtitles.srt",
         vtt_path=root / "subtitles.vtt",
         cues_json_path=root / "subtitles.cues.json",
+        proofread_json_path=root / "subtitles.proofread.json",
+        proofread_work_dir=work / "proofread",
         events_path=root / "events.ndjson",
         hallucinations_log=work / "hallucinations.log",
         merge_log=work / "merge.json",

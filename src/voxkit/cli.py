@@ -105,6 +105,10 @@ def _build_parser() -> argparse.ArgumentParser:
     from voxkit.commands import transcribe
     transcribe.add_subparser(sub)
 
+    # ── proofread（LLM 字幕校对）─────────────────────────────
+    from voxkit.commands import proofread
+    proofread.add_subparser(sub)
+
     return parser
 
 
@@ -134,6 +138,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.cmd == "transcribe":
         from voxkit.commands.transcribe import run as run_transcribe
         return run_transcribe(args)
+    if args.cmd == "proofread":
+        from voxkit.commands.proofread import run as run_proofread
+        return run_proofread(args)
 
     parser.error(f"未知子命令: {args.cmd}")
     return 1  # unreachable

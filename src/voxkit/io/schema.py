@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -238,6 +238,101 @@ class SubtitleCuesOutput(BaseModel):
     cues: List[SubtitleCueOut]
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Proofread — LLM text-enhancement artifact (subtitles.proofread.json)
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# 这是 LLM 校对阶段的产物：以 ``subtitles.cues.json`` (schemaVersion=2) 为输入，
+# 按 ``cueId`` 反引源 cue，**只改文本，不改时间戳/speaker**。生命周期 state 落
+# 在 artifact 顶层 (``draft`` / ``reviewed`` / ``final``)，manifest 镜像一份用于
+# 快速索引。``inputHash`` 用于推导 stale：上游 cues.json 重建后 hash 不一致即过期。
+#
+# 风险等级（``risk``）：
+#   - ``low``：普通修改，自动接受
+#   - ``medium``：可能影响理解，UI 标记
+#   - ``high``：可能引入事实错误，默认人工复核
+#   - ``blocking``：违反 schema/不变量，不应写稳定产物
+#
+# 编辑强度（``edit_level``）：``none`` / ``minor`` / ``major``。
+
+
+RiskLevel = Literal["low", "medium", "high", "blocking"]
+EditLevel = Literal["none", "minor", "major"]
+ArtifactState = Literal["draft", "reviewed", "final"]
+
+
+class ProofreadCueOut(BaseModel):
+    """单条校对后的 cue。``cueId`` 必须对应 ``subtitles.cues.json`` 中的 id。
+
+    时间字段 ``sourceStart`` / ``sourceEnd`` 是源 cue 时间的副本，写入这里只为
+    artifact 自洽（不依赖上游也能展示）；**LLM 不得修改**。
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    cue_id: str = Field(..., alias="cueId")
+    source_start: float = Field(..., alias="sourceStart")
+    source_end: float = Field(..., alias="sourceEnd")
+    speaker: Optional[str] = None
+    source_text: str = Field(..., alias="sourceText")
+    corrected_text: str = Field(..., alias="correctedText")
+    edit_level: EditLevel = Field(..., alias="editLevel")
+    risk: RiskLevel = "low"
+    needs_human_review: bool = Field(False, alias="needsHumanReview")
+    notes: List[str] = Field(default_factory=list)
+
+
+class ProofreadParams(BaseModel):
+    """proofread 阶段输入参数快照（写入 artifact + manifest 用于复现）。"""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    edit_level: str = Field(..., alias="editLevel")  # punctuation/light/standard/strict
+    allow_retiming: bool = Field(False, alias="allowRetiming")
+    glossary_hash: Optional[str] = Field(None, alias="glossaryHash")
+
+
+class ProofreadMetrics(BaseModel):
+    """proofread 完成后的聚合指标。"""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    cue_count: int = Field(..., alias="cueCount")
+    changed_cue_rate: float = Field(..., alias="changedCueRate")
+    review_cue_rate: float = Field(..., alias="reviewCueRate")
+    prompt_tokens_total: int = Field(0, alias="promptTokensTotal")
+    completion_tokens_total: int = Field(0, alias="completionTokensTotal")
+
+
+class ProofreadOutput(BaseModel):
+    """``subtitles.proofread.json`` 顶层 schema。
+
+    生命周期：
+      - ``state="draft"``：机器生成，未经人工确认（``voxkit proofread`` 出口）
+      - ``state="reviewed"``：人工/规则确认（``voxkit review confirm``）
+      - ``state="final"``：锁定发布（``voxkit review lock``）
+
+    ``inputHash`` 是上游 ``subtitles.cues.json`` 的 sha256；下游/UI 可用它推导
+    "是否 stale"（``cues.json`` 重建后 hash 不一致即过期）。
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    schema_version: str = Field("1", alias="schemaVersion")
+    state: ArtifactState = "draft"
+    source_id: str = Field(..., alias="sourceId")
+    input_artifact: str = Field(..., alias="inputArtifact")
+    input_hash: str = Field(..., alias="inputHash")
+    language: str
+    provider: str
+    model: str
+    prompt_version: str = Field(..., alias="promptVersion")
+    prompt_hash: str = Field(..., alias="promptHash")
+    params: ProofreadParams
+    cues: List[ProofreadCueOut]
+    metrics: ProofreadMetrics
+
+
 __all__ = [
     "AudioInfo",
     "SpeakerInfo",
@@ -255,4 +350,12 @@ __all__ = [
     # subtitle cues — render-layer artifact
     "SubtitleCueOut",
     "SubtitleCuesOutput",
+    # proofread — LLM text-enhancement artifact
+    "RiskLevel",
+    "EditLevel",
+    "ArtifactState",
+    "ProofreadCueOut",
+    "ProofreadParams",
+    "ProofreadMetrics",
+    "ProofreadOutput",
 ]
