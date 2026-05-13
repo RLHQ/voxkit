@@ -17,6 +17,8 @@ from typing import Any, Dict, List, Tuple
 
 from pydantic import BaseModel, ConfigDict
 
+from voxkit.core.constants import CJK_LANGUAGES
+
 
 # ── 数据加载 ────────────────────────────────────────────────────────────────
 
@@ -202,12 +204,25 @@ def avg_drift(
 # 命中条件：
 #   * 当前 cue 末尾（可后跟标点空白）是 1–3 个孤立拉丁字母，且前面有空白；
 #   * 下一 cue 开头是 1+ 个**小写**拉丁字母（新词通常大写，故小写多为词尾）。
+#
+# 这套启发式是为 **CJK 语种**设计的——中文上下文里出现孤立拉丁字母大概率
+# 是被切断的词；但英文场景下「cue 末尾介词 of/to/in + 下条小写起头」是
+# 正常 ASR 切分，会被严重误报。因此 ``language`` 非 CJK 时直接返回 0。
 _END_LATIN_SCRAP = re.compile(r"\s[A-Za-z]{1,3}[\s，,。.\?\!？！]*$")
 _START_LOWER_LATIN = re.compile(r"^[a-z]+")
 
 
-def broken_latin_words(cues: List[Dict[str, Any]]) -> int:
-    """统计相邻 cue 跨边界切断拉丁词的对数（启发式，详见正则上方注释）。"""
+def broken_latin_words(
+    cues: List[Dict[str, Any]],
+    language: str | None = None,
+) -> int:
+    """统计相邻 cue 跨边界切断拉丁词的对数（启发式，详见正则上方注释）。
+
+    ``language`` 非 CJK（且非 ``None``）时跳过检测——避免在英文等场景把
+    正常句末介词误判为切断。``None`` 时保留 CJK 行为以兼容旧调用。
+    """
+    if language is not None and language.lower() not in CJK_LANGUAGES:
+        return 0
     n = 0
     for i in range(len(cues) - 1):
         t = (cues[i].get("text") or "").rstrip()
@@ -249,7 +264,7 @@ def build_eval_report(
 
     drift = avg_drift(vk_cues, gold_cues)
     bm = boundary_metrics(vk_cues, gold_cues, tol_s=tolerance_s)
-    broken = broken_latin_words(vk_cues)
+    broken = broken_latin_words(vk_cues, language=language)
     dr = density_ratio(vk_cues, gold_cues)
 
     return EvalReport(

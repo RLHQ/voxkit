@@ -226,6 +226,28 @@ def test_broken_latin_words_capital_start_not_broken() -> None:
     assert broken_latin_words(cues) == 0
 
 
+def test_broken_latin_words_skipped_for_non_cjk() -> None:
+    """启发式是为 CJK 设计的；EN 句末介词 + 下条小写起头属正常英文结构，不算切断。"""
+    cues = [
+        {"start": 0, "end": 1, "text": "consequences of"},
+        {"start": 1, "end": 2, "text": "a fertility crisis"},
+        {"start": 2, "end": 3, "text": "made worse by the"},
+        {"start": 3, "end": 4, "text": "mismanagement"},
+    ]
+    # 默认 language=None 时保持 CJK-friendly 行为（仍会匹配——为不破坏现有 API）
+    # 显式传 EN 时跳过整个检测
+    assert broken_latin_words(cues, language="en") == 0
+
+
+def test_broken_latin_words_still_active_for_cjk_explicit() -> None:
+    """显式 language=zh 时启发式照常生效。"""
+    cues = [
+        {"start": 0, "end": 1, "text": "买了 S"},
+        {"start": 1, "end": 2, "text": "team 真不错"},
+    ]
+    assert broken_latin_words(cues, language="zh") == 1
+
+
 # ── build_eval_report + write ───────────────────────────────────────────────
 
 

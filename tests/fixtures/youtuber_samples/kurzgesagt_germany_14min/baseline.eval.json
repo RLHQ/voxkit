@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "voxkitBaseline": {
+    "version": "0.6.0",
+    "reseg": "EN pysbd word-level (Phase 2 CJK changes do not affect EN path)",
+    "pipeline": "transcribe --resegment=semantic --language=en (no proofread)",
+    "recordedAt": "2026-05-13",
+    "notes": "Low precision/recall reflects current EN baseline, NOT Phase 2 regression. EN path improvement is Phase 3+ work."
+  },
+  "workdir": "<workdir>",
+  "reference": "tests/fixtures/youtuber_samples/kurzgesagt_germany_14min/sub.en.srt",
+  "language": "en",
+  "sourceArtifact": "cues",
+  "tolerance_s": 0.3,
+  "alignment": {
+    "vk_cues": 241,
+    "gold_cues": 201,
+    "density_ratio": 1.199004975124378,
+    "vk_avg_chars": 55.21576763485477,
+    "gold_avg_chars": 67.26865671641791,
+    "vk_avg_dur_s": 3.4674688796680497,
+    "gold_avg_dur_s": 4.004422885572138
+  },
+  "metrics": {
+    "boundary_precision": 0.18,
+    "boundary_recall": 0.20930232558139536,
+    "boundary_f1": 0.19354838709677422,
+    "boundary_vk_bounds": 250,
+    "boundary_gold_bounds": 215,
+    "boundary_vk_hits": 45,
+    "boundary_gold_covered": 45,
+    "chars_drift": -12.052889081563137,
+    "dur_drift_s": -0.5369540059040885,
+    "broken_latin_words": 0
+  }
+}
