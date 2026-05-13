@@ -1,0 +1,2888 @@
+1
+00:00:00,000 --> 00:00:03,419
+Jab bhi mai in videos ko bana raha hota hoon, kabhi-kabhi ek special
+
+2
+00:00:03,419 --> 00:00:07,090
+moment aata hai jab animation banate time choti-choti technical problems
+
+3
+00:00:07,090 --> 00:00:10,459
+solve karni padti hain, aur phir jo math mai samjhana chahta hoon,
+
+4
+00:00:10,459 --> 00:00:14,080
+wo ekdum clear ho jaata hai jab mai use screen par live dekh leta hoon.
+
+5
+00:00:14,480 --> 00:00:17,420
+In moments ke best versions aksar mujhe bata dete hain ki koi
+
+6
+00:00:17,420 --> 00:00:20,408
+video meri favorites me se ek hone wali hai, aur iss piece ke
+
+7
+00:00:20,408 --> 00:00:23,300
+end ko assemble karte waqt bhi mujhe wahi feeling aayi thi.
+
+8
+00:00:27,040 --> 00:00:30,140
+Hamari kahani aaj actually math classroom se start nahi hoti.
+
+9
+00:00:30,460 --> 00:00:31,860
+Hum art room se shuru karte hain.
+
+10
+00:00:32,720 --> 00:00:36,488
+Sochein aap ek gallery me hain, harbour me ek boat ki photo dekh rahe hain,
+
+11
+00:00:36,488 --> 00:00:39,251
+aur jaise hi aapki nazar upar right side me jaati hai,
+
+12
+00:00:39,251 --> 00:00:43,120
+poori duniya hil jaati hai, wahan aapko waterfront pe ek village dikhta hai.
+
+13
+00:00:43,640 --> 00:00:48,106
+In buildings ke beech, jaise hi aap neeche ek building ke entrance ki taraf dekhte hain,
+
+14
+00:00:48,106 --> 00:00:52,420
+duniya aur ajeeb lagne lagti hai, wahan se ek hallway hai jahan pe artwork laga hai.
+
+15
+00:00:53,200 --> 00:00:56,880
+Aur iss hallway ke end me, wapas aap yahin hain, ek boat ki picture ko dekhte hue.
+
+16
+00:00:58,520 --> 00:00:59,860
+Yeh hai M.C.
+
+17
+00:00:59,980 --> 00:01:05,340
+Escher ka 1956 ka lithograph, Print Gallery, ya Dutch me, Prentendentunstelling.
+
+18
+00:01:05,960 --> 00:01:08,445
+Ek letter mein jo unhone apne beta ko likha tha,
+
+19
+00:01:08,445 --> 00:01:12,742
+apni ek aisi creation ka zikr kiya jisme ek young man interest se us print ko dekh
+
+20
+00:01:12,742 --> 00:01:16,780
+raha hai jisme khud artist hi hai, Escher ne ise apni sabse ajeeb cheez kaha,
+
+21
+00:01:16,780 --> 00:01:18,540
+jo unke liye kaafi badi baat thi.
+
+22
+00:01:18,900 --> 00:01:21,718
+Escher ki art duniya bhar me kaafi pasand ki jaati hai,
+
+23
+00:01:21,718 --> 00:01:26,073
+jo aksar paradoxical themes ya kisi character ke saath uniquely satisfying geometric
+
+24
+00:01:26,073 --> 00:01:27,200
+patterns dikhati hai.
+
+25
+00:01:27,500 --> 00:01:30,650
+Yeh pyaar especially mathematicians ke beech zyada hai,
+
+26
+00:01:30,650 --> 00:01:35,060
+kyunki unki art aksar math ke surprisingly deep concepts ko touch karti hai,
+
+27
+00:01:35,060 --> 00:01:38,840
+jabki Escher khud ne is field me koi formal training nahi li thi.
+
+28
+00:01:39,520 --> 00:01:43,380
+The Print Gallery is unexpected depth ka ek perfect example hai.
+
+29
+00:01:43,380 --> 00:01:46,824
+2003 me, mathematicians De Smit aur Lenstra ne is piece ka ek
+
+30
+00:01:46,824 --> 00:01:50,211
+bahut hi interesting analysis diya tha, aur us mind-bending
+
+31
+00:01:50,211 --> 00:01:54,220
+self-contained loop ko explain kiya tha jo Escher ne achieve kiya tha.
+
+32
+00:01:54,720 --> 00:01:59,114
+Is video ke saath mera main goal hai ki mai unke analysis ko visually unpack karu,
+
+33
+00:01:59,114 --> 00:02:02,276
+hamesha ki tarah yeh feel dene ki koshish karte hue ki aap
+
+34
+00:02:02,276 --> 00:02:04,420
+khud bhi isse rediscover kar sakte the.
+
+35
+00:02:05,120 --> 00:02:08,051
+Is analysis se ek cheez jo unexpectedly saamne aati hai,
+
+36
+00:02:08,051 --> 00:02:12,080
+wo hai is sawal ka jawab ki exactly is picture ke beech me kya hona chahiye.
+
+37
+00:02:12,580 --> 00:02:15,240
+Shuru me toh yeh ek incoherent question lag sakta hai.
+
+38
+00:02:15,600 --> 00:02:19,470
+Agar aap upar right se dekhein, toh lagta hai jaise yeh village ki buildings ko feature
+
+39
+00:02:19,470 --> 00:02:23,340
+kar raha hai, lekin left se dekhein toh yeh zyada picture frame ka hissa lag raha hai.
+
+40
+00:02:23,620 --> 00:02:27,740
+Lekin agar aap neeche se dekhein, toh yeh khud gallery ka hi part lagta zyada lag rha hai.
+
+41
+00:02:28,160 --> 00:02:31,518
+Kuch tareeke se is poore scene me aap exactly kahan hain,
+
+42
+00:02:31,518 --> 00:02:35,760
+uski saari ambiguity us blank circle ke beech me compress ho jaati hai.
+
+43
+00:02:36,220 --> 00:02:38,656
+Bas maza lene ke liye, kyunki abhi 2020s chal raha hai,
+
+44
+00:02:38,656 --> 00:02:40,960
+maine ek diffusion model se yeh fill karne ko bola.
+
+45
+00:02:41,500 --> 00:02:43,280
+Aur use bohot struggle karni padi.
+
+46
+00:02:43,860 --> 00:02:45,200
+Wo bilkul samajh hi nahi paa rha.
+
+47
+00:02:45,740 --> 00:02:48,080
+Aur bechari machine ko credit dena chahiye, use mushkil hoti hai.
+
+48
+00:02:48,480 --> 00:02:52,320
+Ye scene kaafi ambiguous aur sahi tareeke se define nahi lag raha hai.
+
+49
+00:02:52,780 --> 00:02:57,152
+Lekin fir bhi, end tak mai chahta hu aap agree kare ki ek hi completion
+
+50
+00:02:57,152 --> 00:03:01,340
+hai jo sahi puzzle piece lagta hai jo aap easily fit kar sakte hai.
+
+51
+00:03:02,100 --> 00:03:05,868
+Maths me ghusne se pehle, mai aapko ek bilkul intuitive description dena chahta
+
+52
+00:03:05,868 --> 00:03:09,780
+hu ki Escher ne actually ye piece kaise banaya, jo teen steps me divide hota hai.
+
+53
+00:03:10,340 --> 00:03:14,749
+Pehla step hai ki isi concept ke ek straightened out version se shuru kare,
+
+54
+00:03:14,749 --> 00:03:17,160
+jahan ek aadmi ek picture dekh raha hai.
+
+55
+00:03:17,640 --> 00:03:22,943
+Us picture me ek harbor hai, jisme ek town hai, jisme ek print gallery hai,
+
+56
+00:03:22,943 --> 00:03:26,620
+jisme wahi aadmi hai, aur aise hi chalta rehta hai.
+
+57
+00:03:26,720 --> 00:03:28,820
+Aap jitna man chahe utna zoom in kar sakte hai.
+
+58
+00:03:30,380 --> 00:03:33,878
+Self-similar image ka ye idea, jahan picture khud ke andar hai,
+
+59
+00:03:33,878 --> 00:03:36,820
+use graphic designers ek special naam se jaante hai.
+
+60
+00:03:37,180 --> 00:03:39,561
+Ye Drosta effect hai, jo ek cocoa company ke naam
+
+61
+00:03:39,561 --> 00:03:42,040
+par hai jinhone ise apni branding me use kiya tha.
+
+62
+00:03:42,560 --> 00:03:45,386
+Actually, yeh ek common marketing gimmick hai jo early 20th
+
+63
+00:03:45,386 --> 00:03:48,020
+century ke har tarah ke products ke liye use hota tha.
+
+64
+00:03:48,480 --> 00:03:52,295
+Jo self-similar Drosta image Escher use kar rahe the,
+
+65
+00:03:52,295 --> 00:03:55,606
+usme zoom in sabse bahut zyada deep hota hai,
+
+66
+00:03:55,606 --> 00:04:00,140
+jahan self-similar copy original se 256 times chhoti hoti hai.
+
+67
+00:04:00,520 --> 00:04:02,420
+Aap abhi thodi der me dekh lenge ki yeh number kahan se aaya.
+
+68
+00:04:03,160 --> 00:04:08,655
+Escher ki genius baat ye thi ki unhone intuitively samjh liya ki picture ko khud me
+
+69
+00:04:08,655 --> 00:04:14,216
+nest karne ka koi way ho sakta hai aur usko ek aise warped loop me badal diya jahan
+
+70
+00:04:14,216 --> 00:04:19,579
+zooming automatically hoti hai jab viewer ki nazar circle ke around ghoomti hai.
+
+71
+00:04:21,180 --> 00:04:24,714
+Waise, aap soch rahe honge ki yeh straightened out version mujhe kahan se mila,
+
+72
+00:04:24,714 --> 00:04:27,444
+actually woh do mathematicians jinhe maine mention kiya tha,
+
+73
+00:04:27,444 --> 00:04:28,920
+vo humein use karne de rahe hai.
+
+74
+00:04:28,920 --> 00:04:33,080
+Ye actually unhone original Escher piece ko reverse engineer karke banaya tha,
+
+75
+00:04:33,080 --> 00:04:36,600
+do Dutch artists, Hans Richter aur Jacqueline Hofstra ki help se.
+
+76
+00:04:37,140 --> 00:04:39,900
+Jis tarha unhone isko reverse engineer kiya, voh kaafi interesting hai.
+
+77
+00:04:40,280 --> 00:04:44,460
+Ek trah se dekha jaye to, ye aisa hai jaise original piece ka logarithm le rahe ho.
+
+78
+00:04:44,920 --> 00:04:47,490
+Mujhe pata hai abhi ye sentence thoda ajeeb lag raha hoga,
+
+79
+00:04:47,490 --> 00:04:51,300
+lekin is video ke aage jaake mai promise karta hu ki sab kuch bilkul clear ho jayega.
+
+80
+00:04:52,220 --> 00:04:56,094
+Escher ne ye loop kaise banaya, iska basic idea samjhane ke liye mai ek aisa
+
+81
+00:04:56,094 --> 00:04:58,948
+example lena chahta hu jo unke wale se thoda simple ho,
+
+82
+00:04:58,948 --> 00:05:02,924
+toh hum ye custom self-similar Drosta image dekhte hain jisme ek pie creature
+
+83
+00:05:02,924 --> 00:05:07,460
+ek framed house ki picture dekh raha hai, aur usi house mein woh pie creature rehta hai.
+
+84
+00:05:08,140 --> 00:05:12,250
+Is example mein, self-similar copy original se sirf 16 times chhoti hai,
+
+85
+00:05:12,250 --> 00:05:15,560
+aur isse sab kuch ek saath dekhna kaafi easy ho jata hai.
+
+86
+00:05:15,980 --> 00:05:20,581
+Ab mai kya karunga ki yahan right side pe ek alag workspace rakhta hu jisme hum
+
+87
+00:05:20,581 --> 00:05:25,298
+jo general goal hai usko sketch karenge, jahan aap aise soch sakte hain ki aapko
+
+88
+00:05:25,298 --> 00:05:29,840
+woh 16-fold zoom-in factor square ke chaar corners mein distribute karna hai.
+
+89
+00:05:30,560 --> 00:05:33,525
+Jaise maan lijiye aap chahte hain ki pie creature khud
+
+90
+00:05:33,525 --> 00:05:36,380
+almost same size mein lower left corner mein dikhe.
+
+91
+00:05:36,880 --> 00:05:40,742
+Toh agar aap original image mein 2 ka factor leke zoom in karte hain,
+
+92
+00:05:40,742 --> 00:05:43,373
+toh jo zoomed version ke upper left mein hoga,
+
+93
+00:05:43,373 --> 00:05:46,620
+usko hum apne workspace ke upper left mein place karenge.
+
+94
+00:05:47,340 --> 00:05:50,537
+Usi tarah, phir se 2 ka factor leke zoom in karo,
+
+95
+00:05:50,537 --> 00:05:54,974
+aur ab us zoomed-in version ke upper right ko lo, usko expand karo,
+
+96
+00:05:54,974 --> 00:05:57,780
+aur workspace ke upper right mein daal do.
+
+97
+00:05:58,600 --> 00:06:01,661
+Finally, ek aur step, phir se 2 ka factor leke zoom in karo,
+
+98
+00:06:01,661 --> 00:06:05,131
+jo zoomed-in version ke lower right mein hai usko lo, enlarge karo,
+
+99
+00:06:05,131 --> 00:06:07,580
+aur workspace ke lower right mein place kar do.
+
+100
+00:06:08,280 --> 00:06:12,880
+Ye chaar corner ek rough idea dete hain ki hum yahan kya banana chahte hain.
+
+101
+00:06:13,180 --> 00:06:16,065
+Agar aap beech ke gaps ko smoothly fill kar sakein,
+
+102
+00:06:16,065 --> 00:06:18,894
+toh jab koi is image ke circle ke around dekhega,
+
+103
+00:06:18,894 --> 00:06:22,288
+toh unko aisa lagega jaise woh zoom in karte jaa rahe hain,
+
+104
+00:06:22,288 --> 00:06:26,361
+aur yeh zoom hote hote finally image ke ek self-similar part se elegant
+
+105
+00:06:26,361 --> 00:06:29,020
+tareeke se jud jaayega jo 16 times chhota hai.
+
+106
+00:06:29,680 --> 00:06:33,842
+Hum bas sab kuch seedha connect karne ki koshish bhi kar sakte hain, kuch is tarah se,
+
+107
+00:06:33,842 --> 00:06:37,955
+lekin honestly woh utna accha nahi lagta, aur definitely utna smooth ya elegant nahi
+
+108
+00:06:37,955 --> 00:06:42,020
+hai jitna Escher ne achieve kiya tha, toh abhi bhi hume kaafi kaam karna baaki hai.
+
+109
+00:06:42,940 --> 00:06:45,920
+Waise jo book mai pichle kuch time se padh raha hu, The Magic of M.C.
+
+110
+00:06:46,040 --> 00:06:49,555
+Escher, ye mujhe Hahue me ek Escher Museum ki zabardast visit pe mili thi,
+
+111
+00:06:49,555 --> 00:06:53,165
+jo agar aap kabhi Netherlands jaayein toh mai definitely recommend karunga,
+
+112
+00:06:53,165 --> 00:06:55,682
+aur jab hum print gallery wale section pe aate hain,
+
+113
+00:06:55,682 --> 00:06:59,340
+toh ye hume thoda glimpse deta hai ki Escher ka process actual mein tha kya.
+
+114
+00:06:59,800 --> 00:07:03,440
+Unke liye, doosra step tha ye warped grid banana.
+
+115
+00:07:03,940 --> 00:07:06,618
+Yahan jo animations hain, unke liye mai us grid ka thoda sa modified
+
+116
+00:07:06,618 --> 00:07:10,044
+version use karne wala hoon, jo mathematics ke hisaab se thoda easy generate hota hai,
+
+117
+00:07:10,044 --> 00:07:11,580
+lekin yeh wahi main point dikhata hai.
+
+118
+00:07:11,980 --> 00:07:17,214
+Unke case me, jo self-similar Drosta image unhone use ki thi uska scaling factor 256 hai,
+
+119
+00:07:17,214 --> 00:07:20,154
+toh usko jab four corners me distribute karna ho,
+
+120
+00:07:20,154 --> 00:07:24,564
+toh unke liye har corner se agle corner tak scale karte hue factor four se
+
+121
+00:07:24,564 --> 00:07:25,740
+scale karna padega.
+
+122
+00:07:26,540 --> 00:07:30,410
+Aur agar aap unki grid ko dhyan se dekhein, maan lo lower right ka ek square,
+
+123
+00:07:30,410 --> 00:07:33,827
+toh dekhiye ki jab aap us square ko bound karne wali top aur bottom
+
+124
+00:07:33,827 --> 00:07:36,440
+lines ko image ke lower left tak follow karte hain,
+
+125
+00:07:36,440 --> 00:07:40,360
+toh wahi lines ab ek aise square ko gher rahi hain jo ab four times bada hai.
+
+126
+00:07:40,720 --> 00:07:43,901
+Usi tarah, agar aap kisi chhote square ke left aur right wali
+
+127
+00:07:43,901 --> 00:07:47,187
+lines ko follow karo aur unko upar le jao, toh woh bhi ek aise
+
+128
+00:07:47,187 --> 00:07:50,420
+square ke around aa jaati hain jo nicely four times bada hai.
+
+129
+00:07:50,860 --> 00:07:54,900
+Toh grid basically ek corner se dusre corner tak jo scaling chahiye, woh set karta hai.
+
+130
+00:07:55,440 --> 00:07:58,439
+Ab humare project mein, jahaan humein sirf har corner se agle
+
+131
+00:07:58,439 --> 00:08:02,619
+corner tak 2 ka factor scale up karna hai, hum iska ek modified version use karenge,
+
+132
+00:08:02,619 --> 00:08:04,340
+lekin basic idea bilkul same hoga.
+
+133
+00:08:05,660 --> 00:08:08,280
+Aap soch rahe honge ki yeh grid aakhir aayi kahan se,
+
+134
+00:08:08,280 --> 00:08:12,481
+lekin main abhi wo question thoda baad mein lene wala hoon aur seedha step three par
+
+135
+00:08:12,481 --> 00:08:16,781
+aata hoon, jahan aap is grid ko self-similar Drosta image ke saath use karke Escher ka
+
+136
+00:08:16,781 --> 00:08:18,560
+final effect create kar sakte hain.
+
+137
+00:08:19,200 --> 00:08:24,067
+Iska process yeh hai ki pehle aap original image pe ek normal square grid bana lete hain,
+
+138
+00:08:24,067 --> 00:08:28,880
+aur maan lijiye aap chahte hain ki yeh wala part final version ke iss corner mein aaye.
+
+139
+00:08:29,280 --> 00:08:32,987
+Jo aap karenge wo yeh hai ki uske andar ke har chhote square ko lenge,
+
+140
+00:08:32,987 --> 00:08:37,700
+aur uska content copy kar ke warped grid ke corresponding chhote square mein daal denge.
+
+141
+00:08:38,100 --> 00:08:42,478
+Uske baad, original grid ke har neighboring square ko bhi warped version ke
+
+142
+00:08:42,478 --> 00:08:46,098
+usi corresponding neighboring square mein le jaana padta hai,
+
+143
+00:08:46,098 --> 00:08:51,060
+toh aap easily grid ko follow karte hue dekh sakte hain ki image ko kahan jaana hai.
+
+144
+00:08:52,000 --> 00:08:56,284
+Aur yeh jo fact hai ki warped version mein grid lines lower left se upper
+
+145
+00:08:56,284 --> 00:09:00,508
+left jaate waqt do guna door ho jaati hain, iska matlab hai ki scene ka
+
+146
+00:09:00,508 --> 00:09:05,320
+scale bhi automatically do guna ho jaata hai jab aap uss line pe upar jaate hain.
+
+147
+00:09:06,660 --> 00:09:10,728
+Is process ka idea yeh hai ki artist ke liye yeh kaafi straightforward hai
+
+148
+00:09:10,728 --> 00:09:15,621
+ki ek-ek chhota square leke, uske andar ka content dusre chhote square mein copy kar de,
+
+149
+00:09:15,621 --> 00:09:18,700
+kyunki itne chhote scale pe cheezein distort nahi hoti.
+
+150
+00:09:19,180 --> 00:09:23,625
+Ye definitely uss se bahut zyada easy hai jitna ki seedhe blank page pe baith ke,
+
+151
+00:09:23,625 --> 00:09:27,740
+pura warped final image khud se imagine karke draw karne ki koshish karna.
+
+152
+00:09:28,960 --> 00:09:31,947
+Toh basically, jab aapke paas yeh warped grid hota hai,
+
+153
+00:09:31,947 --> 00:09:36,128
+toh har chhote square ko copy karne ka process kaafi automatic ho jaata hai,
+
+154
+00:09:36,128 --> 00:09:39,440
+aur agar hum iss automatic process ko pura round chala dein,
+
+155
+00:09:39,440 --> 00:09:42,427
+toh yeh nicely initial position pe wapas aa jaata hai,
+
+156
+00:09:42,427 --> 00:09:46,608
+aur aisa hone ke liye zaroori hai ki original image mein yeh self-similarity
+
+157
+00:09:46,608 --> 00:09:48,780
+ho jab aap 16 times zoom in karte hain.
+
+158
+00:09:49,380 --> 00:09:52,096
+Mujhe lagta hai aap maanenge ki final result kaafi accha hai,
+
+159
+00:09:52,096 --> 00:09:55,123
+yeh wahi general effect create karta hai, lekin sabse badi baat yeh
+
+160
+00:09:55,123 --> 00:09:58,640
+hai ki isse Escher ki original composition ki aur zyada value samajh aati hai.
+
+161
+00:09:59,080 --> 00:10:03,360
+Unhone actually har alag scale pe imagery ka choice bahut soch samajh ke kiya tha.
+
+162
+00:10:03,880 --> 00:10:08,491
+Quote karte hue, "Maine jaan-boojh ke serial type objects choose kiye,
+
+163
+00:10:08,491 --> 00:10:13,300
+jaise ki ek wall pe prints ki line, ya kisi town mein houses ke blocks."
+
+164
+00:10:13,720 --> 00:10:16,150
+Agar cyclic elements nahi hote, toh random viewer
+
+165
+00:10:16,150 --> 00:10:18,680
+tak meri baat pahunchana aur bhi mushkil ho jaata.
+
+166
+00:10:20,060 --> 00:10:23,813
+Yeh idea jahan aap ek straight reference image aur ek warped grid lete hain,
+
+167
+00:10:23,813 --> 00:10:26,331
+aur dono ko use karke ek warped scene banate hain,
+
+168
+00:10:26,331 --> 00:10:28,800
+yeh graphic design mein kaafi common process hai.
+
+169
+00:10:29,100 --> 00:10:32,285
+Isko mesh warp kehte hain, aur Escher ne yeh method iss case ke liye invent
+
+170
+00:10:32,285 --> 00:10:35,640
+nahi kiya tha, yeh unhone pehle bhi kai baar dusre artworks mein use kiya hai.
+
+171
+00:10:36,180 --> 00:10:40,003
+Hamari story ke liye point yeh hai ki Drasta zoom ko loop mein
+
+172
+00:10:40,003 --> 00:10:44,012
+convert karne ka pura logic iss grid mein abstract ho jaata hai,
+
+173
+00:10:44,012 --> 00:10:48,020
+jis se yeh natural question uthta hai ki yeh grid aayi kahan se?
+
+174
+00:10:48,180 --> 00:10:49,000
+Yeh kaise banate hain?
+
+175
+00:10:49,800 --> 00:10:53,462
+Aap soch sakte hain ki shuruat me ek simple tareeke se sab kuch
+
+176
+00:10:53,462 --> 00:10:57,298
+ek kone se dusre kone tak linearly scale karne ki koshish karein,
+
+177
+00:10:57,298 --> 00:11:00,960
+lekin agar aapne aisa kiya toh turant hi conflict dikh jayega.
+
+178
+00:11:01,440 --> 00:11:05,736
+Ye dono scaling processes har square pe alag-alag pressure daal rahe hain,
+
+179
+00:11:05,736 --> 00:11:10,671
+jaise yeh square iss direction mein flare hona chahta hai kyunki right se zoom in ho
+
+180
+00:11:10,671 --> 00:11:15,663
+raha hai, lekin upar jaate hue zoom out hone par yeh doosri direction mein flare hona
+
+181
+00:11:15,663 --> 00:11:16,360
+chahta hai.
+
+182
+00:11:16,940 --> 00:11:22,280
+Escher ko clearly yeh tension solve karne ke liye saari lines ko curve karna pada tha.
+
+183
+00:11:23,160 --> 00:11:27,322
+Lekin ek aur important constraint bhi tha, jo lagta hai unhone follow kiya,
+
+184
+00:11:27,322 --> 00:11:32,206
+jisse image transfer process aasaan ho gaya, final result bhi zyada natural lagne laga,
+
+185
+00:11:32,206 --> 00:11:36,368
+aur jo kisi bhi mathematician ko, jo complex analysis mein interested hai,
+
+186
+00:11:36,368 --> 00:11:37,700
+turant excite kar dega.
+
+187
+00:11:38,020 --> 00:11:43,240
+Unke final warped grid me, chote squares waise hi, squares hain.
+
+188
+00:11:43,680 --> 00:11:46,560
+To be clear, zyadatar mesh warps ke liye yeh sach nahi hai.
+
+189
+00:11:46,760 --> 00:11:49,838
+Most cases mein, jo warped grid lines aap draw karte hain,
+
+190
+00:11:49,838 --> 00:11:53,712
+wo zaroori nahi right angles pe cut ho, aur jo chote regions bante hain,
+
+191
+00:11:53,712 --> 00:11:56,100
+wo generally chote parallelograms hote hain.
+
+192
+00:11:56,500 --> 00:12:01,120
+Ye phir bhi artist ke liye workable ho sakta hai, aap transfer kar sakte hain,
+
+193
+00:12:01,120 --> 00:12:05,325
+lekin shayad original se warped version me copy karna thoda awkward ho
+
+194
+00:12:05,325 --> 00:12:09,530
+jata hai jab distortion hoti hai, toh ye kaafi better hota agar warped
+
+195
+00:12:09,530 --> 00:12:13,320
+grid me chote squares kam se kam approximately square hi rehte.
+
+196
+00:12:13,760 --> 00:12:16,798
+Aur jab aap Escher ke print gallery ke grid ko dhyan se dekhenge,
+
+197
+00:12:16,798 --> 00:12:18,200
+toh usme bhi ye property hai.
+
+198
+00:12:18,600 --> 00:12:21,277
+Sari lines right angle par intersect ho rahi hain,
+
+199
+00:12:21,277 --> 00:12:25,240
+aur chote scale par jo regions bante hain wo approx squares hi hote hain.
+
+200
+00:12:25,800 --> 00:12:29,257
+Artistically, iska ye achha effect hai ki poora scene global scale
+
+201
+00:12:29,257 --> 00:12:33,918
+pechahe kitna bhi warped aur distorted ho, lekin jab aap local scale pe zoom karte hain,
+
+202
+00:12:33,918 --> 00:12:36,380
+toh sab kuch relatively undistorted lagta hai.
+
+203
+00:12:36,760 --> 00:12:40,480
+Isi wajah se Escher ki image ka har local part easily pehchana ja sakta hai.
+
+204
+00:12:41,720 --> 00:12:44,920
+Aur mathematically, yahin se story aur bhi interesting ho jati hai.
+
+205
+00:12:45,440 --> 00:12:49,141
+Dekhiye, do dimensional space se do dimensional space tak function ka ye idea,
+
+206
+00:12:49,141 --> 00:12:51,514
+jahan chote squares lagbhag square hi rehte hain,
+
+207
+00:12:51,514 --> 00:12:55,120
+maths mein ek special role play karta hai aur iska ek special naam bhi hai.
+
+208
+00:12:55,380 --> 00:12:59,298
+Isko conformal map kehte hain, aur ek area jahan ye baar-baar use hota hai,
+
+209
+00:12:59,298 --> 00:13:04,000
+wo hai functions ki study jisme complex number input aur complex number output hote hain.
+
+210
+00:13:04,960 --> 00:13:08,351
+Abhi ke liye, hum thoda peeche hatenge, art classroom se nikal
+
+211
+00:13:08,351 --> 00:13:11,524
+kar math department ki taraf chalenge, jahan mai aapko is
+
+212
+00:13:11,524 --> 00:13:14,860
+field ke kuch core ideas pe ek mini lesson dena chahta hoon.
+
+213
+00:13:16,540 --> 00:13:20,112
+Yahan se basic game plan ye hai ki mai pehle thoda refresher dunga,
+
+214
+00:13:20,112 --> 00:13:23,790
+complex numbers aur complex functions ke kuch basics revise karenge,
+
+215
+00:13:23,790 --> 00:13:28,214
+aur phir mai thodi detail mein jaa kar ye samjhaunga ki logarithms complex numbers
+
+216
+00:13:28,214 --> 00:13:30,080
+ke context mein kaise dikhte hain.
+
+217
+00:13:30,480 --> 00:13:33,915
+Aur jaise hi aapko ye samajh aa jaata hai, hum ek bilkul alag tareeke se dekhenge ki
+
+218
+00:13:33,915 --> 00:13:36,409
+Escher ne apni print gallery mein jo effect create kiya tha,
+
+219
+00:13:36,409 --> 00:13:37,840
+usko kaise recreate kar sakte hai.
+
+220
+00:13:38,980 --> 00:13:40,860
+Chaliye basics revise karke warmup karte hai.
+
+221
+00:13:41,260 --> 00:13:44,730
+Generally, hum real numbers ko ek one dimensional line pe sochte hain,
+
+222
+00:13:44,730 --> 00:13:48,100
+real number line pe, aur complex numbers two dimensional hote hain.
+
+223
+00:13:48,640 --> 00:13:53,092
+Specifically, hum imaginary constant i ke baare mein sochte hain,
+
+224
+00:13:53,092 --> 00:13:57,818
+jo defined hai as square root of -1. Aur is plane pe har dusra point
+
+225
+00:13:57,818 --> 00:14:03,160
+kisi na kisi real number aur kisi real multiple of i ka combination hota hai.
+
+226
+00:14:03,700 --> 00:14:07,610
+Aam taur pe general complex number ke liye z variable ka use hota hai,
+
+227
+00:14:07,610 --> 00:14:11,240
+aur humara game yeh hai ki z ke alag-alag functions ko samjhein.
+
+228
+00:14:11,840 --> 00:14:15,840
+Ek simple lekin important example hai z ko kisi constant se multiply karna.
+
+229
+00:14:16,320 --> 00:14:19,576
+Function f of z equals two times z ka effect hota
+
+230
+00:14:19,576 --> 00:14:22,500
+hai ki sab kuch do guna scale ho jaata hai.
+
+231
+00:14:23,040 --> 00:14:25,160
+Lekin agar kisi imaginary cheez se multiply kare,
+
+232
+00:14:25,160 --> 00:14:27,280
+jaise i, jo negative one ka square root hai, to?
+
+233
+00:14:27,880 --> 00:14:32,003
+Well, aapko pata hai ki one ko i se multiply karein to i milta hai,
+
+234
+00:14:32,003 --> 00:14:34,280
+aur i times i negative one hota hai.
+
+235
+00:14:34,700 --> 00:14:38,304
+Aap notice karenge ki dono 90 degree rotate hue hain, aur generally,
+
+236
+00:14:38,304 --> 00:14:42,120
+kisi bhi value z ko i se multiply karne se 90 degree rotation hota hai.
+
+237
+00:14:42,940 --> 00:14:46,901
+Isse bhi zyada general, jab aap kisi bhi complex constant se multiply karte hain,
+
+238
+00:14:46,901 --> 00:14:49,640
+to effect scaling aur rotating ka combination hota hai.
+
+239
+00:14:50,160 --> 00:14:53,420
+Isko sochne ka ek accha tareeka hai ki kitna scale aur rotation hona chahiye.
+
+240
+00:14:54,000 --> 00:14:57,981
+Zero times kuchh, zero hi hota hai, isliye origin wahi fixed rahega,
+
+241
+00:14:57,981 --> 00:15:02,080
+aur one se kisi bhi constant c ko multiply kare toh wahi c milta hai.
+
+242
+00:15:02,620 --> 00:15:07,170
+Matlab, is point ko one se utha ke uss constant c par le jaana hai jiske baare mein
+
+243
+00:15:07,170 --> 00:15:11,940
+hum baat kar rahe hain, aur wahi scaling aur rotating ka pura amount decide karta hai.
+
+244
+00:15:12,400 --> 00:15:14,880
+Wahan se, baaki grid jitna ho sake utni rigid rehti hai.
+
+245
+00:15:15,440 --> 00:15:20,019
+Ek important point yeh hai ki agar aap sirf kisi constant se multiply kar rahe hain,
+
+246
+00:15:20,019 --> 00:15:22,200
+toh shapes hamesha preserve rehte hain.
+
+247
+00:15:22,660 --> 00:15:26,292
+Jo bhi aap draw karna chahein, jaise square, wo scale ya rotate ho sakta hai,
+
+248
+00:15:26,292 --> 00:15:28,320
+lekin uske alawa koi distortion nahi hota.
+
+249
+00:15:29,080 --> 00:15:31,440
+Ab complicated functions ke liye thoda aur interesting ho jata hai.
+
+250
+00:15:32,120 --> 00:15:36,940
+Ek simple lekin interesting example hoga ki har number z ko z squared se map karna.
+
+251
+00:15:37,580 --> 00:15:40,640
+Toh input two ko two squared, yaani four par move hona padega.
+
+252
+00:15:41,100 --> 00:15:44,520
+Input i ko i squared, yaani negative one par move hona padega.
+
+253
+00:15:45,100 --> 00:15:48,040
+Negative one ko khudh bhi positive one pe map hona hoga.
+
+254
+00:15:48,480 --> 00:15:52,490
+Poora process dekhein toh, agar mai grid lines ke har point ko unke
+
+255
+00:15:52,490 --> 00:15:56,500
+corresponding outputs par le jaane doon, toh ye kuch aisa dikhega.
+
+256
+00:15:57,160 --> 00:16:00,580
+Yeh kaafi accha effect hai, aur constant se multiply karne se alag,
+
+257
+00:16:00,580 --> 00:16:02,520
+isme shape bilkul preserve nahi hoti.
+
+258
+00:16:02,940 --> 00:16:04,680
+Grid lines curve aur warp ho jaati hain.
+
+259
+00:16:05,280 --> 00:16:09,200
+Lekin, aur yeh important hai, thoda dhyan dein ki chhote scale par kya hota hai.
+
+260
+00:16:09,520 --> 00:16:12,440
+Jaise, bas input space ke is chhote square ko dekhein.
+
+261
+00:16:12,940 --> 00:16:15,454
+Jab aap fir se transformation hota hua dekhte hain,
+
+262
+00:16:15,454 --> 00:16:19,840
+toh aap dekh sakte hain ki shape lagbhag preserve rehti hai, kam se kam chhote scale pe.
+
+263
+00:16:20,160 --> 00:16:22,931
+Hamare original grid ke chhote squares function se
+
+264
+00:16:22,931 --> 00:16:25,980
+process hone ke baad bhi lagbhag square hi rehte hain.
+
+265
+00:16:26,500 --> 00:16:29,980
+Lingo mein bole toh, function z squared ek conformal math deta hai.
+
+266
+00:16:30,940 --> 00:16:33,180
+Aur yahan z squared ka choice koi khaas important nahi hai.
+
+267
+00:16:33,540 --> 00:16:37,200
+Agar aap har point z ko z cubed me convert karein, toh kuch aisa dikhega.
+
+268
+00:16:37,580 --> 00:16:39,340
+Squares lagbhag square hi rehte hain.
+
+269
+00:16:40,120 --> 00:16:43,231
+Thik hai, shayad jo example square mai highlight kar raha hu wo output me exactly
+
+270
+00:16:43,231 --> 00:16:46,380
+square nahi lag raha, lekin woh sirf isliye kyunki starting me wo thoda bada tha.
+
+271
+00:16:46,700 --> 00:16:50,320
+To be clear, jo conformal property mai bol raha hoon wo ek limiting property hai.
+
+272
+00:16:50,660 --> 00:16:53,236
+Koi particular square shayad exactly square na bane,
+
+273
+00:16:53,236 --> 00:16:56,505
+lekin idea yeh hai ki jaise-jaise aap aur zoom in karte jaayenge,
+
+274
+00:16:56,505 --> 00:16:59,774
+input space se chhote-chhote square regions choose karte jayenge,
+
+275
+00:16:59,774 --> 00:17:03,440
+toh output bhi waise hi aur zyada accurately square ke close aata jayega.
+
+276
+00:17:04,000 --> 00:17:06,114
+Aur yahan polynomials jaise z squared ya z cubed
+
+277
+00:17:06,114 --> 00:17:08,140
+choose karne mein bhi koi khas baat nahi hai.
+
+278
+00:17:08,420 --> 00:17:11,529
+Almost har function jo aap complex numbers ke saath soch sakte hain,
+
+279
+00:17:11,529 --> 00:17:13,220
+usmein yeh property follow hoti hai.
+
+280
+00:17:13,599 --> 00:17:15,599
+Shape chhote scale par preserve rehta hai.
+
+281
+00:17:15,940 --> 00:17:16,880
+Ye almost jadoo jaisa hai.
+
+282
+00:17:17,680 --> 00:17:20,220
+Complex numbers ka use yahan bahut relevant hai.
+
+283
+00:17:20,380 --> 00:17:24,604
+Agar aap 2D space ke points ko bas real numbers ke ek pair ke roop me sochte,
+
+284
+00:17:24,604 --> 00:17:29,266
+jaise kuch xy coordinates, aur aap x aur y ka koi bhi random function likh dete naya
+
+285
+00:17:29,266 --> 00:17:33,764
+pair of numbers banane ke liye, toh jo usually hota hai jab input space ke points
+
+286
+00:17:33,764 --> 00:17:38,371
+transform hote hain, wo yeh hai ki un chhote squares ka output squish ya distort ho
+
+287
+00:17:38,371 --> 00:17:38,920
+jata hai.
+
+288
+00:17:39,220 --> 00:17:42,566
+Chahe aap kitna bhi zoom in kar lein, output ka limiting shape
+
+289
+00:17:42,566 --> 00:17:46,020
+aam taur pe parallelogram lagta hai, zaroori nahi ki square ho.
+
+290
+00:17:46,660 --> 00:17:49,620
+Toh, complex functions is sense me sach me special hain.
+
+291
+00:17:50,160 --> 00:17:53,880
+Aur basic reason ki chote squares square hi rehte hain, wo calculus hai.
+
+292
+00:17:54,580 --> 00:17:58,520
+Jo aap dekh rahe hain, wo yahi matlab hai ki in functions ke derivatives hote hain.
+
+293
+00:17:59,380 --> 00:18:03,773
+Ho sakta hai yeh thoda ajeeb lage, lekin analogy yeh hai ki zyada tar real numbers
+
+294
+00:18:03,773 --> 00:18:07,309
+ke functions ke liye, jab aap unhe normally visualize karte hain,
+
+295
+00:18:07,309 --> 00:18:10,042
+bas ek graph pe input x-axis pe, output y-axis pe,
+
+296
+00:18:10,042 --> 00:18:13,738
+toh jaise-jaise aap kisi particular point pe aur zoom in karte hain,
+
+297
+00:18:13,738 --> 00:18:17,060
+wo graph zyada aur zyada straight line jaisa lagne lagta hai.
+
+298
+00:18:17,500 --> 00:18:23,380
+Matlab, the rate of change, delta f for a given delta x, ek constant approach karta hai.
+
+299
+00:18:24,020 --> 00:18:26,779
+Yehi actual matlab hai function ke derivative hone ka,
+
+300
+00:18:26,779 --> 00:18:29,180
+lekin visualize karne ke aur bhi tareeke hain.
+
+301
+00:18:29,440 --> 00:18:31,640
+Ye ek aur alag tareeka hai same concept dekhne ka.
+
+302
+00:18:32,220 --> 00:18:34,540
+Function ke graph ko dekhne ke bajaye, chaliye usi
+
+303
+00:18:34,540 --> 00:18:37,000
+function ko ek transformation ke roop me sochte hai.
+
+304
+00:18:37,460 --> 00:18:41,132
+Matlab, aap har ek point ko real number line par uske corresponding
+
+305
+00:18:41,132 --> 00:18:44,420
+output par doosri number line par move hone dene wale hain.
+
+306
+00:18:45,140 --> 00:18:48,783
+Aap notice karenge ki input space me jo dots evenly spaced hai,
+
+307
+00:18:48,783 --> 00:18:53,524
+wo output space me warp ho sakte hai, matlab function ka rate of change generally
+
+308
+00:18:53,524 --> 00:18:54,680
+constant nahi hota.
+
+309
+00:18:55,020 --> 00:18:58,760
+Hamare dots ke beech ki ye spacing image ke alag alag parts me change ho sakti hai.
+
+310
+00:18:59,260 --> 00:19:02,729
+Lekin jaise-jaise aap kisi output par aur zoom karte hain,
+
+311
+00:19:02,729 --> 00:19:05,660
+rate of change ek constant ke paas aa jaata hai.
+
+312
+00:19:06,100 --> 00:19:08,400
+Dots ab aur bhi evenly spaced lag rahe hain.
+
+313
+00:19:09,260 --> 00:19:13,991
+Khaas taur pe, agar aap kisi particular input ke around ek chhota patch of dots le
+
+314
+00:19:13,991 --> 00:19:18,087
+ke unko output space me unke corresponding output ke around copy kare,
+
+315
+00:19:18,087 --> 00:19:23,280
+toh aap lagbhag sabhi dots ko sirf ek constant factor se scale karke align kar sakte hai.
+
+316
+00:19:23,980 --> 00:19:27,654
+Yeh wahi analytical fact hai jo graph ka slope aapko batata hai,
+
+317
+00:19:27,654 --> 00:19:30,180
+bas yeh thoda alag visual context mein hai.
+
+318
+00:19:30,620 --> 00:19:34,086
+Lekin yeh context complex valued functions ko complex plane me
+
+319
+00:19:34,086 --> 00:19:38,000
+transformation ke roop me sochne me kaafi asaani se use ho sakta hai.
+
+320
+00:19:38,540 --> 00:19:43,461
+Yahan pe hum kisi bhi input ke aas-paas ke area ko ek choti si grid of points ki tarah
+
+321
+00:19:43,461 --> 00:19:48,439
+sochenge, jaise pehle kiya tha, aur phir grid ke har point ko uske output pe move hone
+
+322
+00:19:48,439 --> 00:19:48,840
+denge.
+
+323
+00:19:49,800 --> 00:19:52,922
+Is case me, rate of change ke constant ke paas approach
+
+324
+00:19:52,922 --> 00:19:55,760
+karne ka matlab basically wahi equation hota hai.
+
+325
+00:19:56,360 --> 00:20:00,600
+Aapke dimaag me jo visual hona chahiye wo yeh hai ki agar aap input ke around
+
+326
+00:20:00,600 --> 00:20:04,950
+chhote squares ka patch le ke usko output ke corresponding jagah pe copy kare,
+
+327
+00:20:04,950 --> 00:20:09,135
+toh aap lagbhag usko output grid lines ke saath match kar sakte hai sirf ek
+
+328
+00:20:09,135 --> 00:20:12,384
+constant se multiply karke, jo complex numbers ke case me,
+
+329
+00:20:12,384 --> 00:20:17,340
+kisi tarah se rotate aur scale karna hota hai, depending on us complex constant ki value.
+
+330
+00:20:17,940 --> 00:20:20,577
+Kyuki rotation aur scaling shape ko same rakhte hain,
+
+331
+00:20:20,577 --> 00:20:24,408
+iska matlab input space ke saare chote squares is transformation ke baad bhi
+
+332
+00:20:24,408 --> 00:20:25,900
+lagbhag square hi rehte hain.
+
+333
+00:20:27,300 --> 00:20:29,377
+Toh agar seedha bolein, yahi main point hai, isi
+
+334
+00:20:29,377 --> 00:20:31,280
+wajah se hum yeh sab discuss kar rahe hain.
+
+335
+00:20:31,560 --> 00:20:36,038
+Chahe conformal maps, jaise ki Escher ne apni print gallery ke liye use kiya tha,
+
+336
+00:20:36,038 --> 00:20:40,294
+bahut hi constrained aur unusual hote hain normally 2D space ko continuously
+
+337
+00:20:40,294 --> 00:20:44,993
+squish karne ke tariko ke comparison mein, lekin fir bhi, jaise kisi magic ki tarah,
+
+338
+00:20:44,993 --> 00:20:49,139
+sirf complex numbers ki language use karke, aap bina jyada effort ke poori
+
+339
+00:20:49,139 --> 00:20:52,400
+ki poori families of conformal maps create kar sakte hain.
+
+340
+00:20:52,860 --> 00:20:56,280
+Bas complex numbers ke standard functions ko mix aur match karna hai.
+
+341
+00:20:56,640 --> 00:20:59,289
+Ek hi constraint hai ki un functions ka derivative hona chahiye,
+
+342
+00:20:59,289 --> 00:21:02,600
+lekin yeh mostly un sabhi functions ke liye sach hai jo aap likhne ka sochenge.
+
+343
+00:21:03,620 --> 00:21:06,798
+Hamari story ke liye, print gallery ko samajhne ka matlab hai ki ab
+
+344
+00:21:06,798 --> 00:21:10,260
+hamare paas key question ko dobara sochne ka ek bilkul naya tareeka hai.
+
+345
+00:21:10,760 --> 00:21:15,527
+Kya aap koi aisa deliberately tailored complex function bana sakte hain jise zoom in
+
+346
+00:21:15,527 --> 00:21:20,180
+karne par inputs ke around aisa lage jaise outputs me kisi loop me ghoom rahe ho?
+
+347
+00:21:21,900 --> 00:21:25,971
+Abhi is point par, jab sirf complex analysis ka basic crash course hi kiya hai,
+
+348
+00:21:25,971 --> 00:21:29,268
+toh yeh decide karna thoda mushkil hai ki shuru kaha se karein,
+
+349
+00:21:29,268 --> 00:21:33,854
+jab tak humare paas zyada functions ka collection na ho aur unka complex numbers ke liye
+
+350
+00:21:33,854 --> 00:21:35,400
+behavior ka thoda idea na ho.
+
+351
+00:21:35,740 --> 00:21:40,435
+Is case mein, actually sirf do functions hain jo aapko actually samajhne hain,
+
+352
+00:21:40,435 --> 00:21:42,120
+e to the z aur natural log.
+
+353
+00:21:42,880 --> 00:21:45,775
+Mai thoda ruk kar aur time laga ke in dono ko samajhna chahta hu,
+
+354
+00:21:45,775 --> 00:21:48,180
+aur shayad aap bhi agree karo ki yehi sahi cheez hai.
+
+355
+00:21:48,580 --> 00:21:51,564
+Mere hisaab se, har kisi ko life me kam se kam ek baar
+
+356
+00:21:51,564 --> 00:21:54,880
+complex logarithm samajhne ka joy zaroor deserve karta hai.
+
+357
+00:21:55,280 --> 00:21:59,620
+Lekin usse pahale, a zaroori requirement hai complex exponential samajhna
+
+358
+00:22:00,580 --> 00:22:03,919
+Regular viewers ko pata hoga e ko complex number ke power pe raise
+
+359
+00:22:03,919 --> 00:22:07,360
+karne par kya hota hai, lekin ek quick review kabhi bura nahi hota.
+
+360
+00:22:07,840 --> 00:22:11,851
+Hum transformation ka base banana shuru kar sakte hain sirf un familiar examples pe
+
+361
+00:22:11,851 --> 00:22:16,200
+focus karke jaha real number inputs hain aur unke corresponding real number outputs hain.
+
+362
+00:22:16,600 --> 00:22:21,620
+For example, e to the 0 is 1, toh yeh point 0, map hota hai is point 1 pe.
+
+363
+00:22:22,200 --> 00:22:27,496
+Aur jab bhi aap input ko 1 se badhate hain, output e ke factor se grow karta hai,
+
+364
+00:22:27,496 --> 00:22:30,700
+matlab yeh humse kaafi tezi se door ja raha hai.
+
+365
+00:22:31,320 --> 00:22:35,998
+Aur doosri taraf, jab aap input ko kam karte hain, negative numbers me le jaate hain,
+
+366
+00:22:35,998 --> 00:22:40,400
+toh har step left ki taraf output ko phir se e ke factor se chota kar deta hai.
+
+367
+00:22:40,740 --> 00:22:44,360
+Is case me aap notice karenge ki output hamesha positive number hi hota hai.
+
+368
+00:22:44,860 --> 00:22:47,144
+Obviously, yeh tab aur interesting ho jata hai jab hum
+
+369
+00:22:47,144 --> 00:22:49,640
+inputs aur outputs dono ko complex numbers hone dete hain.
+
+370
+00:22:50,140 --> 00:22:53,080
+Yaha, sab kuch basically is baat pe depend karta hai ki jab
+
+371
+00:22:53,080 --> 00:22:56,020
+aap input ka imaginary part badhate hain toh kya hota hai.
+
+372
+00:22:56,380 --> 00:23:00,700
+Waha pe, corresponding output ek circle ke around ghoomta hai.
+
+373
+00:23:02,120 --> 00:23:06,132
+Agar aap soch rahe hain ki exponential me imaginary inputs lene pe output circle me
+
+374
+00:23:06,132 --> 00:23:10,240
+kyu ghoomta hai, toh humne yeh topic pehle bhi channel pe kai baar discuss kiya hai.
+
+375
+00:23:10,520 --> 00:23:12,680
+Screen par aur description mein kuch links diye huye hai.
+
+376
+00:23:13,160 --> 00:23:16,026
+Ek important point jo mai yaha dobara bolunga,
+
+377
+00:23:16,026 --> 00:23:21,322
+woh yeh hai ki baaki exponentials ke comparison me e to the z function ko ye special
+
+378
+00:23:21,322 --> 00:23:25,621
+banata hai, ki jab input 1 unit per second ki rate se upar jata hai,
+
+379
+00:23:25,621 --> 00:23:29,920
+output exactly 1 radian per second ki rate se circle me ghoomta hai.
+
+380
+00:23:30,400 --> 00:23:34,012
+Khas taur pe, imaginary part ko exactly 2 pi badhane
+
+381
+00:23:34,012 --> 00:23:36,860
+se output me ek poori rotation hoti hai.
+
+382
+00:23:37,640 --> 00:23:40,750
+Dusre tareeke se bolein, yeh jo vertical line segments mai
+
+383
+00:23:40,750 --> 00:23:43,324
+draw kar raha hu jinki height exactly 2 pi hai,
+
+384
+00:23:43,324 --> 00:23:47,400
+yeh function apply karte hi ek complete circle pe neatly map ho jaati hain.
+
+385
+00:23:48,560 --> 00:23:52,495
+Aap notice karenge ki maine yeh particular vertical line segments real direction me
+
+386
+00:23:52,495 --> 00:23:56,620
+bilkul evenly spaced draw ki hain, jahan real part har ek se next tak 1 se badhta hai.
+
+387
+00:23:57,000 --> 00:24:00,315
+Right side pe jo circles hain, unmein har ek ka size ek constant
+
+388
+00:24:00,315 --> 00:24:03,320
+scaling factor se alag hai, aur woh scaling factor hai e.
+
+389
+00:24:04,220 --> 00:24:08,588
+Pehle jo simple function z squared tha, maine use transformation ki tarah dikhaya tha,
+
+390
+00:24:08,588 --> 00:24:10,620
+saare inputs ko outputs pe shift karke.
+
+391
+00:24:11,020 --> 00:24:15,560
+Aur is case me, e to the z ke liye, agar aap curious hain ki wohi idea kaise lagta hai,
+
+392
+00:24:15,560 --> 00:24:19,265
+toh sabse easy hai grid ka ek subset lena, jaise yahan input space me,
+
+393
+00:24:19,265 --> 00:24:23,440
+aur yeh hai ki har square ko corresponding output me kaise move kiya jaata hai.
+
+394
+00:24:24,080 --> 00:24:28,031
+Ham log ye function apne print gallery goals ke liye use karte hain,
+
+395
+00:24:28,031 --> 00:24:32,680
+toh in vertical lines aur unke circles ko sochna aapke liye kaafi helpful hoga.
+
+396
+00:24:33,500 --> 00:24:36,188
+Actually, ek bahut hi interesting tareeka hai jisse mai sochta hu
+
+397
+00:24:36,188 --> 00:24:38,751
+ki yeh vertical lines concentric circles me kaise badal jaati
+
+398
+00:24:38,751 --> 00:24:41,480
+hain aur kaise woh poora input space apne saath le ja sakti hain.
+
+399
+00:24:41,780 --> 00:24:46,655
+Mujhe yeh imagine karna pasand hai ki poore z-plane ko ek tube me roll kar diya jaaye,
+
+400
+00:24:46,655 --> 00:24:50,000
+aise ki saari vertical lines akhir me circles ban jaayein.
+
+401
+00:24:50,480 --> 00:24:53,180
+Specifically, har circle ki circumference 2 pi hoga.
+
+402
+00:24:54,240 --> 00:24:58,888
+Ab sochiye, is tube ko leke, output space ke origin ke upar align karte hain,
+
+403
+00:24:58,888 --> 00:25:01,966
+aur phir use output space pe squish kar dete hain,
+
+404
+00:25:01,966 --> 00:25:06,493
+jisse tube ke saare circles exponentially growing size ke concentric rings
+
+405
+00:25:06,493 --> 00:25:07,760
+me badal jaate hain.
+
+406
+00:25:08,700 --> 00:25:11,357
+Yeh toh bas mujhe pasand hai, lekin aap chahe jaise bhi sochein,
+
+407
+00:25:11,357 --> 00:25:14,844
+jo mai chahta hu ki aapke dimaag me set ho jaaye woh yeh idea hai ki vertical lines
+
+408
+00:25:14,844 --> 00:25:15,840
+circles ban jaati hain.
+
+409
+00:25:16,340 --> 00:25:19,791
+Ab yahan ek aur bahut important point yeh hai ki multiple
+
+410
+00:25:19,791 --> 00:25:23,000
+alag-alag inputs ek hi output pe land ho sakte hain.
+
+411
+00:25:23,820 --> 00:25:29,160
+Jaise, e to the zero one hota hai, lekin e to the 2 pi bhi one hota hai.
+
+412
+00:25:29,540 --> 00:25:34,280
+Waise hi e to the negative 2 pi I aur e to the 4 pi I and so on.
+
+413
+00:25:34,540 --> 00:25:39,322
+Actually, kisi bhi vertical line pe jo infinite sequence 2 pi ke gap pe hai,
+
+414
+00:25:39,322 --> 00:25:44,860
+wo sab ek saath collapse ho jayega jab wo vertical line ek circle me roll ho jaati hai.
+
+415
+00:25:45,260 --> 00:25:47,953
+Hum kehte hain ki exponential map many to one hai,
+
+416
+00:25:47,953 --> 00:25:51,670
+chahe yeh abhi obvious na ho ki vertical direction me yeh repetition
+
+417
+00:25:51,670 --> 00:25:56,140
+kaise humare final print gallery effect ko recreate karne me key role play karega.
+
+418
+00:25:56,900 --> 00:25:59,336
+Toh exponentials hume pehla ingredient dete hain,
+
+419
+00:25:59,336 --> 00:26:02,071
+jo lines ko circles me badalna characterize karta hai,
+
+420
+00:26:02,071 --> 00:26:05,700
+aur doosra ingredient jo hume chahiye woh hai us exponential ka inverse,
+
+421
+00:26:05,700 --> 00:26:09,280
+jise natural log kehte hain, jahan basic idea yeh hai ki woh circles ko
+
+422
+00:26:09,280 --> 00:26:11,120
+wapas lines me unravel kar deta hai.
+
+423
+00:26:11,500 --> 00:26:15,633
+Ab, yeh visualize karne me especially fun hoga aur humari story ke liye
+
+424
+00:26:15,633 --> 00:26:19,534
+bhi relevant hoga agar hum sochein ki right wale complex plane par
+
+425
+00:26:19,534 --> 00:26:23,841
+Drosta image paint kar rahe hain, jaise pehle wale example me pi creature
+
+426
+00:26:23,841 --> 00:26:27,800
+ek house ki picture dekh raha hai jahan wohi pi creature rehta hai.
+
+427
+00:26:28,300 --> 00:26:31,737
+Matlab, ab finally wo time hai jab aap aur mai uss sawal ka jawab denge
+
+428
+00:26:31,737 --> 00:26:34,980
+ki kisi picture ka natural log lene ka actual matlab kya hota hai.
+
+429
+00:26:36,400 --> 00:26:37,980
+Iske baare me ek second sochiye.
+
+430
+00:26:38,460 --> 00:26:42,285
+Aap already jaante hain ki ek vertical line segment jaise yeh left pe hai,
+
+431
+00:26:42,285 --> 00:26:46,420
+jiski height 2 pi hai, woh circle ban jaati hai jab aap e to the z ka map apply
+
+432
+00:26:46,420 --> 00:26:47,040
+karte hain.
+
+433
+00:26:47,540 --> 00:26:51,097
+To natural log kya karega, ye iss image ke ek circle of points
+
+434
+00:26:51,097 --> 00:26:54,540
+ko lega aur unhe seedha karke un lines me convert kar dega.
+
+435
+00:26:55,440 --> 00:26:59,599
+Isi tarah, agar aap ek aise circle ko dekhen jo exactly e times chota ho,
+
+436
+00:26:59,599 --> 00:27:03,132
+wo bhi seedha hokar ek line ban jayega, same height ke saath,
+
+437
+00:27:03,132 --> 00:27:05,240
+bas ek unit left pe shift ho jayega.
+
+438
+00:27:05,820 --> 00:27:10,062
+Aur isi tarah, in dono circles ke beech ke har circle ko bhi unwrap karke in dono
+
+439
+00:27:10,062 --> 00:27:14,146
+lines ke beech me ek vertical line me convert kar diya jayega, aur generally,
+
+440
+00:27:14,146 --> 00:27:18,755
+jitne bhi chote chote rings hain image me, wo sab unwrap hoke ye vertical line segments
+
+441
+00:27:18,755 --> 00:27:23,101
+ban jayenge, har ek ki height 2 pi hoga, aur image me left ki taraf aur door chala
+
+442
+00:27:23,101 --> 00:27:23,520
+jayega.
+
+443
+00:27:24,080 --> 00:27:27,045
+Jo result milta hai wo thoda trippy hai, lekin sochne par kaafi cool lagta hai,
+
+444
+00:27:27,045 --> 00:27:29,860
+aur kuch important cheezein hain jo main chahta hoon ki aap notice karein.
+
+445
+00:27:30,060 --> 00:27:33,379
+Shayad aapne notice kiya hoga ki jaise-jaise aap left ki taraf jaate hain,
+
+446
+00:27:33,379 --> 00:27:36,519
+yeh repeat hota hai, aur mai chahta hoon aap ek minute ke liye sochen
+
+447
+00:27:36,519 --> 00:27:39,031
+ki aisa kyu ho sakta hai, lekin is repetition se pehle,
+
+448
+00:27:39,031 --> 00:27:42,260
+mai ek alag direction ke repetition ke baare me baat karna chahta hoon.
+
+449
+00:27:42,800 --> 00:27:46,824
+Abhi tak jaise maine draw kiya hai, left waale values ke liye imaginary part
+
+450
+00:27:46,824 --> 00:27:50,900
+0 se leke 2 pi tak jaa raha hai, lekin yeh actually ek arbitrary choice hai.
+
+451
+00:27:51,400 --> 00:27:56,722
+Yaad rakhiye, agar aap woh z value ko left pe aur 2 pi units se aage badhate hain,
+
+452
+00:27:56,722 --> 00:28:01,524
+toh right waale e to the z ki value usi circle pe dubaara ghoomti rahegi,
+
+453
+00:28:01,524 --> 00:28:06,197
+toh mujhe lagta hai aap agree karenge ki image ko vertical direction me
+
+454
+00:28:06,197 --> 00:28:10,740
+har ek vertical line pe repeat hone dena kaafi interesting lagta hai.
+
+455
+00:28:12,800 --> 00:28:17,520
+Aur yeh doosri taraf bhi hota hai, jaise hi aap left me imaginary part ko kam karte hain,
+
+456
+00:28:17,520 --> 00:28:22,240
+neeche le jaate hain, toh right waali corresponding value wahi circle pe ghoomti rahegi,
+
+457
+00:28:22,240 --> 00:28:25,900
+toh jo pattern aap dekh rahe hain woh waise bhi repeat hona chahiye.
+
+458
+00:28:26,560 --> 00:28:31,132
+Thoda clear bolu toh, jo rule mai left side pe image draw karne ke liye use kar rha hu,
+
+459
+00:28:31,132 --> 00:28:35,494
+wo hai ki left plane me har point z ke liye, aap uski corresponding value e to the
+
+460
+00:28:35,494 --> 00:28:39,540
+z right pe dekhte hain, aur fir usko ek matching color assign kar dete hain.
+
+461
+00:28:40,060 --> 00:28:45,244
+Toh for example, yeh warped pi creature aur yeh wala aur yeh sab actually right
+
+462
+00:28:45,244 --> 00:28:50,560
+waale image ke same part ko dikhate hain, jo bada pi creature hai lower left me.
+
+463
+00:28:51,040 --> 00:28:55,129
+Ek aur tareeke se sochen toh, kyunki e to the z function many to one hai,
+
+464
+00:28:55,129 --> 00:28:59,610
+toh jo feeling milti hai woh yeh hai ki natural logarithm, jo iska inverse hai,
+
+465
+00:28:59,610 --> 00:29:04,428
+woh multi-valued function banna chahta hai, jahan ek input multiple different outputs
+
+466
+00:29:04,428 --> 00:29:05,380
+pe map hota hai.
+
+467
+00:29:06,320 --> 00:29:10,256
+Waise generally, aksar aap nahi chahenge ki function ke multiple outputs ho,
+
+468
+00:29:10,256 --> 00:29:14,761
+kabhi-kabhi toh aapke context me yeh function ki definition ko bhi break kar deta hai,
+
+469
+00:29:14,761 --> 00:29:19,059
+toh log aksar natural log ke outputs ke liye left waale plane ka ek band hi choose
+
+470
+00:29:19,059 --> 00:29:19,680
+karte hain.
+
+471
+00:29:20,060 --> 00:29:24,060
+Complex analysis me, isko function ka branch cut choose karna kehte hain.
+
+472
+00:29:24,560 --> 00:29:28,278
+Hamare liye, jahan humein Escher ka piece recreate aur samajhna hai,
+
+473
+00:29:28,278 --> 00:29:31,832
+wahan aise sochna accha hai ki log ek multi-valued function hai,
+
+474
+00:29:31,832 --> 00:29:35,879
+jahan right side ka har point left par repeat hote points ko dikhata hai,
+
+475
+00:29:35,879 --> 00:29:40,800
+jo vertically two pi ke gap pe hain, aur yeh dono directions mein infinite tak jaata hai.
+
+476
+00:29:41,580 --> 00:29:45,078
+Ab hamare special case me, aap yeh repeating pattern dekh sakte
+
+477
+00:29:45,078 --> 00:29:48,520
+hain jaise left ki taraf jaate hain, lekin yeh kuch alag hai.
+
+478
+00:29:48,820 --> 00:29:50,520
+Aapko yeh zyada images me nahi dikhega.
+
+479
+00:29:51,020 --> 00:29:56,814
+Yeh isliye hota hai kyunki hum ek self-similar Drosta image ke saath kaam kar rahe hain,
+
+480
+00:29:56,814 --> 00:29:59,580
+jo har zoom factor pe same hi dikhti hai.
+
+481
+00:29:59,760 --> 00:30:04,320
+Yeh bilkul directly logarithms aur exponentials ki core property se aata hai.
+
+482
+00:30:04,880 --> 00:30:08,019
+Exponentials se addition multiply ho jaata hai,
+
+483
+00:30:08,019 --> 00:30:11,960
+aur logarithms se multiply phir se addition ban jaata hai.
+
+484
+00:30:12,860 --> 00:30:17,529
+For example, sochiye ki aap right wale plane pe koi choti si value w lete hain,
+
+485
+00:30:17,529 --> 00:30:20,484
+aur fir usi value ka 16 times bhi dekh rahe hain,
+
+486
+00:30:20,484 --> 00:30:23,380
+jo origin se 16 times door scale up ho jata hai.
+
+487
+00:30:24,280 --> 00:30:27,985
+Ab agar hum left side pe us value ka log dekhte hain,
+
+488
+00:30:27,985 --> 00:30:31,969
+toh yahan 16 se multiply karna ab addition ban jata hai,
+
+489
+00:30:31,969 --> 00:30:38,120
+specifically right ki taraf natural log of 16 se shift hona, jo bas ek real number hai.
+
+490
+00:30:39,340 --> 00:30:44,016
+Actually, yeh jo rectangle hai yahan hamare ajeeb se warped log image mein,
+
+491
+00:30:44,016 --> 00:30:49,004
+jiska width log 16 aur height 2 pi hai, yeh right wale image ke baare mein puri
+
+492
+00:30:49,004 --> 00:30:50,500
+information rakhta hai.
+
+493
+00:30:50,900 --> 00:30:54,654
+Yeh rectangle Drosta image ke iss annulus se match karta hai,
+
+494
+00:30:54,654 --> 00:30:59,270
+aur agar aap rectangle ko exactly log 16 units left ki taraf shift kar do,
+
+495
+00:30:59,270 --> 00:31:04,440
+toh aapko woh annulus ka 16 times smaller scaled-down version mil jayega jo perfect
+
+496
+00:31:04,440 --> 00:31:06,840
+puzzle piece ki tarah fit ho jata hai.
+
+497
+00:31:07,360 --> 00:31:10,708
+Aur agar aap yeh baar-baar repeat karte hain, toh yeh infinite
+
+498
+00:31:10,708 --> 00:31:13,840
+nesting ban jaati hai jo Drosta zoom ka main feature hai.
+
+499
+00:31:14,720 --> 00:31:18,729
+Abhi tak maine jaise draw kiya hai, toh right side pe log image ka cutoff hai,
+
+500
+00:31:18,729 --> 00:31:23,047
+aur iss point pe aapko achhe se pata hai ki left pe vertical lines right pe circles
+
+501
+00:31:23,047 --> 00:31:27,262
+ke barabar hoti hain, toh aap guess kar sakte hain ki yeh isi wajah se hai kyunki
+
+502
+00:31:27,262 --> 00:31:31,580
+maine Drosta image ko ek maximum radius di thi, lekin zaruri nahi ki aap aisa karo.
+
+503
+00:31:31,720 --> 00:31:35,247
+Basically, yeh har direction mein infinite tak ja sakta hai,
+
+504
+00:31:35,247 --> 00:31:39,128
+same self-similar pattern ke saath jaise aap scale up karte hain.
+
+505
+00:31:39,128 --> 00:31:43,948
+Jo log image left side pe hai, woh repeat hone wale tiling pattern ke saath right
+
+506
+00:31:43,948 --> 00:31:46,300
+side jitna chahein extend ho sakti hai.
+
+507
+00:31:47,400 --> 00:31:51,767
+Toh conclude karte hain, left wali logarithm image vertically periodic hai,
+
+508
+00:31:51,767 --> 00:31:54,620
+basically kyunki right pe rotation periodic hai.
+
+509
+00:31:54,980 --> 00:31:56,260
+Yeh kisi bhi image ke saath ho sakta hai.
+
+510
+00:31:56,560 --> 00:32:01,133
+Aur Drosta image ke iss special case mein, yeh horizontally bhi periodic hai,
+
+511
+00:32:01,133 --> 00:32:04,400
+kyunki Drosta image zoom in karte hue repeat hoti hai.
+
+512
+00:32:04,640 --> 00:32:09,960
+Yeh doubly periodic property hi hai jo hum final result ke liye use karenge.
+
+513
+00:32:10,820 --> 00:32:12,800
+Ab humare paas saari basic cheezein ready hain.
+
+514
+00:32:13,000 --> 00:32:16,521
+Ab finally mai aapko woh function describe kar sakta hoon jo Drosta
+
+515
+00:32:16,521 --> 00:32:19,780
+zoom ko Escher-style self-contained loop mein badal deta hai.
+
+516
+00:32:20,320 --> 00:32:23,050
+Seedha aage badhne se pehle, humne kaafi kuch cover kiya hai,
+
+517
+00:32:23,050 --> 00:32:25,780
+toh thoda sa time lena sahi rahega taaki sab digest ho sake.
+
+518
+00:32:26,180 --> 00:32:29,336
+Aur mai soch raha tha ki iss video mein kisi point pe 30 seconds
+
+519
+00:32:29,336 --> 00:32:32,640
+leke 3b1b talent ke baare mein baat karun, toh abhi acha time hai.
+
+520
+00:32:32,940 --> 00:32:36,490
+Yeh ek virtual career fair hai jo mai iss saal experiment kar raha hoon,
+
+521
+00:32:36,490 --> 00:32:39,843
+aur basic idea yeh hai ki aap, jo apna free time complex logarithms
+
+522
+00:32:39,843 --> 00:32:43,245
+jaise topics pe seekhne mein lagate hain, shayad aise logon ke saath
+
+523
+00:32:43,245 --> 00:32:46,400
+kaam karna chahenge jo curious, technical aur like-minded hain.
+
+524
+00:32:46,780 --> 00:32:51,640
+To agar aap koi nayi job dekh rahe hai, to ek baar 3b1b.co.talent pe ek baar
+
+525
+00:32:52,160 --> 00:32:52,560
+check karna.
+
+526
+00:32:52,940 --> 00:32:56,471
+Jab aap woh page explore karenge, toh aapko mere aur un teams ke interviews milenge,
+
+527
+00:32:56,471 --> 00:33:00,045
+technical puzzles aur challenges milenge jo specifically aapke liye choose kiye gaye
+
+528
+00:33:00,045 --> 00:33:03,660
+hain, aur kai aur cheezein bhi milengi jo aapko technical team culture ka feel dengi.
+
+529
+00:33:04,160 --> 00:33:07,324
+Aur mujhe yeh idea pasand hai ki iss audience ko aligned career
+
+530
+00:33:07,324 --> 00:33:10,487
+opportunities dikhayi jaye, toh jab bhi aap job dhund rahe ho,
+
+531
+00:33:10,487 --> 00:33:13,400
+chahe abhi ho ya baad mein, ek baar zarur check kar lena.
+
+532
+00:33:14,300 --> 00:33:15,860
+Theek hai, wapas main goal pe aate hain.
+
+533
+00:33:16,140 --> 00:33:20,354
+Kaise hum sab kuch jo complex functions aur transformations ke baare mei seekha hai,
+
+534
+00:33:20,354 --> 00:33:22,963
+jo conformal maps banate hain aur aise hi cheezein,
+
+535
+00:33:22,963 --> 00:33:26,776
+unka use karke aisa koi function bana sakte hain jo Escher ka print gallery
+
+536
+00:33:26,776 --> 00:33:28,080
+effect recreate kar sake?
+
+537
+00:33:28,680 --> 00:33:31,692
+Shayad sabse easy hoga agar mai poore function ki outline bata du,
+
+538
+00:33:31,692 --> 00:33:33,700
+fir hum har step ko detail mei samjh lenge.
+
+539
+00:33:34,440 --> 00:33:39,409
+Pehle, logarithm le lo, jo ek ajeeb sa doubly periodic tiling pattern deta hai,
+
+540
+00:33:39,409 --> 00:33:43,434
+fir us tiling pattern ko sahi tareeke se rotate aur scale karo,
+
+541
+00:33:43,434 --> 00:33:47,145
+aur uske baad exponential le lo, jo usko unwarp karta hai,
+
+542
+00:33:47,145 --> 00:33:49,220
+lekin is baar ek twist ke saath.
+
+543
+00:33:50,080 --> 00:33:52,826
+Yeh thoda ajeeb lag sakta hai, lekin actually yahan ek kaafi accha
+
+544
+00:33:52,826 --> 00:33:55,780
+tareeka hai motivate karne ka aur samjhne ka ki yahan ho kya raha hai.
+
+545
+00:33:56,300 --> 00:33:59,941
+Wapas dekhiye us original Drosta image ko, aur yaad kariye ki hum
+
+546
+00:33:59,941 --> 00:34:03,527
+chaahte hain ki yeh bada pie creature kisi tareeke se us chhote
+
+547
+00:34:03,527 --> 00:34:07,280
+self-similar copy se identify ho jaaye, jo 16 times zoomed-in hai.
+
+548
+00:34:07,540 --> 00:34:10,659
+Main chahta hoon aap un dono ko jodne wali ek line imagine karein.
+
+549
+00:34:11,219 --> 00:34:15,159
+Goal ko frame karne ka ek tareeka yeh hai ki hum chaahte hain final
+
+550
+00:34:15,159 --> 00:34:19,100
+function aisi line ko final space mei ek closed loop mei badal de.
+
+551
+00:34:19,540 --> 00:34:23,903
+Line ke endpoints upar wale hissay mei big aur small pie creatures ko dikhate hain,
+
+552
+00:34:23,903 --> 00:34:26,689
+toh jo bhi function un creatures ko identify karege,
+
+553
+00:34:26,689 --> 00:34:29,159
+usse at least yeh line close ho jaani chahiye.
+
+554
+00:34:29,600 --> 00:34:33,600
+Ab sochiye yeh line image ke logarithm mei kaisi dikhayi degi.
+
+555
+00:34:33,600 --> 00:34:39,000
+Bada pi creature yahan pe multiple copies ke roop mei hai, imaginary line ke side mei.
+
+556
+00:34:39,639 --> 00:34:43,308
+Jaise humne baat ki thi, jab aap image ko scale down karte hain,
+
+557
+00:34:43,308 --> 00:34:46,059
+toh yeh log mei left shift ke barabar hota hai,
+
+558
+00:34:46,059 --> 00:34:49,900
+toh yeh copies log image mei wahi chhota pi creature dikhate hain.
+
+559
+00:34:50,300 --> 00:34:53,111
+Aur actually, horizontal line use karne ke bajaye,
+
+560
+00:34:53,111 --> 00:34:57,720
+humko yeh faayda uthana hai ki yeh log image do alag directions mei periodic hai.
+
+561
+00:34:58,360 --> 00:35:03,030
+Toh isliye, hum ek diagonal line lenge jo bade character
+
+562
+00:35:03,030 --> 00:35:07,700
+ki copy ko is lower left chhoti copy se connect karegi.
+
+563
+00:35:07,940 --> 00:35:10,202
+Is waqt yeh thoda random lag sakta hai, aur hai bhi,
+
+564
+00:35:10,202 --> 00:35:13,855
+lekin sabse accha tareeka samjhane ka yeh hai ki aapko dikha doon kaise yeh process
+
+565
+00:35:13,855 --> 00:35:17,379
+hota hai, aur baad mei agar aap chahein toh compare kar sakte hain ki horizontal
+
+566
+00:35:17,379 --> 00:35:18,640
+line use karte toh kya hota.
+
+567
+00:35:19,200 --> 00:35:22,734
+Ab yeh naya downward component log image mei asal mei original
+
+568
+00:35:22,734 --> 00:35:26,040
+image ke path mei thoda clockwise rotation add karta hai.
+
+569
+00:35:26,460 --> 00:35:30,404
+Yaad hai, humara goal hai ki ise final image mei ek loop bana dein,
+
+570
+00:35:30,404 --> 00:35:34,643
+lekin aap aur mai abhi 10 minute tak baat kar rahe the ek aise function
+
+571
+00:35:34,643 --> 00:35:38,940
+ke baare mei jo line segment ko circle bana deta hai, matlab e to the z.
+
+572
+00:35:39,320 --> 00:35:43,639
+Aapko basically iss line segment ko perfectly vertical banaana hai,
+
+573
+00:35:43,639 --> 00:35:47,893
+jiski height 2 pi ho, aur yeh sab sahi rotation aur scaling karne
+
+574
+00:35:47,893 --> 00:35:52,340
+par depend karta hai taaki usko wahi length aur direction mil jaaye.
+
+575
+00:35:52,940 --> 00:35:56,502
+Ab yaad kariye, jab hum complex numbers ka warm up kar rahe the,
+
+576
+00:35:56,502 --> 00:36:01,454
+humne baat ki thi ki constant se multiply karne par kuch rotation aur scaling milti hai,
+
+577
+00:36:01,454 --> 00:36:06,296
+aur iss case mein ek artistic feature yeh ho sakta hai ki humara big pi creature lower
+
+578
+00:36:06,296 --> 00:36:11,026
+left mein usi jagah fixed rahe, jis ka matlab hai ki humare log image mein yeh point
+
+579
+00:36:11,026 --> 00:36:14,644
+fixed rehna chahiye, toh origin ke around pivot karne ke bajaye,
+
+580
+00:36:14,644 --> 00:36:17,760
+hum sab kuch us point ke around pivot karwana chahenge.
+
+581
+00:36:18,280 --> 00:36:20,789
+Man lijiye hum uss point ko z not label karte hain,
+
+582
+00:36:20,789 --> 00:36:24,381
+toh phir rotation aur scaling ke liye updated formula kuch aisa dikhega,
+
+583
+00:36:24,381 --> 00:36:28,121
+lekin sach kahun toh zyada tar cheezein iss baat par aati hain ki aapko woh
+
+584
+00:36:28,121 --> 00:36:30,876
+constant c choose karna hai jisse aap multiply karenge,
+
+585
+00:36:30,876 --> 00:36:34,714
+aur agar aapko exercises pasand hain, toh shayad aapko yeh dekhna interesting
+
+586
+00:36:34,714 --> 00:36:37,420
+lagega ki us constant ki exact value kya honi chahiye.
+
+587
+00:36:38,200 --> 00:36:41,937
+Yahan pe, kyunki hum thoda visual ho rahe hain aur thoda maza bhi lena hai,
+
+588
+00:36:41,937 --> 00:36:44,926
+main aapko woh constant uski complex plane pe dikhata hoon,
+
+589
+00:36:44,926 --> 00:36:48,663
+aur phir yeh bhi dikhata hoon ki agar mai use thoda idhar-udhar move karun
+
+590
+00:36:48,663 --> 00:36:49,560
+toh kya hota hai.
+
+591
+00:36:50,060 --> 00:36:53,249
+Alag-alag choices aapko alag scaling aur rotation deti hain,
+
+592
+00:36:53,249 --> 00:36:57,820
+jo exponential lene ke baad aapko ye sab ajeebo-garib kaleidoscopic images deti hain.
+
+593
+00:36:58,420 --> 00:37:01,729
+Aap is poore process ko ek game ki tarah soch sakte hain,
+
+594
+00:37:01,729 --> 00:37:06,663
+jisme aapko woh sahi value dhoondhni hai jisse sab kuch lower right waali image mein
+
+595
+00:37:06,663 --> 00:37:08,520
+sahi tareeke se match ho jaaye.
+
+596
+00:37:09,120 --> 00:37:13,549
+Jab wo us sahi value pe set ho jata hai aur hum ye recreated Escher effect dekhte hain,
+
+597
+00:37:13,549 --> 00:37:17,520
+us final image mein neeche right ki taraf, mai ye hole bhi dikhata aaya hoon,
+
+598
+00:37:17,520 --> 00:37:19,760
+jo original Escher piece ke hole jaisa hai.
+
+599
+00:37:20,640 --> 00:37:22,420
+Par wo asal mein bilkul artificial hai.
+
+600
+00:37:22,780 --> 00:37:25,477
+Function ke output image mein wo naturally khud hi
+
+601
+00:37:25,477 --> 00:37:28,120
+apne repeating spiral ke saath fill ho jata hai.
+
+602
+00:37:28,120 --> 00:37:32,769
+Waise bhi, left wala rotated tiling pattern poore plane mein infinite tak faila hua hai,
+
+603
+00:37:32,769 --> 00:37:36,837
+toh jab aap iska exponential lete hain, yeh bhi sab jagah fill kar deta hai,
+
+604
+00:37:36,837 --> 00:37:38,580
+bas zero wale point ko chhod ke.
+
+605
+00:37:39,880 --> 00:37:40,400
+Aur, bas ho gya.
+
+606
+00:37:40,540 --> 00:37:42,040
+Ye hi basic operation hai.
+
+607
+00:37:42,520 --> 00:37:46,165
+Pehle isko ajeeb log space me translate karo, phir rotate aur scale karke
+
+608
+00:37:46,165 --> 00:37:49,760
+cheezein align karo, aur fir exponential ke saath wapas translate karo.
+
+609
+00:37:51,500 --> 00:37:55,003
+Is point par, jab humne apna version Escher jaisa bana liya hai,
+
+610
+00:37:55,003 --> 00:37:58,998
+toh shayad achha hoga agar hum dekhein ki Escher ke actual example mein,
+
+611
+00:37:58,998 --> 00:38:03,759
+yani us seaside Maltese town wali print gallery jahan ek aadmi town ki photo dekh raha
+
+612
+00:38:03,759 --> 00:38:05,620
+hai, wohi process kaise hota hai.
+
+613
+00:38:06,420 --> 00:38:10,720
+Pehla step phir wahi hai, is scene ko uske khud ke chhote se complex plane par rakhna,
+
+614
+00:38:10,720 --> 00:38:15,120
+jahan infinite limiting point, jiske around sab kuch scale hota hai, zero par hota hai.
+
+615
+00:38:16,340 --> 00:38:20,321
+Dusra step, iska logarithm lena, jo is case mein bhi poore scene ka
+
+616
+00:38:20,321 --> 00:38:24,540
+waise hi ajeeb transformation deta hai, par is baar thoda sa farq hai.
+
+617
+00:38:24,980 --> 00:38:28,520
+Kyuki Escher ka zoom kaafi zyada tha, scale factor 256 tha,
+
+618
+00:38:28,520 --> 00:38:31,580
+isliye is naye example me jo repeating tiles hain,
+
+619
+00:38:31,580 --> 00:38:35,000
+wo complex plane ka aur bhi bada hissa cover karte hain.
+
+620
+00:38:36,280 --> 00:38:39,433
+Tisra step fir wahi hai, isko rotate aur scale karna,
+
+621
+00:38:39,433 --> 00:38:43,300
+jo depend karta hai sahi complex constant se multiply karne par.
+
+622
+00:38:43,760 --> 00:38:49,444
+Constraint ye hai ki ye rotated image abhi bhi har 2 pi units vertically repeat ho,
+
+623
+00:38:49,444 --> 00:38:52,800
+lekin image ke us part pe jo pehle diagonal tha.
+
+624
+00:38:53,300 --> 00:38:56,765
+Aur phir chautha step, sab kuch e to the z ke through dal do,
+
+625
+00:38:56,765 --> 00:39:00,400
+aur jo milta hai wo Escher ke final picture jaisa hi lagta hai,
+
+626
+00:39:00,400 --> 00:39:04,717
+aisi image jahan ek loop ke around walk karna zoom in karne ke barabar hota
+
+627
+00:39:04,717 --> 00:39:06,080
+hai by a factor of 256.
+
+628
+00:39:07,720 --> 00:39:10,363
+Aur jab hum ise complex functions ke saath aise samjhte hain,
+
+629
+00:39:10,363 --> 00:39:11,880
+toh beech mein koi hole nahi hota.
+
+630
+00:39:12,160 --> 00:39:16,592
+Wo final result khud ek Drosta image hai, lekin is baar ek twist ke saath,
+
+631
+00:39:16,592 --> 00:39:21,922
+jahan ek self-similarity infinite spiral mein niche tak jaati rehti hai jab tak aap zoom
+
+632
+00:39:21,922 --> 00:39:22,760
+karte rahein.
+
+633
+00:39:24,000 --> 00:39:26,880
+Is poore process mein kuch cheezein hain jo notice karne layak hain.
+
+634
+00:39:27,480 --> 00:39:30,717
+Sabse pehle, agar aap ise formula ki tarah likhen, jahan log lete hain,
+
+635
+00:39:30,717 --> 00:39:34,455
+phir usko kisi constant se multiply karte hain, aur phir exponentiate karte hain,
+
+636
+00:39:34,455 --> 00:39:38,194
+toh ye actually simplify ho sakta hai ki aapka input bas kisi complex constant ki
+
+637
+00:39:38,194 --> 00:39:39,060
+power pe raise ho.
+
+638
+00:39:39,540 --> 00:39:43,200
+Aur agar aap woh offset factor wapas laate hain, toh bas ek aur constant ajata hai.
+
+639
+00:39:43,980 --> 00:39:47,009
+Ek taraf toh yeh kaafi satisfying hai ki pura complicated process
+
+640
+00:39:47,009 --> 00:39:49,199
+bas kuch hi symbols me likh diya ja sakta hai,
+
+641
+00:39:49,199 --> 00:39:52,880
+lekin mujhe lagta hai isse actual me kya ho raha hai wo thoda chhup sakta hai.
+
+642
+00:39:53,740 --> 00:39:56,129
+Aur phir, maine mention kiya tha ki sirf woh horizontal
+
+643
+00:39:56,129 --> 00:39:57,780
+lines use karne se kaam nahi chalega.
+
+644
+00:39:58,040 --> 00:40:01,271
+Agar aap curious hain, toh ye dekhiye ki aesa karke kaisa lagta hai,
+
+645
+00:40:01,271 --> 00:40:04,740
+matlab sab kuch 90 degree ghumana aur sahi amount me scale karna padega.
+
+646
+00:40:05,320 --> 00:40:08,880
+Aapko kuch interesting milta toh hai, lekin yeh wo nahi hai jo hum chahte hain.
+
+647
+00:40:09,180 --> 00:40:11,676
+Aur agar aap sochen, toh basically ho kya raha hai ki
+
+648
+00:40:11,676 --> 00:40:14,360
+aap rotation aur scaling ke roles ko swap kar rahe hain.
+
+649
+00:40:16,680 --> 00:40:20,422
+Agar overall dekhein, toh yeh doosra perspective jahan poora
+
+650
+00:40:20,422 --> 00:40:24,351
+piece log space me rotate ho raha hai, woh Escher ke intuitive
+
+651
+00:40:24,351 --> 00:40:28,280
+distorted grid aur mesh warp approach se kaafi alag lagta hai.
+
+652
+00:40:28,760 --> 00:40:31,180
+Lekin dono perspectives ko connect karne wali ek line hai.
+
+653
+00:40:31,900 --> 00:40:34,582
+Ek cheez toh yeh hai ki ab aap samajh sakte hain ki humne
+
+654
+00:40:34,582 --> 00:40:37,500
+exactly kaise Escher ki grid ko recreate aur modify kiya hai.
+
+655
+00:40:37,940 --> 00:40:40,844
+Aap basically wahi function lete hain jo humne banaya hai,
+
+656
+00:40:40,844 --> 00:40:45,100
+lekin image pe apply karne ke bajaye, aap usko ek normal square grid pe lagate hain.
+
+657
+00:40:45,780 --> 00:40:47,760
+Waise, yeh ek bilkul normal square grid nahi hai.
+
+658
+00:40:48,020 --> 00:40:51,946
+Sabse acha hota hai aisi grid lena jo zoom in karte hi aur dense ho jaye,
+
+659
+00:40:51,946 --> 00:40:53,560
+taaki har scale pe same lage.
+
+660
+00:40:54,200 --> 00:40:56,190
+Jab aap ye karte hain, to logarithm se ek bahut
+
+661
+00:40:56,190 --> 00:40:58,180
+hi khoobsurat curved tiling pattern milta hai.
+
+662
+00:40:58,720 --> 00:41:02,080
+Aur phir wahan se, wahi trick use karte hain—cheezein sahi tareeke se
+
+663
+00:41:02,080 --> 00:41:05,439
+rotate karna aur phir exponential lena—aur result me kuch aesa milta
+
+664
+00:41:05,439 --> 00:41:09,140
+hai jo kaafi close hai us cheez ke jo Escher ne bahut mehnat se banayi thi.
+
+665
+00:41:09,680 --> 00:41:14,302
+Aur yaad rakhiye, pura reason ki hum complex numbers ki language use kar rahe hain,
+
+666
+00:41:14,302 --> 00:41:17,421
+aur maine aapko ye sab steps karvaye, wo yeh hai ki yeh
+
+667
+00:41:17,421 --> 00:41:19,760
+conformal property side me mil jaati hai.
+
+668
+00:41:20,180 --> 00:41:23,151
+Original grid ke chote squares, kam se kam approximately,
+
+669
+00:41:23,151 --> 00:41:25,340
+final result me bhi square hi rehte hain.
+
+670
+00:41:26,000 --> 00:41:30,120
+Escher ne bola tha ki yeh piece banane me unko kaafi badi headaches aayi thi,
+
+671
+00:41:30,120 --> 00:41:34,026
+aur shayad aap aur mai bhi kuch headaches se guzre, lekin alag wajah se,
+
+672
+00:41:34,026 --> 00:41:38,200
+lekin iska payoff yeh hai ki yeh property bina extra effort ke mil jaati hai.
+
+673
+00:41:39,000 --> 00:41:42,744
+Ab yeh clear kar doon, aapko Escher ka kaam enjoy karne ke liye complex derivatives ya
+
+674
+00:41:42,744 --> 00:41:46,400
+logarithms samajhne ki zaroorat nahi hai, aur mai aesa imply bhi nahi karna chahta.
+
+675
+00:41:46,740 --> 00:41:49,681
+Lekin, jab aap uska mathematical side samajh lete hain,
+
+676
+00:41:49,681 --> 00:41:53,637
+toh aapko ek bilkul alag tareeke ki appreciation milti hai ki Escher asal
+
+677
+00:41:53,637 --> 00:41:54,760
+me kya kar rahe the.
+
+678
+00:41:55,180 --> 00:41:57,680
+Aur yahi cheez mujhe sabse zyada interesting lagti hai,
+
+679
+00:41:57,680 --> 00:42:00,680
+jo real connection mai dono storylines ke beech dena chahta hoon.
+
+680
+00:42:01,140 --> 00:42:04,426
+Agar aap Escher ka career dekhein, toh poore time woh kuch concepts ki
+
+681
+00:42:04,426 --> 00:42:07,900
+taraf attract hote rahe, jaise infinity ko ek limited space mein dikhana.
+
+682
+00:42:08,280 --> 00:42:12,304
+Aur saath hi, aisa lagta tha ki woh ek particular aesthetic se guided hain,
+
+683
+00:42:12,304 --> 00:42:16,971
+aksar koi implicit strict rule jaise ki chote squares isi mesh mein chote squares bane
+
+684
+00:42:16,971 --> 00:42:17,400
+rahein.
+
+685
+00:42:17,760 --> 00:42:20,722
+Jab concept aur aesthetic aise combine hote hain,
+
+686
+00:42:20,722 --> 00:42:25,014
+toh Escher ka har ek piece aksar ek aise puzzle ka solution lagta hai,
+
+687
+00:42:25,014 --> 00:42:28,460
+jisme lagta hi nahi ki solution exist karna chahiye tha.
+
+688
+00:42:29,040 --> 00:42:32,697
+Ab jo mujhe itna thought-provoking lagta hai woh yeh hai ki yeh
+
+689
+00:42:32,697 --> 00:42:36,760
+visual puzzles jo unhone banaye, woh sirf math karne jaise nahi hain.
+
+690
+00:42:36,840 --> 00:42:40,310
+Jo specific structures unhe naturally attract karte the,
+
+691
+00:42:40,310 --> 00:42:43,780
+unmein aksar kaafi real aur deep maths chhupi hoti hai.
+
+692
+00:42:44,260 --> 00:42:46,869
+Hamare example mein, deeper structure sirf yahi nahi ki
+
+693
+00:42:46,869 --> 00:42:49,620
+piece ko complex functions se describe kiya ja sakta hai.
+
+694
+00:42:50,120 --> 00:42:52,576
+Jo ideas humne iss storyline mein touch kiye hain,
+
+695
+00:42:52,576 --> 00:42:56,260
+wo jitna aap expect karte, research frontiers se kaafi zyada close hain, .
+
+696
+00:42:56,840 --> 00:42:59,510
+Agar aap humari second half ki approach dekhe,
+
+697
+00:42:59,510 --> 00:43:04,096
+yaad hai kaise woh is doubly periodic pattern pe based tha complex plane mein,
+
+698
+00:43:04,096 --> 00:43:06,940
+jo do alag-alag directions mein repeat hota hai.
+
+699
+00:43:07,860 --> 00:43:10,164
+Aise complex numbers ke functions ka actually ek
+
+700
+00:43:10,164 --> 00:43:12,420
+special naam hai jo doubly periodic hote hain.
+
+701
+00:43:12,640 --> 00:43:14,560
+Unhe elliptic functions kehte hain.
+
+702
+00:43:14,900 --> 00:43:19,025
+Yahan pe yeh explain karna bohot zyada ho jayega ki yeh functions itne useful kyun hain,
+
+703
+00:43:19,025 --> 00:43:23,056
+lekin ek cheez jo mai highlight karna chahta hoon woh yeh hai ki jo do mathematicians
+
+704
+00:43:23,056 --> 00:43:26,338
+maine start mein mention kiye the, jinhone is piece ka analysis diya,
+
+705
+00:43:26,338 --> 00:43:28,822
+De Smit aur Lenstra, woh dono number theorists hain,
+
+706
+00:43:28,822 --> 00:43:32,760
+aur elliptic functions modern number theory mein ek important role play karte hain,
+
+707
+00:43:32,760 --> 00:43:35,760
+ek tarah ka bridge provide karte hain maths ke dusre parts tak.
+
+708
+00:43:36,400 --> 00:43:39,996
+Shayad yehi ek reason hai ki woh is piece ko dekh kar soch sake ki aisa
+
+709
+00:43:39,996 --> 00:43:43,440
+function construct kiya jaa sakta hai, jo humne yahan explain kiya.
+
+710
+00:43:44,660 --> 00:43:49,127
+Jab mai Escher ka kaam dekhta hoon, chahe woh print gallery ho ya koi aur favorite piece,
+
+711
+00:43:49,127 --> 00:43:51,788
+mujhe in pieces se sabse zyada jo feeling milti hai,
+
+712
+00:43:51,788 --> 00:43:54,900
+woh ek bohot specific feeling hai jo kahin aur milti hi nahi.
+
+713
+00:43:55,280 --> 00:43:57,740
+Woh feeling hai cheezon ka perfectly fit hona.
+
+714
+00:43:58,140 --> 00:43:59,580
+Lekin bas yahi nahi hai.
+
+715
+00:43:59,620 --> 00:44:02,320
+Yeh sirf ek puzzle solve hone ki satisfaction se bhi kuch zyada hai.
+
+716
+00:44:02,540 --> 00:44:05,288
+Yeh us creative genius ki appreciation hai jo pehle
+
+717
+00:44:05,288 --> 00:44:07,820
+place mein aisa puzzle sochne ke liye chahiye.
+
+718
+00:44:08,140 --> 00:44:11,600
+Mujhe yeh feeling sirf math karte waqt hi milti hai.
+
+719
+00:44:11,940 --> 00:44:15,806
+Toh yeh fact ki ek artist aur ek mathematician dono ko same structures
+
+720
+00:44:15,806 --> 00:44:19,064
+attract kar sakte hain, lekin bilkul alag reasons ke liye,
+
+721
+00:44:19,064 --> 00:44:23,095
+mujhe yeh suggest karta hai ki dono ko jo cheez attract karti hai usmein
+
+722
+00:44:23,095 --> 00:44:24,200
+kuch universal hai.
+

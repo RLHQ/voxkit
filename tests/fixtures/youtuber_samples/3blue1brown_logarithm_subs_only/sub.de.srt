@@ -1,0 +1,3264 @@
+1
+00:00:00,000 --> 00:00:03,228
+Immer wenn ich eines dieser Videos mache, gibt es manchmal einen besonderen Moment,
+
+2
+00:00:03,228 --> 00:00:05,951
+in dem beim Animieren eine ganze Menge kleiner technischer Knobeleien
+
+3
+00:00:05,951 --> 00:00:08,712
+gelöst werden müssen, und dann macht die zugrunde liegende Mathematik,
+
+4
+00:00:08,712 --> 00:00:11,474
+die ich zu erklären versuche, für mich plötzlich auf eine Weise Klick,
+
+5
+00:00:11,474 --> 00:00:14,080
+wie vorher nicht, sobald ich sie lebendig auf dem Bildschirm sehe.
+
+6
+00:00:14,480 --> 00:00:16,522
+Die besten Versionen dieser Momente sagen mir oft,
+
+7
+00:00:16,522 --> 00:00:18,849
+dass ein Video eines meiner Lieblingsvideos werden wird,
+
+8
+00:00:18,849 --> 00:00:21,748
+und das Zusammensetzen des Endes dieses Stücks hier war so ein Moment,
+
+9
+00:00:21,748 --> 00:00:23,300
+in dem ich genau dieses Gefühl hatte.
+
+10
+00:00:27,040 --> 00:00:30,140
+Unsere Geschichte beginnt heute eigentlich nicht im Matheunterricht.
+
+11
+00:00:30,460 --> 00:00:31,860
+Wir fangen im Kunstraum an.
+
+12
+00:00:32,720 --> 00:00:36,059
+Stell dir vor, du stehst in einer Galerie und schaust auf ein Bild von
+
+13
+00:00:36,059 --> 00:00:38,970
+einem Boot in einem Hafen, und die ganze Welt verformt sich,
+
+14
+00:00:38,970 --> 00:00:43,120
+während dein Blick nach oben und rechts wandert, wo du ein Dorf an diesem Ufer siehst.
+
+15
+00:00:43,640 --> 00:00:47,278
+Zwischen den dicht gedrängten Gebäuden verformt sich die Welt noch stärker,
+
+16
+00:00:47,278 --> 00:00:50,334
+wenn dein Blick nach unten zum Eingang eines Gebäudes wandert,
+
+17
+00:00:50,334 --> 00:00:52,420
+der zu einem Flur voller Kunstwerke führt.
+
+18
+00:00:53,200 --> 00:00:56,880
+Und am Ende dieses Flurs bist du wieder hier und starrst auf ein Bild von einem Boot.
+
+19
+00:00:58,520 --> 00:00:59,860
+Das ist M.C.
+
+20
+00:00:59,980 --> 00:01:02,835
+Eschers Lithografie von 1956, Print Gallery, oder
+
+21
+00:01:02,835 --> 00:01:05,340
+auf Niederländisch Prentententoonstelling.
+
+22
+00:01:05,960 --> 00:01:10,153
+In einem Brief an seinen Sohn, in dem er die Entstehung eines jungen Mannes beschreibt,
+
+23
+00:01:10,153 --> 00:01:13,672
+der interessiert auf einen Druck blickt, auf dem er selbst zu sehen ist,
+
+24
+00:01:13,672 --> 00:01:16,901
+nannte Escher das das merkwürdigste Ding, das ich je gemacht habe,
+
+25
+00:01:16,901 --> 00:01:18,540
+was bei ihm wirklich etwas heißt.
+
+26
+00:01:18,900 --> 00:01:23,026
+Eschers Kunst wird auf der ganzen Welt geliebt und greift oft paradoxe Themen oder auf
+
+27
+00:01:23,026 --> 00:01:27,200
+einzigartige Weise befriedigende geometrische Muster mit einer Art Eigencharakter auf.
+
+28
+00:01:27,500 --> 00:01:30,593
+Diese Liebe ist besonders unter Mathematikern ausgeprägt,
+
+29
+00:01:30,593 --> 00:01:34,825
+weil seine Kunst oft überraschend tiefgehende mathematische Konzepte berührt,
+
+30
+00:01:34,825 --> 00:01:38,840
+obwohl Escher selbst nie eine formale Ausbildung auf diesem Gebiet hatte.
+
+31
+00:01:39,520 --> 00:01:43,380
+Print Gallery bietet ein perfektes Beispiel für diese unerwartete Tiefe.
+
+32
+00:01:43,380 --> 00:01:47,615
+2003 legten die Mathematiker De Smit und Lenstra eine wunderbare Analyse dessen vor,
+
+33
+00:01:47,615 --> 00:01:51,144
+was in diesem Werk eigentlich vor sich geht, und der verblüffenden in
+
+34
+00:01:51,144 --> 00:01:54,220
+sich geschlossenen Schleife, die Escher hier geschaffen hat.
+
+35
+00:01:54,720 --> 00:01:57,250
+Eines meiner Hauptziele mit diesem Video ist es,
+
+36
+00:01:57,250 --> 00:02:01,468
+ihre Analyse visuell auseinanderzunehmen und dir wie immer das Gefühl zu geben,
+
+37
+00:02:01,468 --> 00:02:04,420
+dass du das auch selbst hättest wiederentdecken können.
+
+38
+00:02:05,120 --> 00:02:09,348
+Was aus dieser Analyse ganz unerwartet hervorgeht, ist eine Antwort auf die Frage,
+
+39
+00:02:09,348 --> 00:02:12,080
+was genau in die Mitte dieses Bildes gehören sollte.
+
+40
+00:02:12,580 --> 00:02:15,240
+Zuerst klingt das vielleicht nach einer wirren Frage.
+
+41
+00:02:15,600 --> 00:02:18,048
+Wenn du dich ihr von rechts oben näherst, fühlt es sich so an,
+
+42
+00:02:18,048 --> 00:02:20,141
+als müssten dort Gebäude aus dem Dorf zu sehen sein,
+
+43
+00:02:20,141 --> 00:02:23,340
+aber wenn du von links kommst, sieht es eher wie ein Teil des Bilderrahmens aus.
+
+44
+00:02:23,620 --> 00:02:26,068
+Wenn du dich ihr aber von unten näherst, wirkt es passender,
+
+45
+00:02:26,068 --> 00:02:27,740
+wenn es ein Teil der Galerie selbst ist.
+
+46
+00:02:28,160 --> 00:02:30,510
+Irgendwie ist die ganze Mehrdeutigkeit darüber,
+
+47
+00:02:30,510 --> 00:02:33,060
+wo genau du dich in dieser ganzen Szene befindest,
+
+48
+00:02:33,060 --> 00:02:35,760
+in diesem leeren Kreis in der Mitte zusammengedrückt.
+
+49
+00:02:36,220 --> 00:02:38,631
+Und einfach zum Spaß, weil wir nun mal in den 2020ern sind,
+
+50
+00:02:38,631 --> 00:02:40,960
+habe ich ein Diffusionsmodell versucht, das auszufüllen.
+
+51
+00:02:41,500 --> 00:02:43,280
+Wenig überraschend tut es sich damit unglaublich schwer.
+
+52
+00:02:43,860 --> 00:02:45,200
+Es kapiert es einfach überhaupt nicht.
+
+53
+00:02:45,740 --> 00:02:47,347
+Und wenn man der armen Maschine ein bisschen Anerkennung geben will:
+
+54
+00:02:47,347 --> 00:02:48,080
+Natürlich tut sie sich schwer.
+
+55
+00:02:48,480 --> 00:02:50,503
+Das fühlt sich wie ein von Grund auf mehrdeutiger
+
+56
+00:02:50,503 --> 00:02:52,320
+und schlecht definierter Teil der Szene an.
+
+57
+00:02:52,780 --> 00:02:55,984
+Und trotzdem hoffe ich, dass du am Ende zustimmst, dass es genau eine,
+
+58
+00:02:55,984 --> 00:02:58,136
+und wirklich nur eine, Vervollständigung gibt,
+
+59
+00:02:58,136 --> 00:03:01,340
+die sich wie das richtige Puzzleteil anfühlt, das man einsetzen kann.
+
+60
+00:03:02,100 --> 00:03:04,469
+Bevor wir in die Mathematik eintauchen, will ich dir eine rein
+
+61
+00:03:04,469 --> 00:03:07,640
+intuitive Beschreibung dafür geben, wie Escher dieses Werk eigentlich gemacht hat,
+
+62
+00:03:07,640 --> 00:03:09,780
+was sich in drei verschiedene Schritte aufteilen lässt.
+
+63
+00:03:10,340 --> 00:03:13,468
+Schritt eins ist, mit einer geradegezogenen Version desselben
+
+64
+00:03:13,468 --> 00:03:17,160
+allgemeinen Konzepts zu beginnen, bei der ein Mann auf ein Bild schaut.
+
+65
+00:03:17,640 --> 00:03:21,181
+Dieses Bild enthält einen Hafen, der eine Stadt enthält,
+
+66
+00:03:21,181 --> 00:03:26,620
+die eine Druckgalerie enthält, die denselben Mann enthält, und so weiter und so fort.
+
+67
+00:03:26,720 --> 00:03:28,820
+Du könntest nach Herzenslust für immer hineinzoomen.
+
+68
+00:03:30,380 --> 00:03:34,470
+Diese Idee eines selbstähnlichen Bildes, bei dem das Bild in sich selbst enthalten ist,
+
+69
+00:03:34,470 --> 00:03:36,820
+hat unter Grafikdesignern einen besonderen Namen.
+
+70
+00:03:37,180 --> 00:03:40,160
+Sie ist als Drosta-Effekt bekannt, benannt nach einer Kakaofirma,
+
+71
+00:03:40,160 --> 00:03:42,040
+die ihn in ihrem Branding verwendet hat.
+
+72
+00:03:42,560 --> 00:03:45,252
+Tatsächlich scheint das eine ziemlich verbreitete Marketing-Masche für
+
+73
+00:03:45,252 --> 00:03:48,020
+alle möglichen Produkte aus dem frühen 20. Jahrhundert gewesen zu sein.
+
+74
+00:03:48,480 --> 00:03:52,447
+Das selbstähnliche Drosta-Bild, das Escher allerdings benutzt hat,
+
+75
+00:03:52,447 --> 00:03:55,873
+beinhaltet einen viel, viel tieferen Zoom als all diese,
+
+76
+00:03:55,873 --> 00:04:00,140
+bei dem die selbstähnliche Kopie 256-mal kleiner ist als das Original.
+
+77
+00:04:00,520 --> 00:04:02,420
+Du wirst gleich sehen, woher diese Zahl kommt.
+
+78
+00:04:03,160 --> 00:04:06,917
+Eschers Genialität besteht darin, dass er irgendwie intuitiv erkannt hat,
+
+79
+00:04:06,917 --> 00:04:11,138
+dass es einen Weg geben muss, dieses Konzept eines in sich selbst verschachtelten
+
+80
+00:04:11,138 --> 00:04:14,432
+Bildes zu nehmen und in diese verzerrte Schleife zu verwandeln,
+
+81
+00:04:14,432 --> 00:04:18,447
+bei der das Hineinzoomen implizit passiert, während der Blick des Betrachters
+
+82
+00:04:18,447 --> 00:04:19,579
+um den Kreis wandert.
+
+83
+00:04:21,180 --> 00:04:23,955
+Übrigens fragst du dich vielleicht, woher ich diese begradigte Version habe,
+
+84
+00:04:23,955 --> 00:04:26,948
+und die Antwort ist, dass diese zwei Mathematiker, auf die ich mich bezogen habe,
+
+85
+00:04:26,948 --> 00:04:28,920
+uns großzügigerweise erlaubt haben, sie zu verwenden.
+
+86
+00:04:28,920 --> 00:04:32,716
+Das ist etwas, das sie tatsächlich aus dem originalen Escher-Werk rekonstruiert haben,
+
+87
+00:04:32,716 --> 00:04:36,600
+mit der Hilfe von zwei niederländischen Künstlern, Hans Richter und Jacqueline Hofstra.
+
+88
+00:04:37,140 --> 00:04:39,900
+Die Art, wie sie es rekonstruiert haben, ist tatsächlich super interessant.
+
+89
+00:04:40,280 --> 00:04:44,460
+In gewisser Weise geht es darum, den Logarithmus des Originalwerks zu nehmen.
+
+90
+00:04:44,920 --> 00:04:48,067
+Mir ist klar, dass dieser Satz im Moment wahrscheinlich wie Unsinn klingt,
+
+91
+00:04:48,067 --> 00:04:51,300
+aber später in diesem Video, versprochen, wird das vollkommen Sinn ergeben.
+
+92
+00:04:52,220 --> 00:04:55,424
+Um die Grundidee zu skizzieren, wie Escher diese Schleife gemacht hat,
+
+93
+00:04:55,424 --> 00:04:59,314
+will ich ein Beispiel verwenden, das einfacher ist als das, woran er gearbeitet hat,
+
+94
+00:04:59,314 --> 00:05:02,792
+also holen wir dieses benutzerdefinierte selbstähnliche Drasta-Bild hervor,
+
+95
+00:05:02,792 --> 00:05:05,904
+auf dem ein Kuchenwesen auf ein gerahmtes Bild eines Hauses schaut,
+
+96
+00:05:05,904 --> 00:05:07,460
+in dem dasselbe Kuchenwesen lebt.
+
+97
+00:05:08,140 --> 00:05:12,351
+In diesem Beispiel ist die selbstähnliche Kopie nur 16-mal kleiner als das Original,
+
+98
+00:05:12,351 --> 00:05:15,560
+und das macht einfach alles viel leichter, auf einmal zu sehen.
+
+99
+00:05:15,980 --> 00:05:20,198
+Was ich machen werde, ist, hier rechts einen separaten Arbeitsbereich beizubehalten,
+
+100
+00:05:20,198 --> 00:05:23,262
+um das allgemeine Ziel zu skizzieren, das wir im Sinn haben,
+
+101
+00:05:23,262 --> 00:05:26,526
+wobei man sich das so vorstellen kann, dass man diesen 16-fachen
+
+102
+00:05:26,526 --> 00:05:29,840
+Hineinzoom-Faktor auf die vier Ecken des Quadrats verteilen will.
+
+103
+00:05:30,560 --> 00:05:33,470
+Nehmen wir zum Beispiel an, du willst, dass das Kuchenwesen selbst
+
+104
+00:05:33,470 --> 00:05:36,380
+ungefähr in derselben Größe in der unteren linken Ecke erscheint.
+
+105
+00:05:36,880 --> 00:05:40,206
+Wenn du dann im Original um den Faktor 2 hineinzoomst, nehmen wir das,
+
+106
+00:05:40,206 --> 00:05:43,104
+was in der oberen linken Ecke dieser gezoomten Version wäre,
+
+107
+00:05:43,104 --> 00:05:46,620
+und platzieren es dann in der oberen linken Ecke unseres Arbeitsbereichs.
+
+108
+00:05:47,340 --> 00:05:49,844
+Genauso zoomst du noch einmal um den Faktor 2 hinein,
+
+109
+00:05:49,844 --> 00:05:53,056
+nimmst dann die obere rechte Ecke dieser herangezoomten Version und
+
+110
+00:05:53,056 --> 00:05:56,599
+platzierst jetzt eine vergrößerte Version davon in der oberen rechten Ecke
+
+111
+00:05:56,599 --> 00:05:57,780
+unseres Arbeitsbereichs.
+
+112
+00:05:58,600 --> 00:06:01,644
+Zum Schluss noch ein weiterer Schritt: noch einmal um den Faktor 2 hineinzoomen,
+
+113
+00:06:01,644 --> 00:06:04,460
+das nehmen, was in der unteren rechten Ecke dieser gezoomten Version ist,
+
+114
+00:06:04,460 --> 00:06:07,580
+es vergrößern und in der unteren rechten Ecke unseres Arbeitsbereichs platzieren.
+
+115
+00:06:08,280 --> 00:06:11,486
+Diese vier ausgeschnittenen Ecken geben eine grobe Vorstellung davon,
+
+116
+00:06:11,486 --> 00:06:12,880
+was wir hier erzeugen wollen.
+
+117
+00:06:13,180 --> 00:06:17,294
+Solange du eine glatte Möglichkeit findest, die Lücken zwischen ihnen zu füllen,
+
+118
+00:06:17,294 --> 00:06:21,100
+wird das, was der Betrachter sieht, während sein Blick auf diesem Bild um
+
+119
+00:06:21,100 --> 00:06:24,134
+einen Kreis wandert, immer weiter und weiter hineinzoomen,
+
+120
+00:06:24,134 --> 00:06:27,786
+bis es sich elegant mit dem selbstähnlichen Teil des Bildes verbindet,
+
+121
+00:06:27,786 --> 00:06:29,020
+der 16-mal kleiner ist.
+
+122
+00:06:29,680 --> 00:06:33,699
+Wir könnten einfach versuchen, das alles naiv miteinander zu verbinden, etwa so hier,
+
+123
+00:06:33,699 --> 00:06:36,252
+aber ehrlich gesagt sieht das nicht wirklich gut aus,
+
+124
+00:06:36,252 --> 00:06:40,223
+und es ist ganz sicher nicht so glatt und elegant wie das, was Escher erreicht hat,
+
+125
+00:06:40,223 --> 00:06:42,020
+also liegt noch etwas Arbeit vor uns.
+
+126
+00:06:42,940 --> 00:06:45,920
+Dieses Buch, in dem ich übrigens herumgeblättert habe, The Magic of M.C.
+
+127
+00:06:46,040 --> 00:06:49,739
+Escher, habe ich bei einem wunderbaren Besuch im Escher-Museum in Den Haag bekommen,
+
+128
+00:06:49,739 --> 00:06:52,998
+das ich dir, falls du mal in den Niederlanden bist, sehr empfehlen würde,
+
+129
+00:06:52,998 --> 00:06:55,729
+und wenn wir zu dem Abschnitt über die Druckgalerie blättern,
+
+130
+00:06:55,729 --> 00:06:59,340
+gibt es uns einen kleinen Einblick darin, wie Eschers Prozess tatsächlich aussah.
+
+131
+00:06:59,800 --> 00:07:03,440
+Für ihn war Schritt zwei, dieses verzerrte Gitter zu erschaffen.
+
+132
+00:07:03,940 --> 00:07:06,522
+Für die Animationen hier werde ich eine leicht abgewandelte Version dieses
+
+133
+00:07:06,522 --> 00:07:09,138
+Gitters hervorholen, die mathematisch gesehen einfach ein bisschen schöner
+
+134
+00:07:09,138 --> 00:07:11,580
+zu erzeugen ist, aber denselben entscheidenden Punkt veranschaulicht.
+
+135
+00:07:11,980 --> 00:07:16,018
+In seinem Fall hat das selbstähnliche Drosta-Bild, an dem er gearbeitet hat,
+
+136
+00:07:16,018 --> 00:07:19,471
+einen Skalierungsfaktor von 256, also würde es für ihn bedeuten,
+
+137
+00:07:19,471 --> 00:07:23,615
+beim Weg von einer Ecke zur nächsten jeweils um den Faktor vier zu skalieren,
+
+138
+00:07:23,615 --> 00:07:25,740
+um das auf die vier Ecken zu verteilen.
+
+139
+00:07:26,540 --> 00:07:30,729
+Und wenn du dir sein Gitter genau anschaust, sagen wir eines der Quadrate unten rechts,
+
+140
+00:07:30,729 --> 00:07:34,052
+dann beachte, dass, wenn du den oberen und unteren Begrenzungslinien
+
+141
+00:07:34,052 --> 00:07:36,411
+dieses Quadrats nach links unten im Bild folgst,
+
+142
+00:07:36,411 --> 00:07:40,360
+dieselben Linien am Ende ein Quadrat einschließen, das jetzt viermal so groß ist.
+
+143
+00:07:40,720 --> 00:07:42,975
+Und ähnlich ist es, wenn du dir die Linien anschaust,
+
+144
+00:07:42,975 --> 00:07:45,953
+die links und rechts ein kleines Quadrat aus dieser Region begrenzen,
+
+145
+00:07:45,953 --> 00:07:49,356
+und ihnen nach oben folgst: Dann liegen sie am Ende schön um ein Quadrat herum,
+
+146
+00:07:49,356 --> 00:07:50,420
+das viermal so groß ist.
+
+147
+00:07:50,860 --> 00:07:54,037
+Das Gitter codiert also gewissermaßen die Skalierung von einer Ecke zur nächsten,
+
+148
+00:07:54,037 --> 00:07:54,900
+die wir haben wollen.
+
+149
+00:07:55,440 --> 00:07:58,205
+Für unser kleines Herzensprojekt, bei dem wir von jeder Ecke zur
+
+150
+00:07:58,205 --> 00:08:00,538
+nächsten nur um den Faktor zwei hochskalieren müssen,
+
+151
+00:08:00,538 --> 00:08:04,340
+verwenden wir eine abgeänderte Version davon, aber die allgemeine Idee bleibt dieselbe.
+
+152
+00:08:05,660 --> 00:08:09,118
+Du fragst dich vielleicht ganz natürlich, wo um alles in der Welt dieses Gitter herkommt,
+
+153
+00:08:09,118 --> 00:08:12,265
+aber diese Frage will ich eigentlich noch aufschieben und direkt zu Schritt drei
+
+154
+00:08:12,265 --> 00:08:15,296
+springen, nämlich dazu, wie du dieses Gitter zusammen mit dem selbstähnlichen
+
+155
+00:08:15,296 --> 00:08:18,560
+Droste-Bild tatsächlich benutzen kannst, um Eschers endgültigen Effekt zu erzeugen.
+
+156
+00:08:19,200 --> 00:08:22,395
+So funktioniert das: Zuerst legt man ein gewöhnliches quadratisches
+
+157
+00:08:22,395 --> 00:08:25,018
+Gitter auf das Originalbild, und sagen wir, du willst,
+
+158
+00:08:25,018 --> 00:08:28,880
+dass dieser Teil hier am Ende in dieser Ecke unserer endgültigen Version landet.
+
+159
+00:08:29,280 --> 00:08:33,435
+Dann würdest du jedes winzige Quadrat darin nehmen und seinen Inhalt in das
+
+160
+00:08:33,435 --> 00:08:37,700
+entsprechende winzige Quadrat der verzerrten Version des Gitters übertragen.
+
+161
+00:08:38,100 --> 00:08:42,076
+Von da an muss jedes benachbarte Quadrat in unserem ursprünglichen Gitter zum
+
+162
+00:08:42,076 --> 00:08:45,638
+entsprechenden benachbarten Quadrat in der verzerrten Version gehen,
+
+163
+00:08:45,638 --> 00:08:49,614
+also kannst du im Grunde einfach weiterverfolgen, wohin das Bild gehen muss,
+
+164
+00:08:49,614 --> 00:08:51,060
+indem du dem Gitter folgst.
+
+165
+00:08:52,000 --> 00:08:55,272
+Und die Tatsache, dass die Gitterlinien in der verzerrten Version sich
+
+166
+00:08:55,272 --> 00:08:59,244
+um den Faktor zwei auseinanderziehen, wenn du von links unten nach links oben gehst,
+
+167
+00:08:59,244 --> 00:09:02,469
+bedeutet, dass die Größe unserer Szene beim Hochgehen entlang dieser
+
+168
+00:09:02,469 --> 00:09:05,320
+Linie automatisch um genau diesen Faktor zwei skaliert wird.
+
+169
+00:09:06,660 --> 00:09:10,690
+Die Idee hinter diesem Prozess ist, dass es als Künstler relativ unkompliziert ist,
+
+170
+00:09:10,690 --> 00:09:14,670
+Stück für Stück zu arbeiten und den Inhalt eines winzigen Quadrats in ein anderes
+
+171
+00:09:14,670 --> 00:09:18,700
+winziges Quadrat zu übertragen, weil auf dieser kleinen Skala nichts verzerrt ist.
+
+172
+00:09:19,180 --> 00:09:22,003
+Das ist auf jeden Fall viel, viel einfacher, als zu versuchen,
+
+173
+00:09:22,003 --> 00:09:25,600
+sich das passend verzerrte Endbild aus dem Nichts auszudenken und zu zeichnen,
+
+174
+00:09:25,600 --> 00:09:27,740
+während man nur ein leeres Blatt vor sich hat.
+
+175
+00:09:28,960 --> 00:09:32,999
+Mit diesem verzerrten Gitter in der Hand läuft das Übertragen jedes kleinen
+
+176
+00:09:32,999 --> 00:09:36,770
+Quadrats also angenehm automatisch, und wenn wir diesen automatischen
+
+177
+00:09:36,770 --> 00:09:39,409
+Prozess einmal komplett rundherum laufen lassen,
+
+178
+00:09:39,409 --> 00:09:43,717
+schließt er sich schön wieder an die Ausgangsposition an, und damit das klappt,
+
+179
+00:09:43,717 --> 00:09:46,680
+muss unser Originalbild diese Selbstähnlichkeit haben,
+
+180
+00:09:46,680 --> 00:09:48,780
+wenn man um den Faktor 16 hineinzoomt.
+
+181
+00:09:49,380 --> 00:09:52,209
+Ich hoffe, du stimmst zu, dass das Endergebnis ziemlich schön ist;
+
+182
+00:09:52,209 --> 00:09:55,425
+es erzeugt denselben allgemeinen Effekt wieder, aber vor allem, finde ich,
+
+183
+00:09:55,425 --> 00:09:58,640
+hilft es Kaz dabei, Eschers eigene Komposition noch tiefer wertzuschätzen.
+
+184
+00:09:59,080 --> 00:10:01,353
+Er war bei der Wahl der Bildmotive auf all den verschiedenen
+
+185
+00:10:01,353 --> 00:10:03,360
+Maßstabsebenen tatsächlich sehr bewusst und gezielt.
+
+186
+00:10:03,880 --> 00:10:08,478
+Um ihn zu zitieren: Ich habe ganz absichtlich serielle Arten von Objekten gewählt,
+
+187
+00:10:08,478 --> 00:10:13,300
+wie zum Beispiel eine Reihe von Drucken an der Wand oder Häuserblöcke in einer Stadt.
+
+188
+00:10:13,720 --> 00:10:16,348
+Ohne die zyklischen Elemente wäre es umso schwieriger gewesen,
+
+189
+00:10:16,348 --> 00:10:18,680
+meine Aussage dem zufälligen Betrachter zu vermitteln.
+
+190
+00:10:20,060 --> 00:10:22,771
+Diese Idee, dass man ein gerades Referenzbild und dann ein
+
+191
+00:10:22,771 --> 00:10:25,108
+verzerrtes Gitter hat und beide zusammen benutzt,
+
+192
+00:10:25,108 --> 00:10:28,800
+um eine verzerrte Szene zu erzeugen, ist ein gängiger Prozess im Grafikdesign.
+
+193
+00:10:29,100 --> 00:10:32,454
+Das ist als Mesh Warp bekannt, und Escher hat es für diesen Fall nicht erfunden;
+
+194
+00:10:32,454 --> 00:10:35,640
+es war etwas, das er schon mehrfach zuvor für andere Werke verwendet hatte.
+
+195
+00:10:36,180 --> 00:10:39,519
+Für unsere Geschichte ist der Punkt, dass die gesamte Logik dafür,
+
+196
+00:10:39,519 --> 00:10:42,049
+einen Droste-Zoom in eine Schleife zu verwandeln,
+
+197
+00:10:42,049 --> 00:10:45,186
+in diesem Gitter abstrahiert und gewissermaßen gereinigt ist,
+
+198
+00:10:45,186 --> 00:10:48,020
+was ganz natürlich die Frage aufwirft: Wo kommt es her?
+
+199
+00:10:48,180 --> 00:10:49,000
+Wie macht man das?
+
+200
+00:10:49,800 --> 00:10:53,575
+Als ersten naiven Ansatz kann man sich vorstellen, dass man versucht,
+
+201
+00:10:53,575 --> 00:10:56,584
+alles von einer Ecke zur nächsten linear zu skalieren,
+
+202
+00:10:56,584 --> 00:11:00,960
+aber wenn du das direkt machen würdest, würdest du sofort einen Konflikt sehen.
+
+203
+00:11:01,440 --> 00:11:04,895
+Diese beiden Skalierungsprozesse üben unterschiedliche Kräfte auf die
+
+204
+00:11:04,895 --> 00:11:08,650
+einzelnen Quadrate aus; dieses Quadrat will zum Beispiel in diese Richtung
+
+205
+00:11:08,650 --> 00:11:11,353
+aufgefächert werden, weil man von rechts hineinzoomt,
+
+206
+00:11:11,353 --> 00:11:14,207
+aber es will auch in diese Richtung aufgefächert werden,
+
+207
+00:11:14,207 --> 00:11:16,360
+weil man beim Nach-oben-Gehen herauszoomt.
+
+208
+00:11:16,940 --> 00:11:19,479
+Escher fühlte sich offenbar dazu hingezogen, das zu lösen,
+
+209
+00:11:19,479 --> 00:11:22,280
+indem er alle Linien krümmte, um diese Spannung zu entschärfen.
+
+210
+00:11:23,160 --> 00:11:25,910
+Aber es gibt noch eine weitere entscheidende Einschränkung,
+
+211
+00:11:25,910 --> 00:11:29,451
+von der er sich offenbar leiten ließ, eine, die den Bildübertragungsprozess
+
+212
+00:11:29,451 --> 00:11:33,086
+vermutlich erleichtert hat, die das Endergebnis natürlicher aussehen ließ und
+
+213
+00:11:33,086 --> 00:11:36,209
+bei jedem Mathematiker, der tief in der komplexen Analysis steckt,
+
+214
+00:11:36,209 --> 00:11:37,700
+sofort die Ohren spitzen lässt.
+
+215
+00:11:38,020 --> 00:11:43,240
+In seinem endgültigen verzerrten Gitter sind die winzigen Quadrate nun ja, Quadrate.
+
+216
+00:11:43,680 --> 00:11:46,560
+Zur Klarstellung: Das gilt überhaupt nicht für die meisten Mesh Warps.
+
+217
+00:11:46,760 --> 00:11:49,584
+In den meisten Fällen schneiden sich die verzerrten Gitterlinien,
+
+218
+00:11:49,584 --> 00:11:53,016
+die man zeichnet, nicht unbedingt im rechten Winkel, und die kleinen Bereiche,
+
+219
+00:11:53,016 --> 00:11:56,100
+die sie einschließen, sind im Allgemeinen eher kleine Parallelogramme.
+
+220
+00:11:56,500 --> 00:11:59,187
+Das kann für einen Künstler trotzdem praktikabel sein,
+
+221
+00:11:59,187 --> 00:12:01,874
+man kann die Übertragung immer noch irgendwie machen,
+
+222
+00:12:01,874 --> 00:12:05,955
+aber vermutlich ist das Kopieren vom Original in die verzerrte Version mit dieser
+
+223
+00:12:05,955 --> 00:12:08,592
+Verzerrung umständlicher, also wäre es viel schöner,
+
+224
+00:12:08,592 --> 00:12:12,922
+wenn im verzerrten Gitter die kleinen Quadrate zumindest annähernd quadratisch bleiben
+
+225
+00:12:12,922 --> 00:12:13,320
+würden.
+
+226
+00:12:13,760 --> 00:12:16,079
+Und wenn du dir das Gitter anschaust, das Escher für seine Druckgrafik
+
+227
+00:12:16,079 --> 00:12:18,200
+Print Gallery benutzt hat, dann hat es genau diese Eigenschaft.
+
+228
+00:12:18,600 --> 00:12:22,026
+Alle Linien schneiden sich im rechten Winkel, und auf einer klein genug gewählten
+
+229
+00:12:22,026 --> 00:12:25,240
+Skala sind die Bereiche, die sie begrenzen, tatsächlich annähernd Quadrate.
+
+230
+00:12:25,800 --> 00:12:28,808
+Aus künstlerischer Sicht hat das den schönen Effekt, dass,
+
+231
+00:12:28,808 --> 00:12:32,957
+obwohl die ganze Szene auf globaler Ebene dramatisch verzerrt und verformt ist,
+
+232
+00:12:32,957 --> 00:12:36,380
+beim Hineinzoomen auf lokaler Ebene alles relativ unverzerrt ist.
+
+233
+00:12:36,760 --> 00:12:40,480
+Das ist es, was jeden lokalen Teil von Eschers Bild leicht erkennbar macht.
+
+234
+00:12:41,720 --> 00:12:44,920
+Und mathematisch wird die Geschichte genau hier wirklich interessant.
+
+235
+00:12:45,440 --> 00:12:49,059
+Diese Idee einer Funktion vom zweidimensionalen Raum in den zweidimensionalen Raum,
+
+236
+00:12:49,059 --> 00:12:51,501
+bei der winzige Quadrate annähernd quadratisch bleiben,
+
+237
+00:12:51,501 --> 00:12:55,120
+spielt nämlich eine besondere Rolle und hat in der Mathematik einen eigenen Namen.
+
+238
+00:12:55,380 --> 00:12:58,972
+Sie heißt konforme Abbildung, und ein Bereich, in dem sie ständig vorkommt,
+
+239
+00:12:58,972 --> 00:13:02,994
+ist die Untersuchung von Funktionen mit komplexen Zahlen als Eingaben und komplexen
+
+240
+00:13:02,994 --> 00:13:04,000
+Zahlen als Ausgaben.
+
+241
+00:13:04,960 --> 00:13:07,130
+An diesem Punkt treten wir einen Schritt zurück,
+
+242
+00:13:07,130 --> 00:13:10,701
+verlassen den Kunstunterricht und schlendern rüber in die Mathematikabteilung,
+
+243
+00:13:10,701 --> 00:13:14,001
+wo ich dir eine kleine Lektion zu einigen der zentralen Ideen aus diesem
+
+244
+00:13:14,001 --> 00:13:14,860
+Gebiet geben will.
+
+245
+00:13:16,540 --> 00:13:20,370
+Der grundlegende Plan ab hier ist, dass ich erst eine kleine Auffrischung machen will,
+
+246
+00:13:20,370 --> 00:13:23,755
+ein paar Grundlagen zu komplexen Zahlen und komplexen Funktionen durchgehe,
+
+247
+00:13:23,755 --> 00:13:27,363
+und dann will ich etwas mehr Zeit darauf verwenden, ein Gefühl dafür aufzubauen,
+
+248
+00:13:27,363 --> 00:13:30,080
+wie Logarithmen in diesem Kontext komplexer Zahlen aussehen.
+
+249
+00:13:30,480 --> 00:13:33,728
+Und wenn du das dann verstanden hast, gehen wir eine komplett andere Art durch,
+
+250
+00:13:33,728 --> 00:13:36,113
+wie du dir vorstellen kannst, diesen Effekt nachzubilden,
+
+251
+00:13:36,113 --> 00:13:37,840
+den Escher in seiner Print Gallery hatte.
+
+252
+00:13:38,980 --> 00:13:40,860
+Lass uns mit einer Wiederholung der Grundlagen aufwärmen.
+
+253
+00:13:41,260 --> 00:13:44,659
+Reelle Zahlen stellen wir uns normalerweise als Punkte auf einer eindimensionalen
+
+254
+00:13:44,659 --> 00:13:48,100
+Geraden vor, der reellen Zahlengeraden, und komplexe Zahlen sind zweidimensional.
+
+255
+00:13:48,640 --> 00:13:54,354
+Konkret denken wir an die imaginäre Konstante i, definiert als die Quadratwurzel aus,
+
+256
+00:13:54,354 --> 00:13:59,194
+und jeder andere Punkt in dieser Ebene steht für irgendeine Kombination
+
+257
+00:13:59,194 --> 00:14:03,160
+aus einer reellen Zahl und einem reellen Vielfachen von i.
+
+258
+00:14:03,700 --> 00:14:06,162
+Üblicherweise benutzt man die Variable z, wenn man sich auf eine
+
+259
+00:14:06,162 --> 00:14:08,970
+allgemeine komplexe Zahl bezieht, und das Spiel, das wir spielen wollen,
+
+260
+00:14:08,970 --> 00:14:11,240
+besteht darin, verschiedene Funktionen von z zu verstehen.
+
+261
+00:14:11,840 --> 00:14:15,840
+Ein sehr einfaches, aber wichtiges Beispiel ist, z mit einer Konstanten zu multiplizieren.
+
+262
+00:14:16,320 --> 00:14:19,870
+Die Funktion f von z gleich zwei mal z hat den Effekt,
+
+263
+00:14:19,870 --> 00:14:22,500
+alles um den Faktor zwei zu vergrößern.
+
+264
+00:14:23,040 --> 00:14:25,506
+Aber was ist mit der Multiplikation mit etwas Imaginärem,
+
+265
+00:14:25,506 --> 00:14:27,280
+wie i, der Quadratwurzel aus minus eins?
+
+266
+00:14:27,880 --> 00:14:30,981
+Nun, du weißt, dass eins mal i gleich i ergibt,
+
+267
+00:14:30,981 --> 00:14:34,280
+und per Definition ist i mal i gleich minus eins.
+
+268
+00:14:34,700 --> 00:14:38,136
+Wie du merkst, sind beide um 90 Grad gedreht, und allgemeiner hat die
+
+269
+00:14:38,136 --> 00:14:42,120
+Multiplikation eines beliebigen Werts z mit i den Effekt einer 90-Grad-Drehung.
+
+270
+00:14:42,940 --> 00:14:46,905
+Und noch allgemeiner gilt: Wenn du mit irgendeiner komplexen Konstanten multiplizierst,
+
+271
+00:14:46,905 --> 00:14:49,640
+ist der Effekt eine Kombination aus Skalierung und Drehung.
+
+272
+00:14:50,160 --> 00:14:53,420
+Und es gibt eine schöne Art, sich genau vorzustellen, wie stark skaliert und gedreht wird.
+
+273
+00:14:54,000 --> 00:14:58,383
+Null mal irgendetwas ist null, also muss der Ursprung fest an seinem Platz bleiben,
+
+274
+00:14:58,383 --> 00:15:02,080
+und dann ist eins mal irgendeine Konstante c genau diese Konstante c.
+
+275
+00:15:02,620 --> 00:15:06,259
+Das heißt, dieser Punkt bei eins muss hinübergezogen werden und genau dort landen,
+
+276
+00:15:06,259 --> 00:15:08,878
+wo auch immer die Konstante c liegt, von der wir sprechen,
+
+277
+00:15:08,878 --> 00:15:11,940
+und das legt das Ausmaß der Skalierung und Drehung vollständig fest.
+
+278
+00:15:12,400 --> 00:15:14,880
+Von da an bleibt der Rest des Gitters so starr, wie es nur kann.
+
+279
+00:15:15,440 --> 00:15:19,671
+Ein wichtiger Punkt für unsere Geschichte ist, dass Formen immer erhalten bleiben,
+
+280
+00:15:19,671 --> 00:15:22,200
+wenn du nur mit einer Konstanten multiplizierst.
+
+281
+00:15:22,660 --> 00:15:24,940
+Alles, was du zeichnen willst, zum Beispiel ein Quadrat,
+
+282
+00:15:24,940 --> 00:15:28,320
+kann skaliert oder gedreht werden, aber darüber hinaus gibt es keine Verzerrungen.
+
+283
+00:15:29,080 --> 00:15:31,440
+Bei komplizierteren Funktionen wird es dann interessanter.
+
+284
+00:15:32,120 --> 00:15:34,740
+Ein einfaches, aber nicht triviales Beispiel wäre,
+
+285
+00:15:34,740 --> 00:15:36,940
+jede Zahl z auf z zum Quadrat abzubilden.
+
+286
+00:15:37,580 --> 00:15:40,640
+Die Eingabe zwei muss also auf zwei zum Quadrat wandern, also auf vier.
+
+287
+00:15:41,100 --> 00:15:44,520
+Die Eingabe i muss auf i zum Quadrat wandern, also auf minus eins.
+
+288
+00:15:45,100 --> 00:15:48,040
+Minus eins selbst müsste auf plus eins abgebildet werden.
+
+289
+00:15:48,480 --> 00:15:52,251
+Und in voller Pracht sieht es so aus, wenn ich jeden Punkt zwischen den
+
+290
+00:15:52,251 --> 00:15:56,500
+Gitterlinien dieses Eingaberaums zu seinem entsprechenden Output wandern lasse.
+
+291
+00:15:57,160 --> 00:15:59,749
+Das ist ein ziemlich schöner Effekt, und anders als beim Multiplizieren
+
+292
+00:15:59,749 --> 00:16:02,520
+mit einer Konstanten bleibt die Form hier ganz und gar nicht mehr erhalten.
+
+293
+00:16:02,940 --> 00:16:04,680
+Die Gitterlinien werden gebogen und verzerrt.
+
+294
+00:16:05,280 --> 00:16:09,200
+Aber, und das ist ein wichtiger Punkt, achte darauf, was im kleinen Maßstab passiert.
+
+295
+00:16:09,520 --> 00:16:12,440
+Zum Beispiel, wenn wir uns nur dieses kleine Quadrat aus dem Eingaberaum anschauen.
+
+296
+00:16:12,940 --> 00:16:16,115
+Wenn du die Transformation noch einmal ablaufen siehst, kannst du erkennen,
+
+297
+00:16:16,115 --> 00:16:19,840
+dass die Form ungefähr erhalten bleibt, zumindest in einem ausreichend kleinen Maßstab.
+
+298
+00:16:20,160 --> 00:16:23,160
+Kleine Quadrate aus unserem ursprünglichen Gitter bleiben also auch
+
+299
+00:16:23,160 --> 00:16:25,980
+nach der Verarbeitung durch die Funktion ungefähr quadratisch.
+
+300
+00:16:26,500 --> 00:16:29,980
+Im Fachjargon sagt man, die Funktion z zum Quadrat ist konform.
+
+301
+00:16:30,940 --> 00:16:33,180
+Und die Wahl von z zum Quadrat ist hier wirklich nichts Besonderes.
+
+302
+00:16:33,540 --> 00:16:37,200
+So sieht es aus, wenn du jeden Punkt z auf z hoch drei abbildest.
+
+303
+00:16:37,580 --> 00:16:39,340
+Quadrate bleiben ungefähr quadratisch.
+
+304
+00:16:40,120 --> 00:16:42,550
+Okay, vielleicht sieht dieses Beispielquadrat, das ich hervorhebe,
+
+305
+00:16:42,550 --> 00:16:45,312
+im Output nicht ganz quadratisch aus, aber das liegt eigentlich nur daran,
+
+306
+00:16:45,312 --> 00:16:46,380
+dass es anfangs zu groß war.
+
+307
+00:16:46,700 --> 00:16:48,456
+Um das klarzustellen: Diese konforme Eigenschaft,
+
+308
+00:16:48,456 --> 00:16:50,320
+von der ich spreche, ist eine Grenzwerteigenschaft.
+
+309
+00:16:50,660 --> 00:16:53,843
+Ein bestimmtes Quadrat wird vielleicht nicht exakt zu einem Quadrat,
+
+310
+00:16:53,843 --> 00:16:56,886
+aber die Idee ist, dass der entstehende Output tatsächlich immer
+
+311
+00:16:56,886 --> 00:17:00,069
+besser durch ein Quadrat angenähert wird, je weiter du hineinzoomst
+
+312
+00:17:00,069 --> 00:17:03,440
+und immer kleinere quadratische Bereiche aus dem Eingaberaum auswählst.
+
+313
+00:17:04,000 --> 00:17:06,111
+Und auch an der Wahl von Polynomen wie z zum Quadrat
+
+314
+00:17:06,111 --> 00:17:08,140
+oder z hoch drei ist nichts besonders Spezielles.
+
+315
+00:17:08,420 --> 00:17:10,316
+Bei so gut wie jeder Funktion komplexer Zahlen,
+
+316
+00:17:10,316 --> 00:17:13,220
+die du dir ausdenken und hinschreiben könntest, gilt diese Eigenschaft.
+
+317
+00:17:13,599 --> 00:17:15,599
+Die Form bleibt in einem ausreichend kleinen Maßstab erhalten.
+
+318
+00:17:15,940 --> 00:17:16,880
+Es ist fast wie Magie.
+
+319
+00:17:17,680 --> 00:17:20,220
+Die Verwendung komplexer Zahlen ist hier sehr relevant.
+
+320
+00:17:20,380 --> 00:17:24,031
+Wenn du stattdessen Punkte im 2D-Raum einfach als ein Paar reeller Zahlen mit
+
+321
+00:17:24,031 --> 00:17:27,872
+irgendwelchen xy-Koordinaten auffassen würdest und irgendeine beliebige Funktion
+
+322
+00:17:27,872 --> 00:17:31,713
+von x und y hinschreibst, um ein neues Zahlenpaar zu bekommen, dann ist es viel,
+
+323
+00:17:31,713 --> 00:17:35,459
+viel typischer, dass die Outputs dieser winzigen Quadrate zusammengedrückt und
+
+324
+00:17:35,459 --> 00:17:38,920
+verzerrt werden, wenn Punkte in diesem Eingaberaum transformiert werden.
+
+325
+00:17:39,220 --> 00:17:42,552
+Selbst wenn du immer weiter hineinzoomst, sieht die entstehende Grenzform
+
+326
+00:17:42,552 --> 00:17:46,020
+typischerweise wie ein Parallelogramm aus, nicht unbedingt wie ein Quadrat.
+
+327
+00:17:46,660 --> 00:17:49,620
+Komplexe Funktionen sind in dieser Hinsicht also wirklich etwas Besonderes.
+
+328
+00:17:50,160 --> 00:17:52,905
+Und der grundlegende Grund dafür, dass winzige Quadrate quadratisch bleiben,
+
+329
+00:17:52,905 --> 00:17:53,880
+läuft auf Analysis hinaus.
+
+330
+00:17:54,580 --> 00:17:56,888
+Was du dir hier anschaust, ist genau das, was es bedeutet,
+
+331
+00:17:56,888 --> 00:17:58,520
+dass diese Funktionen Ableitungen haben.
+
+332
+00:17:59,380 --> 00:18:02,892
+Das klingt vielleicht ein bisschen seltsam, aber die Analogie, an die du denken kannst,
+
+333
+00:18:02,892 --> 00:18:05,193
+ist folgende: Bei den meisten Funktionen reeller Zahlen,
+
+334
+00:18:05,193 --> 00:18:08,462
+wenn du sie auf die übliche Weise visualisierst, also einfach mit einem Graphen,
+
+335
+00:18:08,462 --> 00:18:11,611
+bei dem die Eingaben auf der x-Achse und die Ausgaben auf der y-Achse liegen,
+
+336
+00:18:11,611 --> 00:18:14,961
+dann sieht er, wenn du immer weiter in irgendeinen bestimmten Punkt dieses Graphen
+
+337
+00:18:14,961 --> 00:18:17,060
+hineinzoomst, immer mehr wie eine gerade Linie aus.
+
+338
+00:18:17,500 --> 00:18:20,366
+Das heißt, die Änderungsrate, also wie viel Delta f du für
+
+339
+00:18:20,366 --> 00:18:23,380
+ein gegebenes Delta x bekommst, nähert sich einer Konstante.
+
+340
+00:18:24,020 --> 00:18:27,027
+Das ist buchstäblich das, was es bedeutet, dass eine Funktion eine Ableitung hat,
+
+341
+00:18:27,027 --> 00:18:29,180
+aber es ist nicht die einzige Art, sich das vorzustellen.
+
+342
+00:18:29,440 --> 00:18:31,640
+Hier ist eine andere Art, dasselbe Konzept zu sehen.
+
+343
+00:18:32,220 --> 00:18:34,304
+Anstatt uns den Graphen einer Funktion anzuschauen,
+
+344
+00:18:34,304 --> 00:18:37,000
+denken wir über dieselbe Funktion lieber als Transformation nach.
+
+345
+00:18:37,460 --> 00:18:40,846
+Das heißt, du lässt jeden dieser Punkte auf der reellen Zahlengeraden zu
+
+346
+00:18:40,846 --> 00:18:44,420
+seinem entsprechenden Ausgabewert auf dieser anderen Zahlengeraden wandern.
+
+347
+00:18:45,140 --> 00:18:48,197
+Was dir auffallen wird, ist, dass gleichmäßig verteilte Punkte aus
+
+348
+00:18:48,197 --> 00:18:51,392
+dem Eingaberaum im Ausgaberaum verzerrt werden können, was bedeutet,
+
+349
+00:18:51,392 --> 00:18:54,680
+dass die Änderungsrate der Funktion im Allgemeinen nicht konstant ist.
+
+350
+00:18:55,020 --> 00:18:56,871
+Dieser Abstand zwischen unseren Punkten kann sich
+
+351
+00:18:56,871 --> 00:18:58,760
+von einem Teil des Bildes zum nächsten verändern.
+
+352
+00:18:59,260 --> 00:19:02,460
+Aber wir wissen, dass sich die Änderungsrate, wenn du immer weiter in
+
+353
+00:19:02,460 --> 00:19:05,660
+einen bestimmten Ausgabewert hineinzoomst, einer Konstante annähert.
+
+354
+00:19:06,100 --> 00:19:08,400
+Die Punkte sehen immer gleichmäßiger verteilt aus.
+
+355
+00:19:09,260 --> 00:19:12,753
+Genauer gesagt: Wenn du einen winzigen Fleck von Punkten um eine bestimmte
+
+356
+00:19:12,753 --> 00:19:16,058
+Eingabe herum nimmst und ihn in den Ausgaberaum um den entsprechenden
+
+357
+00:19:16,058 --> 00:19:19,834
+Ausgabewert kopierst, kannst du alle Punkte näherungsweise zur Deckung bringen,
+
+358
+00:19:19,834 --> 00:19:23,280
+indem du einfach alles mit einem bestimmten konstanten Faktor skalierst.
+
+359
+00:19:23,980 --> 00:19:28,017
+Das ist dieselbe analytische Tatsache, die dir auch die Steigung eines Graphen sagt,
+
+360
+00:19:28,017 --> 00:19:30,180
+nur in einem anderen visuellen Zusammenhang.
+
+361
+00:19:30,620 --> 00:19:33,816
+Aber dieser Zusammenhang lässt sich viel leichter darauf übertragen,
+
+362
+00:19:33,816 --> 00:19:38,000
+über komplexwertige Funktionen als Transformationen in der komplexen Ebene nachzudenken.
+
+363
+00:19:38,540 --> 00:19:41,790
+Dort denken wir uns die Umgebung um eine gegebene Eingabe als ein
+
+364
+00:19:41,790 --> 00:19:44,290
+winzig kleines Gitter aus Punkten, so wie vorher,
+
+365
+00:19:44,290 --> 00:19:47,790
+und wir lassen jeden Punkt auf diesem Gitter zu seinem entsprechenden
+
+366
+00:19:47,790 --> 00:19:48,840
+Ausgabewert wandern.
+
+367
+00:19:49,800 --> 00:19:52,275
+In diesem Fall bedeutet es für die Änderungsrate,
+
+368
+00:19:52,275 --> 00:19:55,760
+sich einer Konstante anzunähern, im Grunde genau dieselbe Gleichung.
+
+369
+00:19:56,360 --> 00:19:58,760
+Das Bild, das du im Kopf haben solltest, ist, dass du,
+
+370
+00:19:58,760 --> 00:20:02,138
+wenn du diesen winzigen Fleck aus Quadraten um die Eingabe herum nimmst und
+
+371
+00:20:02,138 --> 00:20:05,339
+ihn zum entsprechenden Ausgabewert kopierst, ihn näherungsweise mit den
+
+372
+00:20:05,339 --> 00:20:07,828
+Gitterlinien im Ausgaberaum zur Deckung bringen kannst,
+
+373
+00:20:07,828 --> 00:20:11,562
+indem du mit einer bestimmten Konstante multiplizierst, was, wie du dich erinnerst,
+
+374
+00:20:11,562 --> 00:20:15,162
+im Rahmen komplexer Zahlen bedeutet, ihn je nach Wert dieser komplexen Konstante
+
+375
+00:20:15,162 --> 00:20:17,340
+auf irgendeine Weise zu drehen und zu skalieren.
+
+376
+00:20:17,940 --> 00:20:20,463
+Da Drehung und Skalierung die Form erhalten, bedeutet das,
+
+377
+00:20:20,463 --> 00:20:23,247
+dass all die winzigen Quadrate aus dem Eingaberaum unter dieser
+
+378
+00:20:23,247 --> 00:20:25,900
+Transformation zumindest näherungsweise quadratisch bleiben.
+
+379
+00:20:27,300 --> 00:20:29,759
+Also, wenn wir einen Schritt zurücktreten, hier ist der entscheidende Punkt,
+
+380
+00:20:29,759 --> 00:20:31,280
+der Grund, überhaupt über all das zu sprechen.
+
+381
+00:20:31,560 --> 00:20:35,525
+Auch wenn konforme Abbildungen wie die, die Escher für seine Druckgalerie benutzt hat,
+
+382
+00:20:35,525 --> 00:20:38,522
+unglaublich stark eingeschränkt und unter den allgemeinen Arten,
+
+383
+00:20:38,522 --> 00:20:42,487
+wie man den zweidimensionalen Raum stetig verformen könnte, höchst ungewöhnlich sind,
+
+384
+00:20:42,487 --> 00:20:45,023
+kannst du dennoch, wie von Zauberhand, allein dadurch,
+
+385
+00:20:45,023 --> 00:20:47,374
+dass du die Sprache der komplexen Zahlen sprichst,
+
+386
+00:20:47,374 --> 00:20:50,325
+irgendwie ganze Familien dieser konformen Abbildungen erzeugen,
+
+387
+00:20:50,325 --> 00:20:52,400
+ohne es überhaupt wirklich darauf anzulegen.
+
+388
+00:20:52,860 --> 00:20:54,852
+Alles, was du tust, ist, Standardfunktionen komplexer
+
+389
+00:20:54,852 --> 00:20:56,280
+Zahlen zu mischen und zu kombinieren.
+
+390
+00:20:56,640 --> 00:20:59,269
+Die eine Einschränkung ist, dass diese Funktionen Ableitungen haben müssen,
+
+391
+00:20:59,269 --> 00:21:01,092
+aber das wird auf die meisten Funktionen zutreffen,
+
+392
+00:21:01,092 --> 00:21:02,600
+die dir einfallen und die du aufschreibst.
+
+393
+00:21:03,620 --> 00:21:05,497
+Für unsere Geschichte, also dafür, zu entschlüsseln,
+
+394
+00:21:05,497 --> 00:21:07,229
+was in der Druckgalerie passiert, bedeutet das,
+
+395
+00:21:07,229 --> 00:21:10,260
+dass wir eine völlig neue Möglichkeit haben, die Schlüsselfrage neu zu formulieren.
+
+396
+00:21:10,760 --> 00:21:14,023
+Kannst du eine bewusst maßgeschneiderte komplexe Funktion konstruieren,
+
+397
+00:21:14,023 --> 00:21:17,331
+sodass der Vorgang des Hineinzoomens um die Eingaben herum so aussieht,
+
+398
+00:21:17,331 --> 00:21:20,180
+als würdest du bei den Ausgaben in einer Schleife umhergehen?
+
+399
+00:21:21,900 --> 00:21:25,472
+An diesem Punkt, mit nur dem allernötigsten Crashkurs in komplexer Analysis im Gepäck,
+
+400
+00:21:25,472 --> 00:21:27,425
+ist es schwer zu wissen, wo man anfangen soll,
+
+401
+00:21:27,425 --> 00:21:30,083
+ohne sich zuerst eine größere Palette an Funktionen aufzubauen,
+
+402
+00:21:30,083 --> 00:21:33,032
+mit denen man arbeiten kann, und etwas Vertrautheit damit zu gewinnen,
+
+403
+00:21:33,032 --> 00:21:35,400
+wie sie sich bei komplexen Zahlen tatsächlich verhalten.
+
+404
+00:21:35,740 --> 00:21:38,611
+In diesem Fall gibt es eigentlich nur zwei Funktionen,
+
+405
+00:21:38,611 --> 00:21:42,120
+die du verstehen musst: e hoch z und den natürlichen Logarithmus.
+
+406
+00:21:42,880 --> 00:21:45,599
+Ich möchte mich hinsetzen und mir Zeit nehmen, beide wirklich gut zu verstehen,
+
+407
+00:21:45,599 --> 00:21:48,180
+und ich glaube, du wirst mir zustimmen, dass das gut investierte Zeit ist.
+
+408
+00:21:48,580 --> 00:21:52,845
+Jeder verdient es meiner Meinung nach, wenigstens einmal im Leben die Freude zu erleben,
+
+409
+00:21:52,845 --> 00:21:54,880
+einen komplexen Logarithmus zu verstehen.
+
+410
+00:21:55,280 --> 00:21:57,427
+Zuerst aber ist eine notwendige Voraussetzung,
+
+411
+00:21:57,427 --> 00:21:59,620
+die komplexe Exponentialfunktion zu verstehen.
+
+412
+00:22:00,580 --> 00:22:03,065
+Stammzuschauer werden damit vertraut sein, wie es aussieht,
+
+413
+00:22:03,065 --> 00:22:05,507
+e mit einer komplexen Zahl als Exponenten zu potenzieren,
+
+414
+00:22:05,507 --> 00:22:07,360
+aber eine Wiederholung schadet einfach nie.
+
+415
+00:22:07,840 --> 00:22:10,856
+Wir können damit anfangen, die Transformation schrittweise aufzubauen,
+
+416
+00:22:10,856 --> 00:22:13,485
+indem wir uns nur auf die vertrauteren Beispiele mit reellen
+
+417
+00:22:13,485 --> 00:22:16,200
+Eingaben und den dazugehörigen reellen Ausgaben konzentrieren.
+
+418
+00:22:16,600 --> 00:22:19,237
+Zum Beispiel ist e hoch 0 gleich 1, also wird dieser
+
+419
+00:22:19,237 --> 00:22:21,620
+Punkt bei 0 auf diesen Punkt bei 1 abgebildet.
+
+420
+00:22:22,200 --> 00:22:26,978
+Und jedes Mal, wenn du diese Eingabe um 1 erhöhst, wächst die Ausgabe um den Faktor e,
+
+421
+00:22:26,978 --> 00:22:30,700
+das heißt, sie entfernt sich tatsächlich ziemlich schnell von uns.
+
+422
+00:22:31,320 --> 00:22:34,232
+Und umgekehrt, wenn du diese Eingabe verringerst und sie in
+
+423
+00:22:34,232 --> 00:22:37,192
+den negativen Bereich gehen lässt, entspricht jeder Schritt
+
+424
+00:22:37,192 --> 00:22:40,400
+nach links einem Schrumpfen der Ausgabe, wieder um den Faktor e.
+
+425
+00:22:40,740 --> 00:22:42,531
+Insbesondere wirst du in diesem Fall bemerken,
+
+426
+00:22:42,531 --> 00:22:44,360
+dass die Ausgabe immer eine positive Zahl ist.
+
+427
+00:22:44,860 --> 00:22:47,209
+Das wird natürlich viel interessanter, wenn wir sowohl die
+
+428
+00:22:47,209 --> 00:22:49,640
+Eingaben als auch die Ausgaben komplexe Zahlen sein lassen.
+
+429
+00:22:50,140 --> 00:22:52,933
+Und hier läuft alles, was du wissen musst, darauf hinaus,
+
+430
+00:22:52,933 --> 00:22:56,020
+was passiert, wenn du den Imaginärteil dieser Eingabe erhöhst.
+
+431
+00:22:56,380 --> 00:23:00,700
+Und was dann passiert, ist, dass die entsprechende Ausgabe auf einem Kreis entlangläuft.
+
+432
+00:23:02,120 --> 00:23:04,587
+Falls du dich fragst, warum imaginäre Eingaben in einer
+
+433
+00:23:04,587 --> 00:23:07,234
+Exponentialfunktion dich so auf einem Kreis entlangführen,
+
+434
+00:23:07,234 --> 00:23:10,240
+haben wir das auf diesem Kanal schon viele, viele Male besprochen.
+
+435
+00:23:10,520 --> 00:23:12,680
+Schau dir einige der Links auf dem Bildschirm und in der Beschreibung an.
+
+436
+00:23:13,160 --> 00:23:16,523
+Ein wichtiger Punkt, den ich hier noch einmal betonen will, ist,
+
+437
+00:23:16,523 --> 00:23:20,988
+dass die Funktion e hoch z, im Gegensatz zu Exponentialfunktionen mit anderen Basen,
+
+438
+00:23:20,988 --> 00:23:25,559
+sehr schön ist, weil die Ausgabe genau mit 1 Radiant pro Sekunde um ihren Kreis läuft,
+
+439
+00:23:25,559 --> 00:23:29,920
+wenn sich deine Eingabe mit einer Rate von 1 Einheit pro Sekunde nach oben bewegt.
+
+440
+00:23:30,400 --> 00:23:33,555
+Das heißt insbesondere, dass eine Erhöhung des Imaginärteils um
+
+441
+00:23:33,555 --> 00:23:36,860
+genau 2 Pi in der Ausgabe eine vollständige Umdrehung verursacht.
+
+442
+00:23:37,640 --> 00:23:40,020
+Anders ausgedrückt: Diese vertikalen Linienstücke,
+
+443
+00:23:40,020 --> 00:23:43,210
+die ich gezeichnet habe und die jeweils genau die Höhe 2 Pi haben,
+
+444
+00:23:43,210 --> 00:23:47,400
+werden sauber auf einen vollständigen Kreis abgebildet, wenn du die Funktion anwendest.
+
+445
+00:23:48,560 --> 00:23:51,784
+Du wirst bemerken, dass ich diese speziellen vertikalen Linienstücke so gezeichnet habe,
+
+446
+00:23:51,784 --> 00:23:54,129
+dass sie in Realrichtung gleichmäßig voneinander entfernt sind,
+
+447
+00:23:54,129 --> 00:23:56,620
+wobei sich der Realteil von einem zum nächsten jeweils um 1 erhöht.
+
+448
+00:23:57,000 --> 00:24:00,181
+Die entsprechenden Kreise auf der rechten Seite unterscheiden sich jeweils
+
+449
+00:24:00,181 --> 00:24:03,320
+um einen konstanten Skalierungsfaktor, und zwar den Skalierungsfaktor e.
+
+450
+00:24:04,220 --> 00:24:06,910
+Vorhin habe ich für die einfachere Funktion z zum Quadrat gezeigt,
+
+451
+00:24:06,910 --> 00:24:10,009
+wie sie als Transformation aussieht, also wie alle Eingaben zu den Ausgaben
+
+452
+00:24:10,009 --> 00:24:10,620
+bewegt werden.
+
+453
+00:24:11,020 --> 00:24:14,927
+Und falls du neugierig bist, wie dieselbe Idee in diesem Fall für e hoch z aussieht,
+
+454
+00:24:14,927 --> 00:24:17,579
+ist es am einfachsten, einen Teil des Gitters zu nehmen,
+
+455
+00:24:17,579 --> 00:24:20,509
+wie diesen hier aus dem Eingaberaum, und so sieht es dann aus,
+
+456
+00:24:20,509 --> 00:24:23,440
+wenn jedes Quadrat zur entsprechenden Ausgabe verschoben wird.
+
+457
+00:24:24,080 --> 00:24:27,276
+Wenn wir diese Funktion tatsächlich für unsere Ziele mit der Druckgalerie verwenden,
+
+458
+00:24:27,276 --> 00:24:29,598
+wird es sehr hilfreich sein, dein Denken daran zu verankern,
+
+459
+00:24:29,598 --> 00:24:32,680
+an diese vertikalen Linien und die Kreise zu denken, in die sie sich verwandeln.
+
+460
+00:24:33,500 --> 00:24:36,434
+Tatsächlich gibt es eine sehr spielerische Art, wie ich mir gern vorstelle,
+
+461
+00:24:36,434 --> 00:24:39,094
+wie sich diese vertikalen Linien in konzentrische Kreise verwandeln
+
+462
+00:24:39,094 --> 00:24:41,480
+und wie sie den gesamten Eingaberaum mit sich tragen können.
+
+463
+00:24:41,780 --> 00:24:45,748
+Ich stelle mir gern vor, dass man die gesamte z-Ebene gewissermaßen zu
+
+464
+00:24:45,748 --> 00:24:50,000
+einem Rohr aufrollt, sodass all diese vertikalen Linien zu Kreisen werden.
+
+465
+00:24:50,480 --> 00:24:53,180
+Genauer gesagt hätte jeder Kreis einen Umfang von 2 Pi.
+
+466
+00:24:54,240 --> 00:24:58,764
+Als Nächstes stell dir vor, dieses Rohr über dem Ursprung des Ausgaberaums auszurichten
+
+467
+00:24:58,764 --> 00:25:02,092
+und es dann irgendwie auf diesen Ausgaberaum zusammenzudrücken,
+
+468
+00:25:02,092 --> 00:25:06,460
+sodass alle Kreise aus diesem Rohr zu diesen konzentrischen Ringen mit exponentiell
+
+469
+00:25:06,460 --> 00:25:07,760
+wachsender Größe werden.
+
+470
+00:25:08,700 --> 00:25:11,889
+So stelle ich es mir einfach gern vor, aber wie auch immer du darüber nachdenken willst,
+
+471
+00:25:11,889 --> 00:25:14,100
+ich möchte, dass sich die Vorstellung von vertikalen Linien,
+
+472
+00:25:14,100 --> 00:25:15,840
+die zu Kreisen werden, in dein Gehirn einprägt.
+
+473
+00:25:16,340 --> 00:25:19,448
+Der andere sehr wichtige Punkt, den man hier betonen muss, ist,
+
+474
+00:25:19,448 --> 00:25:23,000
+dass mehrere verschiedene Eingaben auf derselben Ausgabe landen können.
+
+475
+00:25:23,820 --> 00:25:29,160
+Zum Beispiel ist e hoch null gleich eins, aber e hoch 2 pi i ist auch eins.
+
+476
+00:25:29,540 --> 00:25:34,280
+Genauso e hoch minus 2 pi i und e hoch 4 pi i und so weiter.
+
+477
+00:25:34,540 --> 00:25:37,736
+Tatsächlich wird die unendliche Folge entlang jeder gegebenen
+
+478
+00:25:37,736 --> 00:25:41,245
+vertikalen Linie mit einem Abstand von 2 pi alle zusammengefaltet,
+
+479
+00:25:41,245 --> 00:25:44,860
+wenn diese vertikale Linie sozusagen zu einem Kreis aufgerollt wird.
+
+480
+00:25:45,260 --> 00:25:48,027
+Wir sagen, dass die Exponentialabbildung viele-zu-eins ist,
+
+481
+00:25:48,027 --> 00:25:51,732
+auch wenn vielleicht noch nicht klar ist, wie diese Wiederholung in vertikaler
+
+482
+00:25:51,732 --> 00:25:55,624
+Richtung der Schlüssel für unsere endgültige Nachbildung des Print-Gallery-Effekts
+
+483
+00:25:55,624 --> 00:25:56,140
+sein wird.
+
+484
+00:25:56,900 --> 00:25:59,506
+Okay, Exponentialfunktionen geben uns also die erste Zutat,
+
+485
+00:25:59,506 --> 00:26:02,994
+nämlich dass Linien zu Kreisen werden, und die zweite Zutat, die wir brauchen,
+
+486
+00:26:02,994 --> 00:26:05,335
+ist die Umkehrung einer solchen Exponentialfunktion,
+
+487
+00:26:05,335 --> 00:26:09,000
+bekannt als der natürliche Logarithmus, bei dem die Grundidee im Wesentlichen ist,
+
+488
+00:26:09,000 --> 00:26:11,120
+dass er diese Kreise wieder zu Linien entwirrt.
+
+489
+00:26:11,500 --> 00:26:15,429
+Jetzt wird das besonders spaßig zu visualisieren und besonders wichtig für unsere
+
+490
+00:26:15,429 --> 00:26:19,650
+Geschichte, wenn wir uns vorstellen, diese komplexe Ebene rechts mit einem Droste-Bild
+
+491
+00:26:19,650 --> 00:26:23,385
+zu bemalen, sagen wir mit dem Beispiel, mit dem wir vorhin gearbeitet haben,
+
+492
+00:26:23,385 --> 00:26:26,102
+mit dem Pi-Wesen, das ein Bild von einem Haus anschaut,
+
+493
+00:26:26,102 --> 00:26:27,800
+in dem genau dieses Pi-Wesen lebt.
+
+494
+00:26:28,300 --> 00:26:31,818
+Mit anderen Worten: Es ist endlich Zeit, dass du und ich die Frage beantworten,
+
+495
+00:26:31,818 --> 00:26:34,980
+was es bedeutet, den natürlichen Logarithmus von einem Bild zu nehmen.
+
+496
+00:26:36,400 --> 00:26:37,980
+Okay, denk mal kurz darüber nach.
+
+497
+00:26:38,460 --> 00:26:42,617
+Du weißt ja schon, dass ein vertikales Liniensegment wie dieses hier links mit
+
+498
+00:26:42,617 --> 00:26:47,040
+einer Höhe von 2 pi zu einem Kreis wird, wenn du die Abbildung e hoch z anwendest.
+
+499
+00:26:47,540 --> 00:26:50,908
+Also wird der natürliche Logarithmus einen Kreis aus Punkten auf
+
+500
+00:26:50,908 --> 00:26:54,540
+diesem Bild nehmen und ihn dann zu einer dieser Linien geradeziehen.
+
+501
+00:26:55,440 --> 00:26:59,205
+Genauso würde ein Kreis, der genau um den Faktor e kleiner ist,
+
+502
+00:26:59,205 --> 00:27:02,850
+auch zu einer Linie mit derselben Höhe geradegezogen werden,
+
+503
+00:27:02,850 --> 00:27:05,240
+die um eine Einheit weiter links liegt.
+
+504
+00:27:05,820 --> 00:27:10,259
+Und ebenso wird jeder Kreis zwischen diesen beiden zu einer dieser vertikalen
+
+505
+00:27:10,259 --> 00:27:14,699
+Linien zwischen den letzten beiden entrollt, und ganz allgemein werden immer
+
+506
+00:27:14,699 --> 00:27:19,657
+kleinere und kleinere Ringe aus dem Bild in diese vertikalen Liniensegmente entpackt,
+
+507
+00:27:19,657 --> 00:27:23,520
+jedes mit einer Höhe von 2 pi und im Bild immer weiter nach links.
+
+508
+00:27:24,080 --> 00:27:27,106
+Das Ergebnis ist ein bisschen abgefahren, aber ziemlich cool, wenn du darüber nachdenkst,
+
+509
+00:27:27,106 --> 00:27:29,860
+und es gibt eine Reihe wichtiger Dinge, auf die ich dich aufmerksam machen will.
+
+510
+00:27:30,060 --> 00:27:32,637
+Dir ist wahrscheinlich aufgefallen, dass es sich wiederholt,
+
+511
+00:27:32,637 --> 00:27:35,043
+wenn du dich nach links bewegst, und ich lade dich ein,
+
+512
+00:27:35,043 --> 00:27:37,921
+im Hinterkopf kurz darüber nachzudenken, warum das so sein könnte,
+
+513
+00:27:37,921 --> 00:27:41,100
+aber vor dieser Wiederholung will ich über eine andere Richtung sprechen,
+
+514
+00:27:41,100 --> 00:27:42,260
+in der es sich wiederholt.
+
+515
+00:27:42,800 --> 00:27:46,958
+So wie ich es bisher gezeichnet habe, reicht der Imaginärteil der Werte links
+
+516
+00:27:46,958 --> 00:27:50,900
+von 0 bis 2 pi, aber das ist eigentlich eine ziemlich willkürliche Wahl.
+
+517
+00:27:51,400 --> 00:27:56,263
+Denk dran: Wenn du den Wert z links noch einmal um weitere 2 pi nach oben wandern lässt,
+
+518
+00:27:56,263 --> 00:28:01,015
+dann würde der zugehörige Wert e hoch z rechts einfach noch einmal um denselben Kreis
+
+519
+00:28:01,015 --> 00:28:05,435
+herumlaufen, also hoffe ich, du stimmst zu, dass es zumindest verlockend wirkt,
+
+520
+00:28:05,435 --> 00:28:10,022
+unser Bild in dieser vertikalen Richtung entlang jeder dieser vertikalen Linien zu
+
+521
+00:28:10,022 --> 00:28:10,740
+wiederholen.
+
+522
+00:28:12,800 --> 00:28:17,217
+Und andersherum gilt das auch: Wenn der Imaginärteil links nach unten hin kleiner wird,
+
+523
+00:28:17,217 --> 00:28:21,381
+dann läuft der entsprechende Wert rechts einfach weiter um denselben Kreis herum,
+
+524
+00:28:21,381 --> 00:28:25,900
+also sollte sich das Muster, das du siehst, vielleicht auch auf diese Weise wiederholen.
+
+525
+00:28:26,560 --> 00:28:31,462
+Um es deutlicher zu sagen: Die Regel, die ich benutze, um dieses Bild links zu zeichnen,
+
+526
+00:28:31,462 --> 00:28:35,752
+ist, dass du für jeden Punkt z in dieser Ebene links den entsprechenden Wert
+
+527
+00:28:35,752 --> 00:28:39,540
+e hoch z rechts anschaust und ihm dann eine passende Farbe zuweist.
+
+528
+00:28:40,060 --> 00:28:45,560
+Zum Beispiel entsprechen dieses verzerrte Pi-Wesen und dieses und dieses in Wirklichkeit
+
+529
+00:28:45,560 --> 00:28:50,560
+alle demselben Teil des Bildes rechts, nämlich dem großen Pi-Wesen unten links.
+
+530
+00:28:51,040 --> 00:28:53,557
+Eine andere Art, darüber nachzudenken, ist, dass wir,
+
+531
+00:28:53,557 --> 00:28:56,738
+weil die Funktion e hoch z viele-zu-eins ist, das Gefühl bekommen,
+
+532
+00:28:56,738 --> 00:28:59,302
+dass der natürliche Logarithmus, also ihre Umkehrung,
+
+533
+00:28:59,302 --> 00:29:02,151
+eigentlich eine mehrwertige Funktion sein will, also etwas,
+
+534
+00:29:02,151 --> 00:29:05,380
+bei dem ein Input auf mehrere verschiedene Outputs abgebildet wird.
+
+535
+00:29:06,320 --> 00:29:10,082
+In der Praxis will man aber oft nicht, dass eine Funktion mehrere Outputs hat,
+
+536
+00:29:10,082 --> 00:29:14,278
+manchmal widerspricht das in deinem Kontext sogar schon der Definition einer Funktion,
+
+537
+00:29:14,278 --> 00:29:17,510
+deshalb wählen Leute oft einfach einen Streifen dieser Ebene links
+
+538
+00:29:17,510 --> 00:29:19,680
+als Outputs des natürlichen Logarithmus aus.
+
+539
+00:29:20,060 --> 00:29:22,017
+In der komplexen Analysis nennt man das, einen
+
+540
+00:29:22,017 --> 00:29:24,060
+Verzweigungsschnitt für die Funktion zu wählen.
+
+541
+00:29:24,560 --> 00:29:28,158
+Für unsere Zwecke aber, wo wir Eschers Werk nachbilden und verstehen wollen,
+
+542
+00:29:28,158 --> 00:29:32,183
+ist es eigentlich schön, sich den Logarithmus als mehrwertige Funktion vorzustellen,
+
+543
+00:29:32,183 --> 00:29:36,397
+bei der jeder Punkt rechts einer sich wiederholenden Folge von Punkten links entspricht,
+
+544
+00:29:36,397 --> 00:29:40,184
+die vertikal um jeweils zwei pi versetzt sind und in beide Richtungen unendlich
+
+545
+00:29:40,184 --> 00:29:40,800
+weitergehen.
+
+546
+00:29:41,580 --> 00:29:45,220
+In unserem speziellen Fall siehst du dieses sich wiederholende Muster auch,
+
+547
+00:29:45,220 --> 00:29:48,520
+wenn du dich nach links bewegst, aber das ist etwas völlig anderes.
+
+548
+00:29:48,820 --> 00:29:50,520
+Bei den meisten Bildern würdest du das nicht sehen.
+
+549
+00:29:51,020 --> 00:29:54,872
+Es entsteht ganz speziell deshalb, weil wir mit einem selbstähnlichen Droste-Bild
+
+550
+00:29:54,872 --> 00:29:57,250
+arbeiten, also mit einem, das identisch aussieht,
+
+551
+00:29:57,250 --> 00:29:59,580
+wenn du um einen bestimmten Faktor hineinzoomst.
+
+552
+00:29:59,760 --> 00:30:04,320
+Das folgt direkt aus einer Grundeigenschaft von Logarithmen und Exponentialfunktionen.
+
+553
+00:30:04,880 --> 00:30:08,359
+Exponentialfunktionen machen aus Addition Multiplikation,
+
+554
+00:30:08,359 --> 00:30:11,960
+und Logarithmen machen aus Multiplikation wieder Addition.
+
+555
+00:30:12,860 --> 00:30:16,430
+Stell dir zum Beispiel vor, du nimmst irgendeinen kleinen Wert w auf dieser
+
+556
+00:30:16,430 --> 00:30:19,524
+Ebene rechts und betrachtest außerdem das 16-Fache dieses Werts,
+
+557
+00:30:19,524 --> 00:30:23,380
+also einen Wert, der um den Faktor 16 weiter vom Ursprung entfernt skaliert ist.
+
+558
+00:30:24,280 --> 00:30:27,844
+Wenn wir uns jetzt links den entsprechenden Wert, also den Logarithmus von w,
+
+559
+00:30:27,844 --> 00:30:31,269
+anschauen, dann sieht dieser Vorgang des Multiplizierens mit 16 jetzt wie
+
+560
+00:30:31,269 --> 00:30:34,602
+eine Addition aus, nämlich konkret wie eine Verschiebung nach rechts um
+
+561
+00:30:34,602 --> 00:30:38,120
+den natürlichen Logarithmus von 16, was einfach irgendeine reelle Zahl ist.
+
+562
+00:30:39,340 --> 00:30:44,725
+Tatsächlich enthält dieses Rechteck hier in unserem seltsam verzerrten Log-Bild mit
+
+563
+00:30:44,725 --> 00:30:50,500
+einer Breite von log 16 und einer Höhe von 2 pi alle Informationen über das Bild rechts.
+
+564
+00:30:50,900 --> 00:30:54,003
+Es entspricht diesem Ringbereich des Droste-Bildes,
+
+565
+00:30:54,003 --> 00:30:59,235
+und wenn du dieses Rechteck um genau log-16-Einheiten nach links verschieben würdest,
+
+566
+00:30:59,235 --> 00:31:04,102
+bekämst du eine verkleinerte Version dieses Ringbereichs, exakt 16-mal kleiner,
+
+567
+00:31:04,102 --> 00:31:06,840
+die sich wie ein Puzzleteil perfekt einfügt.
+
+568
+00:31:07,360 --> 00:31:12,193
+Und wenn du das unendlich oft wiederholst, ergibt sich diese unendliche Verschachtelung,
+
+569
+00:31:12,193 --> 00:31:13,840
+die den Droste-Zoom ausmacht.
+
+570
+00:31:14,720 --> 00:31:18,229
+So wie ich die Dinge bisher gezeichnet habe, haben wir diesen Abschneidepunkt
+
+571
+00:31:18,229 --> 00:31:21,145
+im Log-Bild auf der rechten Seite, und inzwischen weißt du gut,
+
+572
+00:31:21,145 --> 00:31:23,697
+dass vertikale Linien links Kreisen rechts entsprechen,
+
+573
+00:31:23,697 --> 00:31:26,841
+also kannst du wahrscheinlich erraten, dass das damit zusammenhängt,
+
+574
+00:31:26,841 --> 00:31:29,803
+dass ich diesem Droste-Bild einen maximalen Radius gegeben habe,
+
+575
+00:31:29,803 --> 00:31:31,580
+aber natürlich muss man das nicht tun.
+
+576
+00:31:31,720 --> 00:31:35,365
+Im Prinzip kann es sich in alle Richtungen unendlich weit ausdehnen und
+
+577
+00:31:35,365 --> 00:31:38,753
+dabei beim Hochskalieren demselben selbstähnlichen Muster folgen,
+
+578
+00:31:38,753 --> 00:31:41,115
+und das Ergebnis für das Log-Bild links wäre,
+
+579
+00:31:41,115 --> 00:31:43,682
+dass es sich beliebig weit nach rechts erstreckt,
+
+580
+00:31:43,682 --> 00:31:46,300
+wieder mit einem sich wiederholenden Kachelmuster.
+
+581
+00:31:47,400 --> 00:31:51,805
+Zusammengefasst ist das Logarithmus-Bild links also vertikal periodisch,
+
+582
+00:31:51,805 --> 00:31:54,620
+im Grunde weil Drehung rechts periodisch ist.
+
+583
+00:31:54,980 --> 00:31:56,260
+Das würde bei jedem Bild passieren.
+
+584
+00:31:56,560 --> 00:32:01,264
+Und in diesem speziellen Fall eines Droste-Bildes ist es auch horizontal periodisch,
+
+585
+00:32:01,264 --> 00:32:04,400
+weil sich das Droste-Bild beim Hineinzoomen wiederholt.
+
+586
+00:32:04,640 --> 00:32:06,993
+Diese doppelt periodische Eigenschaft ist das,
+
+587
+00:32:06,993 --> 00:32:09,960
+was wir am Ende für das finale Ergebnis ausnutzen werden.
+
+588
+00:32:10,820 --> 00:32:12,800
+Und wir haben jetzt alle Grundlagen, die wir brauchen.
+
+589
+00:32:13,000 --> 00:32:15,555
+Ich kann dir jetzt endlich die Funktion beschreiben,
+
+590
+00:32:15,555 --> 00:32:19,780
+die den Droste-Zoom in diese in sich geschlossene Schleife im Escher-Stil verwandelt.
+
+591
+00:32:20,320 --> 00:32:22,928
+Bevor wir einfach direkt hineinspringen, haben wir ziemlich viel behandelt,
+
+592
+00:32:22,928 --> 00:32:25,780
+also ist es vielleicht ganz gut, dem Ganzen etwas Raum zum Sackenlassen zu geben.
+
+593
+00:32:26,180 --> 00:32:29,370
+Und ich wollte irgendwann in diesem Video mal 30 kurze Sekunden über 3b1b talent
+
+594
+00:32:29,370 --> 00:32:32,640
+sprechen, also ist jetzt vielleicht ein genauso guter Zeitpunkt wie jeder andere.
+
+595
+00:32:32,940 --> 00:32:36,219
+Das ist die virtuelle Karrieremesse, mit der ich dieses Jahr experimentiere,
+
+596
+00:32:36,219 --> 00:32:39,670
+und die Grundidee ist, dass du, als jemand, der seine Freizeit damit verbringt,
+
+597
+00:32:39,670 --> 00:32:43,208
+Dinge wie komplexe Logarithmen zu lernen, wahrscheinlich daran interessiert bist,
+
+598
+00:32:43,208 --> 00:32:46,400
+mit gleichgesinnten, neugierigen und technisch starken Teams zu arbeiten.
+
+599
+00:32:46,780 --> 00:32:49,596
+Wenn du also auf Jobsuche bist oder offen für einen neuen Job,
+
+600
+00:32:49,596 --> 00:32:51,640
+schau dir die Organisationen auf 3b1b.co an.
+
+601
+00:32:52,160 --> 00:32:52,560
+talent.
+
+602
+00:32:52,940 --> 00:32:55,659
+Wenn du dir diese Seite anschaust, findest du Interviews zwischen mir
+
+603
+00:32:55,659 --> 00:32:58,300
+und den jeweiligen Teams, technische Rätsel und Herausforderungen,
+
+604
+00:32:58,300 --> 00:33:00,901
+die sie für dich ausgewählt haben, und verschiedene andere Dinge,
+
+605
+00:33:00,901 --> 00:33:03,660
+die dir ein Gefühl für die Kultur des technischen Teams geben sollen.
+
+606
+00:33:04,160 --> 00:33:08,295
+Und ich mag einfach die Idee, diesem Publikum passende Karrierechancen zu zeigen,
+
+607
+00:33:08,295 --> 00:33:12,022
+also schau auf jeden Fall mal rein, wann immer du nach einem Job suchst,
+
+608
+00:33:12,022 --> 00:33:13,400
+egal ob jetzt oder später.
+
+609
+00:33:14,300 --> 00:33:15,860
+Okay, zurück zu unserem eigentlichen Ziel.
+
+610
+00:33:16,140 --> 00:33:20,279
+Wie können wir all das, was wir über komplexe Funktionen und Transformationen aufgebaut
+
+611
+00:33:20,279 --> 00:33:23,656
+haben, die konforme Abbildungen liefern und all solche Sachen, nutzen,
+
+612
+00:33:23,656 --> 00:33:25,939
+um irgendeine Art von Funktion zu konstruieren,
+
+613
+00:33:25,939 --> 00:33:28,080
+die Eschers Print-Gallery-Effekt nachbildet?
+
+614
+00:33:28,680 --> 00:33:31,109
+Vielleicht ist es am einfachsten, wenn ich einfach gleich den ganzen Aufbau
+
+615
+00:33:31,109 --> 00:33:33,700
+der Funktion hinschreibe, und dann können wir jeden Schritt genauer durchgehen.
+
+616
+00:33:34,440 --> 00:33:37,980
+Zuerst nimmt man einen Logarithmus, der dieses bizarre doppelt periodische
+
+617
+00:33:37,980 --> 00:33:41,615
+Kachelmuster erzeugt, dann dreht und skaliert man dieses Kachelmuster genau
+
+618
+00:33:41,615 --> 00:33:45,011
+auf die richtige Weise, und danach nimmt man eine Exponentialfunktion,
+
+619
+00:33:45,011 --> 00:33:49,220
+die die Verzerrung wieder rückgängig macht, aber dieses Mal mit einer gewissen Wendung.
+
+620
+00:33:50,080 --> 00:33:53,469
+Das wirkt vielleicht ein bisschen bizarr, aber es gibt tatsächlich eine sehr schöne Art,
+
+621
+00:33:53,469 --> 00:33:55,780
+zu motivieren und zu verstehen, was hier wirklich passiert.
+
+622
+00:33:56,300 --> 00:34:00,672
+Schau noch einmal auf dieses ursprüngliche Droste-Bild zurück und erinnere dich daran,
+
+623
+00:34:00,672 --> 00:34:04,688
+wie wir diese große Kuchen-Kreatur irgendwie mit der kleineren selbstähnlichen
+
+624
+00:34:04,688 --> 00:34:07,280
+Kopie identifizieren wollen, 16-mal hineingezoomt.
+
+625
+00:34:07,540 --> 00:34:10,659
+Ich will, dass du an eine Linie denkst, die beide miteinander verbindet.
+
+626
+00:34:11,219 --> 00:34:14,023
+Eine Art, unser Ziel zu formulieren, ist, dass wir wollen,
+
+627
+00:34:14,023 --> 00:34:17,698
+dass die endgültige Funktion so eine Linie in eine geschlossene Schleife im
+
+628
+00:34:17,698 --> 00:34:19,100
+endgültigen Raum verwandelt.
+
+629
+00:34:19,540 --> 00:34:23,854
+Die Endpunkte der Linie oben stehen für das große und das kleine Pi-Wesen,
+
+630
+00:34:23,854 --> 00:34:27,235
+also sollte jede Funktion, die diese Wesen identifiziert,
+
+631
+00:34:27,235 --> 00:34:29,159
+diese Linie zumindest schließen.
+
+632
+00:34:29,600 --> 00:34:33,600
+Denk jetzt darüber nach, wie diese Linie im Logarithmus des Bildes aussieht.
+
+633
+00:34:33,600 --> 00:34:36,626
+Das große Pi-Wesen entspricht all diesen mehrfachen
+
+634
+00:34:36,626 --> 00:34:39,000
+Kopien hier neben der imaginären Linie.
+
+635
+00:34:39,639 --> 00:34:44,740
+Wie wir besprochen haben, entspricht das Verkleinern des Bildes einer Verschiebung nach
+
+636
+00:34:44,740 --> 00:34:49,900
+links im Logarithmus, also stellen diese Kopien im Log-Bild dieses kleine Pi-Wesen dar.
+
+637
+00:34:50,300 --> 00:34:54,065
+Und tatsächlich wollen wir statt dieser horizontalen Linie ausnutzen,
+
+638
+00:34:54,065 --> 00:34:57,720
+dass dieses Log-Bild in zwei getrennten Richtungen periodisch ist.
+
+639
+00:34:58,360 --> 00:35:01,863
+Stattdessen arbeiten wir also mit einer diagonalen Linie,
+
+640
+00:35:01,863 --> 00:35:06,532
+die diese Kopie der großen Figur mit dieser unten links liegenden Kopie der
+
+641
+00:35:06,532 --> 00:35:07,700
+kleinen verbindet.
+
+642
+00:35:07,940 --> 00:35:10,404
+Das wirkt im Moment vielleicht etwas unmotiviert, und das ist es auch,
+
+643
+00:35:10,404 --> 00:35:12,938
+aber am besten lässt sich erklären, warum, indem ich dir einfach zeige,
+
+644
+00:35:12,938 --> 00:35:15,824
+wie sich das ausspielt, und danach können wir, wenn du willst, damit vergleichen,
+
+645
+00:35:15,824 --> 00:35:18,640
+was passiert wäre, wenn du versucht hättest, die horizontale Linie zu benutzen.
+
+646
+00:35:19,200 --> 00:35:22,404
+Diese neue nach unten gerichtete Komponente im Log-Bild entspricht nun dem
+
+647
+00:35:22,404 --> 00:35:26,040
+Hinzufügen einer gewissen Drehung im Uhrzeigersinn zur Bahn im ursprünglichen Bild.
+
+648
+00:35:26,460 --> 00:35:30,862
+Denk dran, unser Ziel ist es, das im endgültigen Bild in eine Schleife zu verwandeln,
+
+649
+00:35:30,862 --> 00:35:34,797
+aber du und ich haben gerade ungefähr 10 Minuten lang ausführlich über eine
+
+650
+00:35:34,797 --> 00:35:38,940
+Funktion gesprochen, die Liniensegmente in Kreise verwandelt, nämlich e hoch z.
+
+651
+00:35:39,320 --> 00:35:43,605
+Was du tun musst, ist, dieses Liniensegment am Ende perfekt vertikal mit einer
+
+652
+00:35:43,605 --> 00:35:47,506
+Höhe von 2 Pi landen zu lassen, und im Grunde läuft das darauf hinaus,
+
+653
+00:35:47,506 --> 00:35:52,340
+es genau richtig zu drehen und zu skalieren, damit es diese Länge und Richtung bekommt.
+
+654
+00:35:52,940 --> 00:35:56,532
+Wenn du dich erinnerst, haben wir beim Warmwerden mit komplexen Zahlen darüber
+
+655
+00:35:56,532 --> 00:36:00,538
+gesprochen, dass die Multiplikation mit einer Konstante dir irgendeine Kombination aus
+
+656
+00:36:00,538 --> 00:36:04,268
+Drehung und Skalierung gibt, und in diesem Fall wäre ein künstlerisches Merkmal,
+
+657
+00:36:04,268 --> 00:36:08,228
+das uns gefallen könnte, dass unser großes Pi-Wesen unten links an dieser Stelle fest
+
+658
+00:36:08,228 --> 00:36:12,142
+bleibt, und das würde bedeuten, dass dieser Punkt in unserem Log-Bild fest an seinem
+
+659
+00:36:12,142 --> 00:36:15,596
+Platz bleiben muss, also wollen wir nicht wirklich um den Ursprung drehen,
+
+660
+00:36:15,596 --> 00:36:17,760
+sondern dass sich alles um diesen Punkt dreht.
+
+661
+00:36:18,280 --> 00:36:20,829
+Sagen wir, wir nennen diesen Punkt so etwas wie z null,
+
+662
+00:36:20,829 --> 00:36:24,629
+dann würde die aktualisierte Formel für diese Drehung und Skalierung so aussehen,
+
+663
+00:36:24,629 --> 00:36:28,522
+aber eigentlich läuft der meiste Inhalt darauf hinaus, diese Konstante c zu wählen,
+
+664
+00:36:28,522 --> 00:36:32,276
+mit der du multiplizierst, und wenn du Übungen magst, könnte es dir Spaß machen,
+
+665
+00:36:32,276 --> 00:36:34,964
+dir tatsächlich kurz die Zeit zu nehmen und auszurechnen,
+
+666
+00:36:34,964 --> 00:36:37,420
+welchen konkreten Wert diese Konstante haben sollte.
+
+667
+00:36:38,200 --> 00:36:41,915
+Aber hier, weil wir gerade sehr visuell unterwegs sind und ich ein bisschen Spaß haben
+
+668
+00:36:41,915 --> 00:36:45,457
+will, zeige ich dir diese Konstante mal in ihrer eigenen kleinen komplexen Ebene,
+
+669
+00:36:45,457 --> 00:36:49,214
+und dann auch, was passiert, wenn ich sie irgendwie packe und ein bisschen hin und her
+
+670
+00:36:49,214 --> 00:36:49,560
+bewege.
+
+671
+00:36:50,060 --> 00:36:53,751
+Unterschiedliche Wahlen geben dir unterschiedliche Skalierungen und Drehungen,
+
+672
+00:36:53,751 --> 00:36:57,820
+was nach dem Exponenzieren all diese völlig bizarren kaleidoskopischen Bilder ergibt.
+
+673
+00:36:58,420 --> 00:37:01,278
+Eine Art, die ganze Operation zu sehen, ist als ein Spiel,
+
+674
+00:37:01,278 --> 00:37:04,135
+bei dem du versuchst, genau den richtigen Wert zu finden,
+
+675
+00:37:04,135 --> 00:37:08,520
+damit am Ende alles so ausgerichtet ist, wie du es in diesem Bild unten rechts brauchst.
+
+676
+00:37:09,120 --> 00:37:12,429
+Wenn er auf diesen passenden Wert eingestellt ist und wir diesen nachgebildeten
+
+677
+00:37:12,429 --> 00:37:15,990
+Escher-Effekt bekommen, habe ich in diesem endgültigen Bild unten rechts dieses Loch
+
+678
+00:37:15,990 --> 00:37:19,760
+in der Mitte gezeigt, analog zu dem Loch, das Escher in seinem ursprünglichen Werk hatte.
+
+679
+00:37:20,640 --> 00:37:22,420
+Aber das ist tatsächlich völlig künstlich.
+
+680
+00:37:22,780 --> 00:37:25,332
+Das Ausgabebild der Funktion füllt das ganz von selbst
+
+681
+00:37:25,332 --> 00:37:28,120
+mit seiner eigenen sich wiederholenden Spirale nach innen.
+
+682
+00:37:28,120 --> 00:37:33,288
+Schließlich erstreckt sich das gedrehte Kachelmuster links unendlich durch die ganze
+
+683
+00:37:33,288 --> 00:37:38,580
+Ebene, also füllt seine Exponentialfunktion auch alles aus, außer dem Punkt bei null.
+
+684
+00:37:39,880 --> 00:37:40,400
+Und das ist es!
+
+685
+00:37:40,540 --> 00:37:42,040
+Das ist die grundlegende Operation.
+
+686
+00:37:42,520 --> 00:37:45,399
+Übersetze in diesen bizarr aussehenden Log-Raum, drehe und skaliere,
+
+687
+00:37:45,399 --> 00:37:47,347
+um die Dinge wieder aufeinander auszurichten,
+
+688
+00:37:47,347 --> 00:37:49,760
+und übersetze dann mit einer Exponentialfunktion zurück.
+
+689
+00:37:51,500 --> 00:37:55,364
+An diesem Punkt, nachdem wir unsere eigene Variation von Escher nachgebaut haben,
+
+690
+00:37:55,364 --> 00:37:57,606
+wäre es vielleicht schön, einmal durchzugehen,
+
+691
+00:37:57,606 --> 00:38:00,564
+wie derselbe Prozess bei Eschers konkretem Beispiel aussieht,
+
+692
+00:38:00,564 --> 00:38:04,046
+dieser maltesischen Küstenstadt mit einer Druckgalerie und einer Person,
+
+693
+00:38:04,046 --> 00:38:05,620
+die ein Bild der Stadt anschaut.
+
+694
+00:38:06,420 --> 00:38:10,721
+Wie zuvor besteht Schritt eins darin, diese Szene auf ihre eigene kleine komplexe Ebene
+
+695
+00:38:10,721 --> 00:38:15,120
+zu setzen, wobei der unendliche Grenzpunkt, um den herum alles skaliert, bei null liegt.
+
+696
+00:38:16,340 --> 00:38:20,464
+Schritt zwei: Nimm davon einen Logarithmus, was uns in diesem Fall eine ähnlich bizarre
+
+697
+00:38:20,464 --> 00:38:24,540
+Transformation der ganzen Szene gibt, aber diesmal gibt es einen kleinen Unterschied.
+
+698
+00:38:24,980 --> 00:38:27,485
+Weil Escher mit einem viel tieferen Zoom gearbeitet hat,
+
+699
+00:38:27,485 --> 00:38:30,929
+mit einem Skalierungsfaktor von 256, erstrecken sich die sich wiederholenden
+
+700
+00:38:30,929 --> 00:38:34,240
+Kacheln in diesem neuen Beispiel tatsächlich über einen größeren Teil der
+
+701
+00:38:34,240 --> 00:38:35,000
+komplexen Ebene.
+
+702
+00:38:36,280 --> 00:38:40,096
+Schritt drei ist wieder, das Ganze zu drehen und zu skalieren, was davon abhängt,
+
+703
+00:38:40,096 --> 00:38:43,300
+mit der passenden Wahl einer komplexen Konstante zu multiplizieren.
+
+704
+00:38:43,760 --> 00:38:48,254
+Die Bedingung ist, sicherzustellen, dass sich dieses gedrehte Bild vertikal immer noch
+
+705
+00:38:48,254 --> 00:38:52,800
+alle 2 Pi Einheiten wiederholt, aber entlang eines Bildteils, der vorher diagonal war.
+
+706
+00:38:53,300 --> 00:38:57,507
+Und dann in Schritt vier jagt man das alles durch e hoch z, und was man bekommt,
+
+707
+00:38:57,507 --> 00:39:01,084
+ist etwas, das Eschers endgültigem Bild sehr ähnlich ist: ein Bild,
+
+708
+00:39:01,084 --> 00:39:05,239
+bei dem das Herumgehen entlang einer Schleife einem Hineinzoomen um den Faktor
+
+709
+00:39:05,239 --> 00:39:06,080
+256 entspricht.
+
+710
+00:39:07,720 --> 00:39:10,702
+Und wieder gilt: Wenn wir es auf diese Weise mit komplexen Funktionen betrachten,
+
+711
+00:39:10,702 --> 00:39:11,880
+gibt es kein Loch in der Mitte.
+
+712
+00:39:12,160 --> 00:39:16,212
+Dieses Endergebnis ist selbst ein Droste-Bild, wenn auch diesmal mit einer Verdrehung,
+
+713
+00:39:16,212 --> 00:39:19,745
+bei der es eine Art Selbstähnlichkeit gibt, die sich spiralförmig beliebig
+
+714
+00:39:19,745 --> 00:39:22,760
+weit nach innen fortsetzt, ganz egal, wie weit du hineinzoomst.
+
+715
+00:39:24,000 --> 00:39:26,880
+Es gibt ein paar Dinge, die bei diesem ganzen Prozess bemerkenswert sind.
+
+716
+00:39:27,480 --> 00:39:30,721
+Erstens: Wenn du diese Idee als Formel aufschreibst, bei der du einen Logarithmus nimmst,
+
+717
+00:39:30,721 --> 00:39:33,015
+ihn mit einer Konstante multiplizierst und dann exponentierst,
+
+718
+00:39:33,015 --> 00:39:35,673
+dann kann man das tatsächlich so vereinfachen, dass es einfach aussieht,
+
+719
+00:39:35,673 --> 00:39:38,587
+als würdest du deine Eingabe mit dem Exponenten irgendeiner komplexen Konstante
+
+720
+00:39:38,587 --> 00:39:39,060
+potenzieren.
+
+721
+00:39:39,540 --> 00:39:41,354
+Und wenn du diesen Verschiebungsfaktor wieder einführst,
+
+722
+00:39:41,354 --> 00:39:43,200
+bringt er einfach noch eine weitere Konstante ins Spiel.
+
+723
+00:39:43,980 --> 00:39:46,766
+Einerseits ist es sehr befriedigend, dass sich dieser ganze komplizierte
+
+724
+00:39:46,766 --> 00:39:49,359
+Prozess auf so wenige Symbole auf der Seite herunterbrechen lässt,
+
+725
+00:39:49,359 --> 00:39:51,913
+aber ich finde auch, dass dadurch ein bisschen verschleiert wird,
+
+726
+00:39:51,913 --> 00:39:52,880
+was eigentlich passiert.
+
+727
+00:39:53,740 --> 00:39:55,590
+Und ich hatte ja erwähnt, dass es nicht funktionieren würde,
+
+728
+00:39:55,590 --> 00:39:57,780
+wenn du nur versuchen würdest, diese horizontalen Linien zu verwenden.
+
+729
+00:39:58,040 --> 00:40:01,170
+Falls du neugierig bist: So sieht es aus, wenn du das versuchst,
+
+730
+00:40:01,170 --> 00:40:04,740
+was bedeuten würde, alles um 90 Grad zu drehen und passend zu skalieren.
+
+731
+00:40:05,320 --> 00:40:06,963
+Du bekommst schon etwas irgendwie Interessantes,
+
+732
+00:40:06,963 --> 00:40:08,880
+aber es ist einfach nicht das, worauf wir hinauswollen.
+
+733
+00:40:09,180 --> 00:40:12,124
+Und wenn du darüber nachdenkst, läuft im Grunde genommen einfach darauf hinaus,
+
+734
+00:40:12,124 --> 00:40:14,360
+dass du die Rollen von Rotation und Skalierung vertauschst.
+
+735
+00:40:16,680 --> 00:40:20,763
+Wenn man von all dem mal einen Schritt zurücktritt, fühlt sich diese zweite Perspektive,
+
+736
+00:40:20,763 --> 00:40:23,362
+bei der sich alles um Rotation in einem Log-Raum dreht,
+
+737
+00:40:23,362 --> 00:40:27,259
+komplett anders an als Eschers intuitiverer Ansatz mit seinem verzerrten Gitter und
+
+738
+00:40:27,259 --> 00:40:28,280
+der Gitterverformung.
+
+739
+00:40:28,760 --> 00:40:31,180
+Aber es gibt einen roten Faden, der beide Perspektiven verbindet.
+
+740
+00:40:31,900 --> 00:40:35,000
+Zum einen kannst du jetzt verstehen, wie genau wir das Gitter,
+
+741
+00:40:35,000 --> 00:40:37,500
+das Escher hatte, nachgebaut und verändert haben.
+
+742
+00:40:37,940 --> 00:40:40,846
+Im Grunde nimmst du genau dieselbe Funktion, die wir aufgebaut haben,
+
+743
+00:40:40,846 --> 00:40:44,047
+aber statt sie auf ein Bild anzuwenden, wendest du sie auf ein gewöhnliches
+
+744
+00:40:44,047 --> 00:40:45,100
+quadratisches Gitter an.
+
+745
+00:40:45,780 --> 00:40:47,760
+Na ja, eigentlich nicht ganz auf ein gewöhnliches quadratisches Gitter.
+
+746
+00:40:48,020 --> 00:40:51,541
+Am besten arbeitet man mit einem, das beim Hineinzoomen immer dichter wird,
+
+747
+00:40:51,541 --> 00:40:53,560
+damit es auf allen Skalen gleich aussieht.
+
+748
+00:40:54,200 --> 00:40:58,180
+Wenn du das machst, erzeugt der Logarithmus dieses sehr schöne gekrümmte Kachelmuster.
+
+749
+00:40:58,720 --> 00:41:02,134
+Und von dort aus machst du denselben Trick, die Dinge genau richtig zu drehen
+
+750
+00:41:02,134 --> 00:41:05,726
+und dann eine Exponentialfunktion darauf anzuwenden, mit dem Ergebnis von etwas,
+
+751
+00:41:05,726 --> 00:41:09,140
+das dem sehr nahekommt, woran Escher viele mühselige Stunden gearbeitet hat.
+
+752
+00:41:09,680 --> 00:41:13,345
+Und denk dran: Der ganze Grund, warum wir die Sprache der komplexen Zahlen benutzen,
+
+753
+00:41:13,345 --> 00:41:16,793
+also warum ich dich durch all diese Umwege geschickt habe, ist die Motivation,
+
+754
+00:41:16,793 --> 00:41:19,760
+dass diese konforme Eigenschaft dabei als Nebenprodukt herausfällt.
+
+755
+00:41:20,180 --> 00:41:23,494
+Winzige Quadrate aus dem ursprünglichen Gitter bleiben im Endergebnis,
+
+756
+00:41:23,494 --> 00:41:25,340
+zumindest näherungsweise, quadratisch.
+
+757
+00:41:26,000 --> 00:41:29,598
+Escher sagte, dass ihm die Arbeit an diesem Stück gewaltige Kopfschmerzen bereitet hat,
+
+758
+00:41:29,598 --> 00:41:33,072
+und auch wenn du und ich vielleicht selbst ein paar Kopfschmerzen ertragen mussten,
+
+759
+00:41:33,072 --> 00:41:35,388
+wenn auch aus ganz anderen Gründen, ist der Lohn dafür,
+
+760
+00:41:35,388 --> 00:41:38,200
+dass wir diese Eigenschaft ganz ohne zusätzlichen Aufwand bekommen.
+
+761
+00:41:39,000 --> 00:41:42,453
+Um das klarzustellen: Du musst komplexe Ableitungen oder Logarithmen natürlich nicht
+
+762
+00:41:42,453 --> 00:41:45,496
+verstehen, um Eschers Werk zu genießen, und ich will auch nicht andeuten,
+
+763
+00:41:45,496 --> 00:41:46,400
+dass du das müsstest.
+
+764
+00:41:46,740 --> 00:41:49,477
+Wenn du aber diese stärker mathematische Seite verstehst,
+
+765
+00:41:49,477 --> 00:41:53,175
+bekommst du die Fähigkeit zu einer ganz anderen Art von Wertschätzung dafür,
+
+766
+00:41:53,175 --> 00:41:54,760
+was Escher eigentlich getan hat.
+
+767
+00:41:55,180 --> 00:41:58,254
+Und genau das finde ich an all dem faszinierend, die eigentliche Verbindung,
+
+768
+00:41:58,254 --> 00:42:00,680
+die ich zwischen den beiden Erzählsträngen herstellen will.
+
+769
+00:42:01,140 --> 00:42:04,312
+Wenn du dir Eschers Karriere ansiehst, dann fühlte er sich durchgehend zu bestimmten
+
+770
+00:42:04,312 --> 00:42:07,673
+Konzepten hingezogen, zu Dingen wie der Darstellung von Unendlichkeit in einem endlichen
+
+771
+00:42:07,673 --> 00:42:07,900
+Raum.
+
+772
+00:42:08,280 --> 00:42:11,809
+Und gleichzeitig schien er sich von einer gewissen Ästhetik leiten zu lassen,
+
+773
+00:42:11,809 --> 00:42:14,513
+oft von irgendeiner impliziten starren Regel wie der Idee,
+
+774
+00:42:14,513 --> 00:42:17,400
+dass kleine Quadrate in diesem Gitter kleine Quadrate bleiben.
+
+775
+00:42:17,760 --> 00:42:21,088
+Das Endergebnis, wenn Konzept und Ästhetik auf diese Weise zusammenkommen, ist,
+
+776
+00:42:21,088 --> 00:42:24,584
+dass sich ein bestimmtes Werk von Escher oft wie die Lösung eines Rätsels anfühlt,
+
+777
+00:42:24,584 --> 00:42:26,522
+bei dem noch nicht einmal offensichtlich ist,
+
+778
+00:42:26,522 --> 00:42:28,460
+dass überhaupt eine Lösung existieren sollte.
+
+779
+00:42:29,040 --> 00:42:32,519
+Was ich nun so anregend finde, ist, dass diese visuellen Rätsel,
+
+780
+00:42:32,519 --> 00:42:36,760
+auf die er gestoßen ist, nicht bloß dem Vorgang des Mathematikmachens ähneln.
+
+781
+00:42:36,840 --> 00:42:40,577
+Die konkreten Strukturen, zu denen er sich intuitiv hingezogen fühlte,
+
+782
+00:42:40,577 --> 00:42:43,780
+verbergen oft sehr echte und sehr tiefe Mathematik in sich.
+
+783
+00:42:44,260 --> 00:42:46,982
+In unserem Beispiel besteht die tiefere Struktur nicht nur darin,
+
+784
+00:42:46,982 --> 00:42:49,620
+dass sich das Werk mit komplexen Funktionen beschreiben lässt.
+
+785
+00:42:50,120 --> 00:42:52,461
+Die Ideen, die wir in diesem Erzählstrang angesprochen haben,
+
+786
+00:42:52,461 --> 00:42:54,879
+liegen den aktuellen Forschungsgrenzen tatsächlich viel näher,
+
+787
+00:42:54,879 --> 00:42:56,260
+als du vielleicht erwarten würdest.
+
+788
+00:42:56,840 --> 00:43:00,063
+Wenn du auf unseren Ansatz in der zweiten Hälfte zurückblickst, denk daran,
+
+789
+00:43:00,063 --> 00:43:03,459
+wie sehr er darauf beruhte, dieses doppelt periodische Muster in der komplexen
+
+790
+00:43:03,459 --> 00:43:06,940
+Ebene zu verwenden, etwas, das sich in zwei verschiedenen Richtungen wiederholt.
+
+791
+00:43:07,860 --> 00:43:10,762
+Für Funktionen komplexer Zahlen, die auf diese Weise doppelt periodisch sind,
+
+792
+00:43:10,762 --> 00:43:12,420
+gibt es tatsächlich einen besonderen Namen.
+
+793
+00:43:12,640 --> 00:43:14,560
+Man kennt sie als elliptische Funktionen.
+
+794
+00:43:14,900 --> 00:43:18,843
+Es wäre viel zu viel, hier genau zu erklären, warum diese Funktionen so nützlich sind,
+
+795
+00:43:18,843 --> 00:43:21,731
+aber eine Sache möchte ich hervorheben: Die zwei Mathematiker,
+
+796
+00:43:21,731 --> 00:43:23,932
+auf die ich am Anfang verwiesen habe, also die,
+
+797
+00:43:23,932 --> 00:43:27,003
+die die Analyse dieses Werks geliefert haben, De Smit und Lenstra,
+
+798
+00:43:27,003 --> 00:43:30,304
+sind beide Zahlentheoretiker, und elliptische Funktionen spielen in der
+
+799
+00:43:30,304 --> 00:43:32,551
+modernen Zahlentheorie eine sehr wichtige Rolle,
+
+800
+00:43:32,551 --> 00:43:35,760
+indem sie eine Art Brücke zu anderen Bereichen der Mathematik bilden.
+
+801
+00:43:36,400 --> 00:43:38,648
+Das erklärt vielleicht zumindest teilweise, wie es sein kann,
+
+802
+00:43:38,648 --> 00:43:40,934
+dass sie dieses Werk ansehen und auf die Idee kommen konnten,
+
+803
+00:43:40,934 --> 00:43:43,440
+genau die Funktion zu konstruieren, die wir hier vorgestellt haben.
+
+804
+00:43:44,660 --> 00:43:47,942
+Wenn ich Eschers Werk betrachte, egal ob es die Druckgalerie ist oder viele
+
+805
+00:43:47,942 --> 00:43:51,093
+andere Favoriten, dann liebe ich diese Werke vor allem deshalb so sehr,
+
+806
+00:43:51,093 --> 00:43:54,900
+weil sie in mir ein ganz bestimmtes Gefühl wecken, das man anderswo nur schwer findet.
+
+807
+00:43:55,280 --> 00:43:57,740
+Es ist das Gefühl, dass sich Dinge perfekt an ihren Platz fügen.
+
+808
+00:43:58,140 --> 00:43:59,580
+Aber das trifft es nicht ganz.
+
+809
+00:43:59,620 --> 00:44:02,320
+Es ist mehr als nur die Freude darüber, ein gelöstes Rätsel zu sehen.
+
+810
+00:44:02,540 --> 00:44:04,871
+Es ist eine Wertschätzung für das kreative Genie,
+
+811
+00:44:04,871 --> 00:44:07,820
+das nötig ist, um sich das Rätsel überhaupt erst auszudenken.
+
+812
+00:44:08,140 --> 00:44:11,600
+Der einzige andere Ort, an dem ich dieses Gefühl bekomme, ist beim Mathematikmachen.
+
+813
+00:44:11,940 --> 00:44:15,889
+Die Tatsache, dass sich also ein Künstler und ein Mathematiker zu denselben Strukturen
+
+814
+00:44:15,889 --> 00:44:19,057
+hingezogen fühlen können, aber aus völlig unterschiedlichen Gründen,
+
+815
+00:44:19,057 --> 00:44:22,180
+deutet für mich darauf hin, dass es etwas Universelles in dem gibt,
+
+816
+00:44:22,180 --> 00:44:24,200
+wovon sich beide offenbar angezogen fühlen.
+

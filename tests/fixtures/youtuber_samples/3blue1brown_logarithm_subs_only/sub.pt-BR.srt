@@ -1,0 +1,3028 @@
+1
+00:00:00,000 --> 00:00:03,509
+Sempre que eu faço um desses vídeos, às vezes rola um momento especial em que o
+
+2
+00:00:03,509 --> 00:00:06,929
+ato de animar envolve resolver um monte de pequenos quebra-cabeças técnicos,
+
+3
+00:00:06,929 --> 00:00:10,482
+e aí a matemática por trás do que eu tô tentando explicar faz clique pra mim de
+
+4
+00:00:10,482 --> 00:00:14,080
+um jeito que não tinha feito antes, quando eu vejo aquilo ganhando vida na tela.
+
+5
+00:00:14,480 --> 00:00:18,890
+As melhores versões desses momentos costumam me dizer quando um vídeo vai ser um dos meus
+
+6
+00:00:18,890 --> 00:00:23,300
+favoritos, e montar o final deste aqui foi um desses casos em que eu tive essa sensação.
+
+7
+00:00:27,040 --> 00:00:30,140
+Nossa história, na verdade, não começa hoje na sala de aula de matemática.
+
+8
+00:00:30,460 --> 00:00:31,860
+A gente começa na sala de arte.
+
+9
+00:00:32,720 --> 00:00:36,814
+Imagine estar em uma galeria, olhando para a imagem de um barco num porto,
+
+10
+00:00:36,814 --> 00:00:41,018
+e o mundo inteiro se distorce conforme seu olhar sobe e vai para a direita,
+
+11
+00:00:41,018 --> 00:00:43,120
+onde você vê uma vila à beira d'água.
+
+12
+00:00:43,640 --> 00:00:48,030
+Entre os prédios bem agrupados, o mundo se distorce ainda mais conforme seu olhar
+
+13
+00:00:48,030 --> 00:00:52,420
+desce até a entrada de um prédio, que leva a um corredor cheio de obras de arte.
+
+14
+00:00:53,200 --> 00:00:56,880
+E no fim desse corredor, lá está você de novo, encarando a imagem de um barco.
+
+15
+00:00:58,520 --> 00:00:59,362
+Esta é a litografia de 1956 de M.C. Escher, A Galeria de Gravuras,
+
+16
+00:00:59,362 --> 00:00:59,860
+ou em holandês, Prentendentunstelling.
+
+17
+00:00:59,980 --> 00:01:01,659
+Numa carta que escreveu para o filho, descrevendo sua criação de um jovem
+
+18
+00:01:01,659 --> 00:01:03,063
+olhando com interesse para uma gravura que mostra ele mesmo,
+
+19
+00:01:03,063 --> 00:01:04,788
+Escher chamou isso de a coisa mais peculiar que já fiz, o que, vindo dele,
+
+20
+00:01:04,788 --> 00:01:05,340
+quer dizer muita coisa.
+
+21
+00:01:05,960 --> 00:01:12,211
+A arte de Escher é amada no mundo todo, frequentemente trazendo temas paradoxais
+
+22
+00:01:12,211 --> 00:01:18,540
+ou padrões geométricos singularmente satisfatórios com algum tipo de personagem.
+
+23
+00:01:18,900 --> 00:01:20,767
+Esse amor é ainda mais forte entre matemáticos,
+
+24
+00:01:20,767 --> 00:01:23,507
+já que a arte dele muitas vezes toca em conceitos surpreendentemente
+
+25
+00:01:23,507 --> 00:01:26,207
+profundos da matemática, apesar de o próprio Escher não ter nenhuma
+
+26
+00:01:26,207 --> 00:01:27,200
+formação formal na área.
+
+27
+00:01:27,500 --> 00:01:38,840
+A Galeria de Gravuras oferece um exemplo perfeito dessa profundidade inesperada.
+
+28
+00:01:39,520 --> 00:01:40,807
+Em 2003, os matemáticos De Smit e Lenstra fizeram uma análise
+
+29
+00:01:40,807 --> 00:01:42,072
+deliciosa do que realmente está acontecendo nessa obra e do
+
+30
+00:01:42,072 --> 00:01:43,380
+loop autocontido de cair o queixo que Escher conseguiu criar.
+
+31
+00:01:43,380 --> 00:01:46,806
+Um dos meus principais objetivos com este vídeo é oferecer um
+
+32
+00:01:46,806 --> 00:01:50,288
+desdobramento visual da análise deles, tentando, como sempre,
+
+33
+00:01:50,288 --> 00:01:54,220
+te passar a sensação de que você mesmo poderia ter redescoberto isso.
+
+34
+00:01:54,720 --> 00:01:59,606
+Uma coisa que surge de forma inesperada dessa análise é uma resposta
+
+35
+00:01:59,606 --> 00:02:04,420
+para a pergunta do que exatamente deveria ir no meio dessa imagem.
+
+36
+00:02:05,120 --> 00:02:12,080
+À primeira vista, isso pode soar como uma pergunta sem sentido.
+
+37
+00:02:12,580 --> 00:02:13,367
+Se você chega por ela pelo canto superior direito,
+
+38
+00:02:13,367 --> 00:02:14,547
+parece que ali deveriam estar os prédios da vila, mas vindo pela esquerda,
+
+39
+00:02:14,547 --> 00:02:15,240
+parece mais uma parte da moldura da imagem.
+
+40
+00:02:15,600 --> 00:02:23,340
+Mas, se você vem por baixo, parece mais adequado que aquilo faça parte da própria galeria.
+
+41
+00:02:23,620 --> 00:02:25,619
+De algum jeito, toda a ambiguidade sobre onde exatamente você está
+
+42
+00:02:25,619 --> 00:02:27,740
+nessa cena inteira fica comprimida naquele círculo em branco no meio.
+
+43
+00:02:28,160 --> 00:02:31,736
+E só por diversão, já que estamos nos anos 2020,
+
+44
+00:02:31,736 --> 00:02:35,760
+eu deixei um modelo de difusão tentar preencher isso.
+
+45
+00:02:36,220 --> 00:02:40,960
+Sem surpresa, ele sofre demais.
+
+46
+00:02:41,500 --> 00:02:43,280
+Ele simplesmente não entende nada.
+
+47
+00:02:43,860 --> 00:02:45,200
+E, dando um pouco de crédito à pobre máquina, claro que ela sofre.
+
+48
+00:02:45,740 --> 00:02:48,080
+Isso parece ser uma parte da cena intrinsecamente ambígua e mal definida.
+
+49
+00:02:48,480 --> 00:02:50,445
+Mas, ainda assim, espero que, no fim, você concorde que existe uma, e realmente só uma,
+
+50
+00:02:50,445 --> 00:02:52,320
+versão completa que parece ser a peça certa desse quebra-cabeça para encaixar ali.
+
+51
+00:02:52,780 --> 00:02:57,033
+Antes de mergulhar na matemática, quero te dar uma descrição puramente intuitiva
+
+52
+00:02:57,033 --> 00:03:01,340
+de como Escher realmente fez essa obra, que se divide em três passos diferentes.
+
+53
+00:03:02,100 --> 00:03:06,860
+O primeiro passo é começar com uma versão endireitada da mesma ideia geral,
+
+54
+00:03:06,860 --> 00:03:09,780
+em que um homem está olhando para uma imagem.
+
+55
+00:03:10,340 --> 00:03:12,898
+Essa imagem contém um porto, que contém uma cidade,
+
+56
+00:03:12,898 --> 00:03:17,160
+que contém uma galeria de gravuras, que contém esse mesmo homem, e assim por diante.
+
+57
+00:03:17,640 --> 00:03:26,620
+Você poderia dar zoom para sempre, o quanto quisesse.
+
+58
+00:03:26,720 --> 00:03:28,820
+You could zoom in forever to your heart's content.
+
+59
+00:03:30,380 --> 00:03:34,593
+Essa ideia de uma imagem autossimilar, em que a imagem está contida dentro de si mesma,
+
+60
+00:03:34,593 --> 00:03:36,820
+tem um nome especial para designers gráficos.
+
+61
+00:03:37,180 --> 00:03:39,724
+Ela é conhecida como efeito Drosta, nomeado em homenagem
+
+62
+00:03:39,724 --> 00:03:42,040
+a uma empresa de cacau que usou isso na sua marca.
+
+63
+00:03:42,560 --> 00:03:44,962
+Na verdade, isso parece ter sido um truque de marketing
+
+64
+00:03:44,962 --> 00:03:48,020
+relativamente comum para todo tipo de produto do começo do século 20.
+
+65
+00:03:48,480 --> 00:03:52,228
+A imagem Drosta autossimilar que o Escher estava usando, porém,
+
+66
+00:03:52,228 --> 00:03:56,452
+envolve um zoom muito, muito mais profundo do que qualquer uma dessas,
+
+67
+00:03:56,452 --> 00:04:00,140
+em que a cópia autossimilar é 256 vezes menor que a original.
+
+68
+00:04:00,520 --> 00:04:02,420
+Você já vai ver de onde vem esse número em só um minutinho.
+
+69
+00:04:03,160 --> 00:04:07,127
+A genialidade do Escher é que ele de algum jeito percebeu intuitivamente
+
+70
+00:04:07,127 --> 00:04:11,259
+que devia existir uma forma de pegar esse conceito de uma imagem encaixada
+
+71
+00:04:11,259 --> 00:04:14,565
+dentro dela mesma e transformar isso nesse loop distorcido,
+
+72
+00:04:14,565 --> 00:04:18,808
+em que o zoom acontece implicitamente conforme o olhar do observador passeia
+
+73
+00:04:18,808 --> 00:04:19,579
+pelo círculo.
+
+74
+00:04:21,180 --> 00:04:24,596
+Aliás, você pode estar se perguntando de onde eu tirei essa versão endireitada,
+
+75
+00:04:24,596 --> 00:04:28,228
+e a resposta é que aqueles dois matemáticos que eu mencionei gentilmente deixaram a
+
+76
+00:04:28,228 --> 00:04:28,920
+gente usar ela.
+
+77
+00:04:28,920 --> 00:04:32,858
+Isso é algo que eles realmente reconstruíram a partir da obra original do Escher
+
+78
+00:04:32,858 --> 00:04:36,600
+com a ajuda de dois artistas holandeses, Hans Richter e Jacqueline Hofstra.
+
+79
+00:04:37,140 --> 00:04:39,900
+A forma como eles fizeram essa reconstrução é, na verdade, super interessante.
+
+80
+00:04:40,280 --> 00:04:44,460
+Falando de certo jeito, isso envolve tirar o logaritmo da obra original.
+
+81
+00:04:44,920 --> 00:04:47,777
+Eu sei que essa frase provavelmente parece um absurdo agora,
+
+82
+00:04:47,777 --> 00:04:51,300
+mas mais pra frente neste vídeo, prometo que isso vai fazer todo sentido.
+
+83
+00:04:52,220 --> 00:04:55,102
+Pra explicar a ideia básica de como o Escher fez esse loop,
+
+84
+00:04:55,102 --> 00:04:59,205
+eu quero usar um exemplo mais simples do que aquele com que ele estava trabalhando,
+
+85
+00:04:59,205 --> 00:05:02,917
+então vamos abrir essa imagem Drasta autossimilar personalizada que tem uma
+
+86
+00:05:02,917 --> 00:05:06,727
+criatura de torta olhando para um quadro de uma casa onde essa mesma criatura
+
+87
+00:05:06,727 --> 00:05:07,460
+de torta mora.
+
+88
+00:05:08,140 --> 00:05:11,824
+Neste exemplo, a cópia autossimilar é só 16 vezes menor que a original,
+
+89
+00:05:11,824 --> 00:05:15,560
+e isso simplesmente deixa tudo muito mais fácil de enxergar de uma vez.
+
+90
+00:05:15,980 --> 00:05:20,727
+O que eu vou fazer é manter um espaço de trabalho separado aqui à direita pra rascunhar
+
+91
+00:05:20,727 --> 00:05:25,202
+o objetivo geral que a gente tem em mente, em que uma forma de pensar nisso é que
+
+92
+00:05:25,202 --> 00:05:29,840
+você quer distribuir esse fator de zoom de 16 vezes pelos quatro cantos do quadrado.
+
+93
+00:05:30,560 --> 00:05:33,492
+Por exemplo, digamos que você queira que a própria criatura de torta
+
+94
+00:05:33,492 --> 00:05:36,380
+apareça mais ou menos no mesmo tamanho no canto inferior esquerdo.
+
+95
+00:05:36,880 --> 00:05:39,361
+Então, se você der zoom por um fator de 2 na original,
+
+96
+00:05:39,361 --> 00:05:42,669
+a gente vai pegar o que estaria no canto superior esquerdo dessa versão
+
+97
+00:05:42,669 --> 00:05:46,620
+ampliada e então colocar isso no canto superior esquerdo do nosso espaço de trabalho.
+
+98
+00:05:47,340 --> 00:05:50,637
+Do mesmo jeito, dê mais um zoom por um fator de 2 e depois pegue o
+
+99
+00:05:50,637 --> 00:05:54,233
+canto superior direito dessa versão ampliada e agora coloque uma versão
+
+100
+00:05:54,233 --> 00:05:57,780
+expandida disso no canto superior direito do nosso espaço de trabalho.
+
+101
+00:05:58,600 --> 00:06:01,210
+Por fim, mais uma etapa: dê mais um zoom por um fator de 2,
+
+102
+00:06:01,210 --> 00:06:04,130
+pegue o que está no canto inferior direito dessa versão ampliada,
+
+103
+00:06:04,130 --> 00:06:07,580
+aumente isso e coloque no canto inferior direito do nosso espaço de trabalho.
+
+104
+00:06:08,280 --> 00:06:12,880
+Esses quatro cantos recortados dão uma ideia aproximada do que a gente quer criar aqui.
+
+105
+00:06:13,180 --> 00:06:17,842
+Desde que você consiga encontrar um jeito suave de preencher os espaços entre eles,
+
+106
+00:06:17,842 --> 00:06:22,055
+então, conforme o olhar do observador passeia por um círculo nessa imagem,
+
+107
+00:06:22,055 --> 00:06:26,155
+o que ele vê vai ampliando cada vez mais até se juntar de forma elegante
+
+108
+00:06:26,155 --> 00:06:29,020
+com a parte autossimilar da imagem 16 vezes menor.
+
+109
+00:06:29,680 --> 00:06:33,558
+A gente poderia simplesmente tentar juntar tudo de forma ingênua, algo assim,
+
+110
+00:06:33,558 --> 00:06:37,588
+mas sinceramente isso não fica muito bom, e com certeza não é tão suave nem tão
+
+111
+00:06:37,588 --> 00:06:42,020
+elegante quanto o que o Escher conseguiu fazer, então ainda temos trabalho pela frente.
+
+112
+00:06:42,940 --> 00:06:45,920
+Esse livro que eu venho folheando, aliás, The Magic of M.C.
+
+113
+00:06:46,040 --> 00:06:50,129
+Escher, é algo que eu comprei numa visita maravilhosa ao Museu Escher em Haia, que,
+
+114
+00:06:50,129 --> 00:06:52,986
+se você estiver algum dia na Holanda, eu recomendo muito,
+
+115
+00:06:52,986 --> 00:06:55,990
+e quando a gente chega na seção sobre a galeria de gravuras,
+
+116
+00:06:55,990 --> 00:06:59,340
+ele dá uma pequena espiada no que de fato foi o processo do Escher.
+
+117
+00:06:59,800 --> 00:07:03,440
+Pra ele, o segundo passo foi criar essa grade distorcida.
+
+118
+00:07:03,940 --> 00:07:07,737
+Nas animações aqui, eu vou mostrar uma leve modificação dessa grade que basicamente
+
+119
+00:07:07,737 --> 00:07:11,580
+é só um pouco melhor matematicamente de gerar, mas ilustra o mesmo ponto principal.
+
+120
+00:07:11,980 --> 00:07:16,676
+No caso dele, a imagem Drosta autossimilar com que ele estava trabalhando tem um fator
+
+121
+00:07:16,676 --> 00:07:20,280
+de escala de 256, então, pra distribuir isso pelos quatro cantos,
+
+122
+00:07:20,280 --> 00:07:24,866
+no caso dele isso envolveria escalar por um fator de quatro conforme você vai de um
+
+123
+00:07:24,866 --> 00:07:25,740
+canto ao outro.
+
+124
+00:07:26,540 --> 00:07:29,984
+E se você olhar de perto a grade dele, digamos em um dos quadrados no canto
+
+125
+00:07:29,984 --> 00:07:33,427
+inferior direito, repare como, se você seguir as linhas de cima e de baixo
+
+126
+00:07:33,427 --> 00:07:36,595
+que delimitam esse quadrado até o canto inferior esquerdo da imagem,
+
+127
+00:07:36,595 --> 00:07:40,360
+essas mesmas linhas acabam envolvendo um quadrado que agora é quatro vezes maior.
+
+128
+00:07:40,720 --> 00:07:43,861
+E, de forma parecida, se você olhar para as linhas que delimitam a esquerda e a
+
+129
+00:07:43,861 --> 00:07:47,041
+direita de um quadrado pequeno daquela região, e seguir essas linhas para cima,
+
+130
+00:07:47,041 --> 00:07:50,420
+elas acabam se encaixando em volta de um quadrado que é certinho quatro vezes maior.
+
+131
+00:07:50,860 --> 00:07:54,900
+Então a grade meio que codifica a escala de um canto para o outro que a gente quer.
+
+132
+00:07:55,440 --> 00:07:58,532
+Agora, para o nosso projetinho, em que a gente só precisa aumentar
+
+133
+00:07:58,532 --> 00:08:00,921
+por um fator de dois de cada canto para o próximo,
+
+134
+00:08:00,921 --> 00:08:04,340
+vamos usar uma versão modificada disso, mas vai ser a mesma ideia geral.
+
+135
+00:08:05,660 --> 00:08:08,837
+Você pode naturalmente se perguntar de onde diabos vem essa grade,
+
+136
+00:08:08,837 --> 00:08:12,591
+mas na verdade eu quero adiar essa pergunta e pular direto para o passo três,
+
+137
+00:08:12,591 --> 00:08:16,779
+que é como você pode de fato usar essa grade junto com a imagem Drosse auto-semelhante
+
+138
+00:08:16,779 --> 00:08:18,560
+para criar o efeito final do Escher.
+
+139
+00:08:19,200 --> 00:08:22,514
+O jeito que isso funciona é primeiro colocar uma grade quadrada
+
+140
+00:08:22,514 --> 00:08:25,671
+comum sobre a imagem original, e aí digamos que você queira
+
+141
+00:08:25,671 --> 00:08:28,880
+que esta parte aqui acabe neste canto da nossa versão final.
+
+142
+00:08:29,280 --> 00:08:33,381
+O que você faria seria pegar cada quadradinho dentro dela e depois copiar o
+
+143
+00:08:33,381 --> 00:08:37,700
+conteúdo dele para o quadradinho correspondente na versão distorcida da grade.
+
+144
+00:08:38,100 --> 00:08:42,532
+A partir daí, cada quadrado vizinho na nossa grade original é forçado a ir para
+
+145
+00:08:42,532 --> 00:08:45,674
+o quadrado vizinho correspondente na versão distorcida,
+
+146
+00:08:45,674 --> 00:08:49,826
+então você meio que pode continuar seguindo para onde a imagem tem que ir
+
+147
+00:08:49,826 --> 00:08:51,060
+acompanhando a grade.
+
+148
+00:08:52,000 --> 00:08:55,330
+E o fato de as linhas da grade na versão distorcida se espaçarem por um
+
+149
+00:08:55,330 --> 00:08:58,613
+fator de dois à medida que você vai do canto inferior esquerdo para o
+
+150
+00:08:58,613 --> 00:09:02,225
+canto superior esquerdo significa que a escala da nossa cena automaticamente
+
+151
+00:09:02,225 --> 00:09:05,320
+aumenta por esse fator de dois conforme você sobe por essa linha.
+
+152
+00:09:06,660 --> 00:09:11,553
+A ideia desse processo é que, como artista, é relativamente simples ir pedaço por pedaço,
+
+153
+00:09:11,553 --> 00:09:15,346
+copiando o que está dentro de um quadradinho para outro quadradinho,
+
+154
+00:09:15,346 --> 00:09:18,700
+porque nessa pequena escala as coisas não estão distorcidas.
+
+155
+00:09:19,180 --> 00:09:23,281
+Com certeza é muito, muito mais fácil do que tentar imaginar e desenhar a imagem
+
+156
+00:09:23,281 --> 00:09:27,740
+final distorcida adequada começando do nada com só uma página em branco na sua frente.
+
+157
+00:09:28,960 --> 00:09:31,868
+Então, basicamente, com essa grade distorcida em mãos,
+
+158
+00:09:31,868 --> 00:09:35,638
+o processo de copiar cada quadradinho fica agradavelmente automático,
+
+159
+00:09:35,638 --> 00:09:39,409
+e se a gente deixar esse processo automático seguir por toda a volta,
+
+160
+00:09:39,409 --> 00:09:43,071
+ele fecha direitinho com a posição inicial, e para isso acontecer é
+
+161
+00:09:43,071 --> 00:09:47,003
+necessário que a nossa imagem original tenha essa auto-semelhança quando
+
+162
+00:09:47,003 --> 00:09:48,780
+você dá zoom por um fator de 16.
+
+163
+00:09:49,380 --> 00:09:52,599
+Espero que você concorde que o resultado final que temos ficou bem legal,
+
+164
+00:09:52,599 --> 00:09:55,730
+ele recria o mesmo efeito geral, mas acima de tudo eu acho que ele faz
+
+165
+00:09:55,730 --> 00:09:58,640
+o Kaz apreciar mais profundamente a própria composição do Escher.
+
+166
+00:09:59,080 --> 00:10:03,360
+Na verdade, ele foi bem deliberado na escolha das imagens em todas as escalas distintas.
+
+167
+00:10:03,880 --> 00:10:07,742
+Citando: eu escolhi bem intencionalmente tipos seriais de objetos,
+
+168
+00:10:07,742 --> 00:10:11,311
+como por exemplo uma fileira de gravuras ao longo da parede,
+
+169
+00:10:11,311 --> 00:10:13,300
+ou blocos de casas em uma cidade.
+
+170
+00:10:13,720 --> 00:10:16,176
+Sem os elementos cíclicos, seria muito mais difícil
+
+171
+00:10:16,176 --> 00:10:18,680
+transmitir meu significado ao observador aleatório.
+
+172
+00:10:20,060 --> 00:10:24,308
+Essa ideia em que você tem uma imagem de referência reta e depois uma grade distorcida,
+
+173
+00:10:24,308 --> 00:10:26,896
+e usa as duas juntas para criar uma cena distorcida,
+
+174
+00:10:26,896 --> 00:10:28,800
+é um processo comum em design gráfico.
+
+175
+00:10:29,100 --> 00:10:32,622
+Isso é conhecido como mesh warp, e o Escher não inventou isso para esse caso,
+
+176
+00:10:32,622 --> 00:10:35,640
+é algo que ele já tinha usado várias vezes antes em outras obras.
+
+177
+00:10:36,180 --> 00:10:41,837
+Para a nossa história, o ponto é que toda a lógica de transformar um zoom Drosta em um
+
+178
+00:10:41,837 --> 00:10:46,902
+loop é abstraída e purificada nessa grade, o que levanta a pergunta natural:
+
+179
+00:10:46,902 --> 00:10:48,020
+de onde ela vem?
+
+180
+00:10:48,180 --> 00:10:49,000
+Como é que se faz isso?
+
+181
+00:10:49,800 --> 00:10:53,356
+Dá para imaginar que, como uma primeira abordagem ingênua,
+
+182
+00:10:53,356 --> 00:10:57,771
+você talvez tentasse escalar tudo linearmente de um canto para o outro,
+
+183
+00:10:57,771 --> 00:11:00,960
+mas se fizesse isso logo de cara veria um conflito.
+
+184
+00:11:01,440 --> 00:11:04,997
+Esses dois processos de escala colocam pressões diferentes sobre os
+
+185
+00:11:04,997 --> 00:11:08,714
+quadrados individuais, onde, por exemplo, este quadrado quer se abrir
+
+186
+00:11:08,714 --> 00:11:11,316
+nesta direção com base no zoom vindo da direita,
+
+187
+00:11:11,316 --> 00:11:15,086
+mas também quer se abrir nesta direção com base no afastamento do zoom
+
+188
+00:11:15,086 --> 00:11:16,360
+à medida que você sobe.
+
+189
+00:11:16,940 --> 00:11:19,711
+Ao que tudo indica, o Escher foi levado a resolver isso
+
+190
+00:11:19,711 --> 00:11:22,280
+curvando todas as linhas para aliviar essa tensão.
+
+191
+00:11:23,160 --> 00:11:26,807
+Mas existe uma outra restrição crucial pela qual parece que ele foi guiado,
+
+192
+00:11:26,807 --> 00:11:30,746
+uma que presumivelmente tornou o processo de transferência da imagem mais fácil,
+
+193
+00:11:30,746 --> 00:11:34,296
+fez o resultado final parecer mais natural e que vai fazer as orelhas de
+
+194
+00:11:34,296 --> 00:11:37,700
+qualquer matemático imerso em análise complexa se levantarem na hora.
+
+195
+00:11:38,020 --> 00:11:43,240
+Na grade distorcida final dele, os quadradinhos são, bem, quadrados.
+
+196
+00:11:43,680 --> 00:11:46,560
+Para deixar claro, isso não é nem um pouco verdade para a maioria dos mesh warps.
+
+197
+00:11:46,760 --> 00:11:49,920
+Na maioria dos casos, as linhas da grade distorcida que você desenha
+
+198
+00:11:49,920 --> 00:11:52,150
+não necessariamente se cruzam em ângulos retos,
+
+199
+00:11:52,150 --> 00:11:56,100
+e as pequenas regiões que elas delimitam geralmente vão ser pequenos paralelogramos.
+
+200
+00:11:56,500 --> 00:12:00,958
+Isso ainda pode funcionar para um artista, ainda dá meio que para fazer a transferência,
+
+201
+00:12:00,958 --> 00:12:05,163
+mas provavelmente o ato de copiar da versão original para a versão distorcida fica
+
+202
+00:12:05,163 --> 00:12:08,862
+mais estranho quando você tem essa distorção, então seria bem melhor se,
+
+203
+00:12:08,862 --> 00:12:13,320
+na grade distorcida, os quadradinhos continuassem pelo menos aproximadamente quadrados.
+
+204
+00:12:13,760 --> 00:12:17,151
+E quando você olha de perto pra grade que o Escher usou na galeria de gravuras dele,
+
+205
+00:12:17,151 --> 00:12:18,200
+ela tem essa propriedade.
+
+206
+00:12:18,600 --> 00:12:22,055
+Todas as linhas se cruzam em ângulos retos, e numa escala pequena o bastante,
+
+207
+00:12:22,055 --> 00:12:25,240
+as regiões que elas delimitam realmente são aproximadamente quadrados.
+
+208
+00:12:25,800 --> 00:12:28,113
+Artisticamente, isso tem o efeito legal de que,
+
+209
+00:12:28,113 --> 00:12:31,557
+mesmo que a cena inteira esteja dramaticamente deformada e distorcida
+
+210
+00:12:31,557 --> 00:12:34,461
+numa escala global, quando você dá zoom numa escala local,
+
+211
+00:12:34,461 --> 00:12:36,380
+tudo fica relativamente sem distorção.
+
+212
+00:12:36,760 --> 00:12:40,480
+É isso que faz cada parte local da imagem do Escher ser facilmente reconhecível.
+
+213
+00:12:41,720 --> 00:12:44,920
+E matematicamente, é aqui que a história realmente começa a ficar interessante.
+
+214
+00:12:45,440 --> 00:12:48,769
+Veja bem, essa ideia de uma função de um espaço bidimensional para um espaço
+
+215
+00:12:48,769 --> 00:12:52,667
+bidimensional, em que quadradinhos minúsculos continuam sendo aproximadamente quadrados,
+
+216
+00:12:52,667 --> 00:12:55,120
+tem um papel especial e um nome especial na matemática.
+
+217
+00:12:55,380 --> 00:12:59,664
+Isso se chama aplicação conforme, e uma área em que isso aparece o tempo todo é no
+
+218
+00:12:59,664 --> 00:13:04,000
+estudo de funções com entradas de números complexos e saídas de números complexos.
+
+219
+00:13:04,960 --> 00:13:07,208
+Nesse ponto, a gente vai dar um passo pra trás,
+
+220
+00:13:07,208 --> 00:13:10,699
+sair da sala de aula de arte e passear até o departamento de matemática,
+
+221
+00:13:10,699 --> 00:13:14,860
+onde eu quero te oferecer uma mini aula sobre algumas das ideias centrais desse campo.
+
+222
+00:13:16,540 --> 00:13:20,241
+O plano básico daqui pra frente é que eu quero primeiro fazer uma pequena revisão,
+
+223
+00:13:20,241 --> 00:13:23,716
+passar por alguns fundamentos dos números complexos e das funções complexas,
+
+224
+00:13:23,716 --> 00:13:27,011
+e depois quero passar um tempo de verdade construindo uma intuição sobre
+
+225
+00:13:27,011 --> 00:13:30,080
+como os logaritmos se parecem nesse contexto dos números complexos.
+
+226
+00:13:30,480 --> 00:13:34,056
+E aí, quando você tiver isso em mãos, a gente vai passar por uma maneira completamente
+
+227
+00:13:34,056 --> 00:13:37,591
+diferente de pensar em recriar esse efeito que o Escher tinha na galeria de gravuras
+
+228
+00:13:37,591 --> 00:13:37,840
+dele.
+
+229
+00:13:38,980 --> 00:13:40,860
+Vamos começar com uma revisão do básico.
+
+230
+00:13:41,260 --> 00:13:45,284
+Normalmente pensamos nos números reais como existindo numa linha unidimensional,
+
+231
+00:13:45,284 --> 00:13:48,100
+a reta real, e os números complexos são bidimensionais.
+
+232
+00:13:48,640 --> 00:13:52,820
+Mais especificamente, pensamos na constante imaginária i,
+
+233
+00:13:52,820 --> 00:13:57,513
+definida como a raiz quadrada de E todo outro ponto nesse plano
+
+234
+00:13:57,513 --> 00:14:03,160
+representa alguma combinação de um número real com algum múltiplo real de i.
+
+235
+00:14:03,700 --> 00:14:07,665
+É comum usar a variável z pra se referir a um número complexo qualquer,
+
+236
+00:14:07,665 --> 00:14:11,240
+e o jogo que a gente quer fazer é entender várias funções de z.
+
+237
+00:14:11,840 --> 00:14:15,840
+Um exemplo bem simples, mas importante, é multiplicar z por alguma constante.
+
+238
+00:14:16,320 --> 00:14:22,500
+A função f de z igual a duas vezes z tem o efeito de ampliar tudo por um fator de dois.
+
+239
+00:14:23,040 --> 00:14:27,280
+Mas e multiplicar por algo imaginário, como i, a raiz quadrada de menos um?
+
+240
+00:14:27,880 --> 00:14:34,280
+Bom, você sabe que multiplicar um por i dá i, e por definição, i vezes i é menos um.
+
+241
+00:14:34,700 --> 00:14:38,458
+Você vai notar que os dois são uma rotação de 90 graus, e de forma mais geral,
+
+242
+00:14:38,458 --> 00:14:42,120
+multiplicar qualquer valor z por i tem o efeito de uma rotação de 90 graus.
+
+243
+00:14:42,940 --> 00:14:46,960
+E mais geral ainda, quando você multiplica por qualquer constante complexa,
+
+244
+00:14:46,960 --> 00:14:49,640
+o efeito é alguma combinação de escala e rotação.
+
+245
+00:14:50,160 --> 00:14:53,420
+E tem uma maneira legal de pensar em quanto exatamente isso deve escalar e girar.
+
+246
+00:14:54,000 --> 00:14:58,381
+Zero vezes qualquer coisa é zero, então a origem tem que ficar fixa no lugar,
+
+247
+00:14:58,381 --> 00:15:02,080
+e depois um vezes qualquer constante c é essa mesma constante c.
+
+248
+00:15:02,620 --> 00:15:05,727
+Então isso significa que esse ponto no um tem que ser arrastado
+
+249
+00:15:05,727 --> 00:15:08,735
+até cair em cima daquela constante c de que estamos falando,
+
+250
+00:15:08,735 --> 00:15:11,940
+e isso determina completamente a quantidade de escala e rotação.
+
+251
+00:15:12,400 --> 00:15:14,880
+A partir daí, o resto da grade continua o mais rígido possível.
+
+252
+00:15:15,440 --> 00:15:17,890
+Um ponto importante pra enfatizar na nossa história é que,
+
+253
+00:15:17,890 --> 00:15:20,764
+se tudo o que você está fazendo é multiplicar por alguma constante,
+
+254
+00:15:20,764 --> 00:15:22,200
+as formas são sempre preservadas.
+
+255
+00:15:22,660 --> 00:15:25,351
+Qualquer coisa que você queira desenhar, como um quadrado,
+
+256
+00:15:25,351 --> 00:15:28,320
+pode ser ampliada ou girada, mas além disso, não há distorções.
+
+257
+00:15:29,080 --> 00:15:31,440
+Agora as coisas ficam mais interessantes no caso de funções mais complicadas.
+
+258
+00:15:32,120 --> 00:15:36,940
+Um exemplo simples, mas não trivial, seria mapear cada número z para z ao quadrado.
+
+259
+00:15:37,580 --> 00:15:40,640
+Então a entrada dois vai ter que ir para dois ao quadrado, que é quatro.
+
+260
+00:15:41,100 --> 00:15:44,520
+A entrada i vai ter que ir para i ao quadrado, que é menos um.
+
+261
+00:15:45,100 --> 00:15:48,040
+O próprio menos um teria que ser mapeado para mais um.
+
+262
+00:15:48,480 --> 00:15:52,463
+E, na forma completa, é isso que acontece se eu deixar cada ponto entre as
+
+263
+00:15:52,463 --> 00:15:56,500
+linhas da grade desse espaço de entrada ir para as saídas correspondentes.
+
+264
+00:15:57,160 --> 00:16:00,275
+É um efeito bem legal e, diferente de multiplicar por uma constante,
+
+265
+00:16:00,275 --> 00:16:02,520
+a forma definitivamente deixa de ser preservada.
+
+266
+00:16:02,940 --> 00:16:04,680
+As linhas da grade ficam curvas e deformadas.
+
+267
+00:16:05,280 --> 00:16:09,200
+Mas, e esse é um ponto-chave, presta atenção no que acontece em pequena escala.
+
+268
+00:16:09,520 --> 00:16:12,440
+Por exemplo, focando só nesse quadradinho do espaço de entrada.
+
+269
+00:16:12,940 --> 00:16:15,121
+Quando você vê a transformação acontecer de novo,
+
+270
+00:16:15,121 --> 00:16:17,703
+dá pra perceber que a forma é aproximadamente preservada,
+
+271
+00:16:17,703 --> 00:16:19,840
+pelo menos numa escala suficientemente pequena.
+
+272
+00:16:20,160 --> 00:16:23,261
+Os quadradinhos da nossa grade original continuam aproximadamente
+
+273
+00:16:23,261 --> 00:16:25,980
+quadrados mesmo depois de serem processados pela função.
+
+274
+00:16:26,500 --> 00:16:29,980
+Pra usar o termo técnico, a função z ao quadrado é conforme.
+
+275
+00:16:30,940 --> 00:16:33,180
+E a escolha de z ao quadrado realmente não tem nada de especial aqui.
+
+276
+00:16:33,540 --> 00:16:37,200
+Olha como fica se você transformar cada ponto z em z ao cubo.
+
+277
+00:16:37,580 --> 00:16:39,340
+Os quadrados continuam aproximadamente quadrados.
+
+278
+00:16:40,120 --> 00:16:43,413
+Ok, talvez esse quadrado de exemplo que eu estou destacando não pareça exatamente
+
+279
+00:16:43,413 --> 00:16:46,380
+quadrado na saída, mas na verdade é só porque ele começou grande demais.
+
+280
+00:16:46,700 --> 00:16:48,435
+Pra deixar claro, essa propriedade conforme de
+
+281
+00:16:48,435 --> 00:16:50,320
+que eu estou falando é uma propriedade de limite.
+
+282
+00:16:50,660 --> 00:16:54,685
+Um quadrado específico pode não virar exatamente um quadrado, mas a ideia é que,
+
+283
+00:16:54,685 --> 00:16:58,962
+conforme você dá mais e mais zoom, escolhendo regiões quadradas do espaço de entrada
+
+284
+00:16:58,962 --> 00:17:03,440
+cada vez menores, a saída resultante vai ser cada vez melhor aproximada por um quadrado.
+
+285
+00:17:04,000 --> 00:17:05,886
+E também não tem nada de tão especial assim na
+
+286
+00:17:05,886 --> 00:17:08,140
+escolha de polinômios como z ao quadrado ou z ao cubo.
+
+287
+00:17:08,420 --> 00:17:12,234
+Pra praticamente qualquer função de números complexos que você consiga imaginar escrever,
+
+288
+00:17:12,234 --> 00:17:13,220
+essa propriedade vale.
+
+289
+00:17:13,599 --> 00:17:15,599
+A forma é preservada numa escala suficientemente pequena.
+
+290
+00:17:15,940 --> 00:17:16,880
+É quase como mágica.
+
+291
+00:17:17,680 --> 00:17:20,220
+O uso de números complexos é muito relevante aqui.
+
+292
+00:17:20,380 --> 00:17:24,218
+Se, em vez disso, você estivesse pensando em pontos no espaço 2D simplesmente
+
+293
+00:17:24,218 --> 00:17:26,660
+como um par de números reais com coordenadas xy,
+
+294
+00:17:26,660 --> 00:17:30,697
+e escrevesse alguma função arbitrária de x e y pra obter um novo par de números,
+
+295
+00:17:30,697 --> 00:17:34,484
+o que é muito, muito mais típico quando os pontos daquele espaço de entrada
+
+296
+00:17:34,484 --> 00:17:38,920
+são transformados é que as imagens daqueles quadradinhos ficam espremidas e distorcidas.
+
+297
+00:17:39,220 --> 00:17:42,468
+Mesmo quando você dá mais e mais zoom, a forma limite resultante
+
+298
+00:17:42,468 --> 00:17:46,020
+normalmente parece um paralelogramo, não necessariamente um quadrado.
+
+299
+00:17:46,660 --> 00:17:49,620
+Então, funções complexas realmente são especiais nesse sentido.
+
+300
+00:17:50,160 --> 00:17:53,880
+E o motivo básico de os quadradinhos continuarem quadrados se resume ao cálculo.
+
+301
+00:17:54,580 --> 00:17:58,520
+O que você está vendo é o que significa essas funções terem derivadas.
+
+302
+00:17:59,380 --> 00:18:02,967
+Isso pode soar meio estranho, mas a analogia que você pode usar é que,
+
+303
+00:18:02,967 --> 00:18:07,221
+para a maioria das funções de números reais, se você visualizá-las do jeito comum,
+
+304
+00:18:07,221 --> 00:18:10,295
+só com um gráfico de entradas no eixo x e saídas no eixo y,
+
+305
+00:18:10,295 --> 00:18:14,600
+à medida que você dá cada vez mais zoom em qualquer ponto específico desse gráfico,
+
+306
+00:18:14,600 --> 00:18:17,060
+ele vai parecendo cada vez mais uma linha reta.
+
+307
+00:18:17,500 --> 00:18:21,791
+Ou seja, a taxa de variação, o quanto de delta f você obtém para um dado delta x,
+
+308
+00:18:21,791 --> 00:18:23,380
+se aproxima de uma constante.
+
+309
+00:18:24,020 --> 00:18:26,997
+Isso é literalmente o que significa uma função ter derivada,
+
+310
+00:18:26,997 --> 00:18:29,180
+mas não é a única forma de visualizar isso.
+
+311
+00:18:29,440 --> 00:18:31,640
+Aqui vai uma forma diferente de enxergar o mesmo conceito.
+
+312
+00:18:32,220 --> 00:18:35,701
+Em vez de olhar para o gráfico de uma função, vamos pensar na mesma função,
+
+313
+00:18:35,701 --> 00:18:37,000
+mas como uma transformação.
+
+314
+00:18:37,460 --> 00:18:41,039
+Ou seja, você vai deixar cada um desses pontos na reta dos números reais
+
+315
+00:18:41,039 --> 00:18:44,420
+se mover até suas saídas correspondentes nessa outra reta numérica.
+
+316
+00:18:45,140 --> 00:18:48,287
+O que você vai notar é que pontos igualmente espaçados no espaço
+
+317
+00:18:48,287 --> 00:18:50,992
+de entrada podem ficar distorcidos no espaço de saída,
+
+318
+00:18:50,992 --> 00:18:54,680
+o que significa que a taxa de variação da função em geral não é constante.
+
+319
+00:18:55,020 --> 00:18:58,760
+Esse espaçamento entre os nossos pontos pode mudar de uma parte da imagem para outra.
+
+320
+00:18:59,260 --> 00:19:03,337
+Mas a gente sabe que, à medida que você dá cada vez mais zoom em uma saída específica,
+
+321
+00:19:03,337 --> 00:19:05,660
+a taxa de variação se aproxima de uma constante.
+
+322
+00:19:06,100 --> 00:19:08,400
+Os pontos vão parecendo cada vez mais igualmente espaçados.
+
+323
+00:19:09,260 --> 00:19:12,714
+Mais especificamente, se você pegar um pedacinho minúsculo de pontos
+
+324
+00:19:12,714 --> 00:19:16,067
+em torno de uma entrada específica e copiar isso para o espaço de
+
+325
+00:19:16,067 --> 00:19:19,216
+saída em torno da saída correspondente, você consegue alinhar
+
+326
+00:19:19,216 --> 00:19:23,280
+aproximadamente todos os pontos só escalando tudo por um certo fator constante.
+
+327
+00:19:23,980 --> 00:19:28,060
+Esse é o mesmo fato analítico que a inclinação de um gráfico está te dizendo,
+
+328
+00:19:28,060 --> 00:19:30,180
+só que em um contexto visual diferente.
+
+329
+00:19:30,620 --> 00:19:34,200
+Mas esse contexto se transfere bem mais facilmente para pensar em
+
+330
+00:19:34,200 --> 00:19:38,000
+funções com valores complexos como transformações no plano complexo.
+
+331
+00:19:38,540 --> 00:19:41,766
+Aí a gente vai pensar na vizinhança em torno de uma certa
+
+332
+00:19:41,766 --> 00:19:44,822
+entrada como uma pequena grade de pontos, como antes,
+
+333
+00:19:44,822 --> 00:19:48,840
+e deixar cada ponto dessa grade se mover até sua saída correspondente.
+
+334
+00:19:49,800 --> 00:19:52,912
+Nesse caso, o que significa a taxa de variação se aproximar
+
+335
+00:19:52,912 --> 00:19:55,760
+de uma constante é basicamente a mesma equação exata.
+
+336
+00:19:56,360 --> 00:20:00,465
+A imagem mental que você deve ter é que, se você pegar aquele pequeno conjunto de
+
+337
+00:20:00,465 --> 00:20:04,164
+quadrados em torno da entrada e copiar isso para a saída correspondente,
+
+338
+00:20:04,164 --> 00:20:08,066
+dá para fazer isso coincidir aproximadamente com as linhas da grade de saída
+
+339
+00:20:08,066 --> 00:20:10,853
+multiplicando por uma certa constante, que, lembre-se,
+
+340
+00:20:10,853 --> 00:20:15,009
+no contexto dos números complexos, significa girar e escalar isso de algum jeito,
+
+341
+00:20:15,009 --> 00:20:17,340
+dependendo do valor dessa constante complexa.
+
+342
+00:20:17,940 --> 00:20:20,494
+Como rotação e escala preservam a forma, isso quer dizer que
+
+343
+00:20:20,494 --> 00:20:23,261
+todos os quadradinhos minúsculos do espaço de entrada continuam,
+
+344
+00:20:23,261 --> 00:20:25,900
+pelo menos aproximadamente, quadrados sob essa transformação.
+
+345
+00:20:27,300 --> 00:20:29,704
+Então, dando um passo para trás, aqui está o ponto principal,
+
+346
+00:20:29,704 --> 00:20:31,280
+o motivo de estar falando de tudo isso.
+
+347
+00:20:31,560 --> 00:20:35,611
+Mesmo que mapas conformes como o que o Escher estava usando na gravura Print
+
+348
+00:20:35,611 --> 00:20:39,768
+Gallery sejam incrivelmente restritos e muito incomuns entre as formas gerais
+
+349
+00:20:39,768 --> 00:20:44,192
+de deformar continuamente um espaço bidimensional, ainda assim, quase como mágica,
+
+350
+00:20:44,192 --> 00:20:47,177
+simplesmente falando a linguagem dos números complexos,
+
+351
+00:20:47,177 --> 00:20:51,227
+você consegue de algum jeito criar famílias inteiras desses mapas conformes
+
+352
+00:20:51,227 --> 00:20:52,400
+sem nem tentar muito.
+
+353
+00:20:52,860 --> 00:20:56,280
+Tudo o que você faz é misturar e combinar funções padrão de números complexos.
+
+354
+00:20:56,640 --> 00:20:59,200
+A única restrição é que essas funções precisam ter derivadas,
+
+355
+00:20:59,200 --> 00:21:02,600
+mas isso vai ser verdade para a maioria das funções que você pensar em escrever.
+
+356
+00:21:03,620 --> 00:21:06,657
+Para a nossa história, decifrar o que está acontecendo com a Print Gallery,
+
+357
+00:21:06,657 --> 00:21:10,260
+isso significa que temos uma maneira totalmente nova de reformular a pergunta principal.
+
+358
+00:21:10,760 --> 00:21:15,371
+Dá para construir alguma função complexa feita de propósito para que o
+
+359
+00:21:15,371 --> 00:21:20,180
+ato de dar zoom nas entradas pareça caminhar em um loop entre as saídas?
+
+360
+00:21:21,900 --> 00:21:26,004
+Agora, neste ponto, com só o mínimo de uma introdução relâmpago à análise complexa,
+
+361
+00:21:26,004 --> 00:21:29,318
+fica difícil saber por onde começar sem antes montar um repertório
+
+362
+00:21:29,318 --> 00:21:32,581
+maior de funções para trabalhar e ganhar alguma familiaridade com
+
+363
+00:21:32,581 --> 00:21:35,400
+como elas realmente se comportam para números complexos.
+
+364
+00:21:35,740 --> 00:21:39,974
+Nesse caso, na prática só existem duas funções que você precisa entender:
+
+365
+00:21:39,974 --> 00:21:42,120
+e elevado a z e o logaritmo natural.
+
+366
+00:21:42,880 --> 00:21:45,487
+Quero parar e passar um tempo de verdade entendendo as duas,
+
+367
+00:21:45,487 --> 00:21:48,180
+e acho que você vai concordar que é um tempo muito bem gasto.
+
+368
+00:21:48,580 --> 00:21:51,757
+Todo mundo merece, na minha opinião, pelo menos uma vez na
+
+369
+00:21:51,757 --> 00:21:54,880
+vida sentir a alegria de entender um logaritmo complexo.
+
+370
+00:21:55,280 --> 00:21:59,620
+Mas antes, um pré-requisito necessário é entender a exponencial complexa.
+
+371
+00:22:00,580 --> 00:22:03,792
+Quem já acompanha o canal vai estar familiarizado com a cara de
+
+372
+00:22:03,792 --> 00:22:07,360
+elevar e à potência de um número complexo, mas revisar nunca faz mal.
+
+373
+00:22:07,840 --> 00:22:12,079
+A gente pode começar a montar essa transformação focando só nos exemplos
+
+374
+00:22:12,079 --> 00:22:16,200
+mais familiares de entradas reais e nas saídas reais correspondentes.
+
+375
+00:22:16,600 --> 00:22:21,620
+Por exemplo, e elevado a 0 é 1, então esse ponto no 0 vai parar nesse ponto no 1.
+
+376
+00:22:22,200 --> 00:22:25,326
+E aí, toda vez que você deixa essa entrada aumentar em 1,
+
+377
+00:22:25,326 --> 00:22:30,042
+a saída cresce por um fator de e, ou seja, ela dispara pra longe da gente bem rápido,
+
+378
+00:22:30,042 --> 00:22:30,700
+na verdade.
+
+379
+00:22:31,320 --> 00:22:34,148
+E aí, por outro lado, conforme você diminui essa entrada,
+
+380
+00:22:34,148 --> 00:22:37,026
+deixando ela entrar nos números negativos, cada passo pra
+
+381
+00:22:37,026 --> 00:22:40,400
+esquerda corresponde a encolher a saída, de novo por um fator de e.
+
+382
+00:22:40,740 --> 00:22:44,360
+Em particular, você vai notar que nesse caso a saída é sempre um número positivo.
+
+383
+00:22:44,860 --> 00:22:47,146
+Isso, claro, fica bem mais interessante quando deixamos
+
+384
+00:22:47,146 --> 00:22:49,640
+tanto as entradas quanto as saídas serem números complexos.
+
+385
+00:22:50,140 --> 00:22:53,080
+E aqui, tudo que você precisa saber se resume ao que acontece
+
+386
+00:22:53,080 --> 00:22:56,020
+quando você deixa a parte imaginária dessa entrada aumentar.
+
+387
+00:22:56,380 --> 00:23:00,700
+E o que acontece aí é que a saída correspondente anda ao redor de um círculo.
+
+388
+00:23:02,120 --> 00:23:04,700
+Se você está se perguntando por que entradas imaginárias numa
+
+389
+00:23:04,700 --> 00:23:07,449
+exponencial fazem você andar em volta de um círculo desse jeito,
+
+390
+00:23:07,449 --> 00:23:10,240
+a gente já falou disso muitas, muitas outras vezes aqui no canal.
+
+391
+00:23:10,520 --> 00:23:12,680
+Veja alguns dos links na tela e na descrição.
+
+392
+00:23:13,160 --> 00:23:17,350
+Um ponto-chave que vou reforçar aqui é que o que torna a função e elevado
+
+393
+00:23:17,350 --> 00:23:21,425
+a z muito legal, ao contrário de exponenciais com outras bases, é que,
+
+394
+00:23:21,425 --> 00:23:25,041
+conforme sua entrada sobe a uma taxa de 1 unidade por segundo,
+
+395
+00:23:25,041 --> 00:23:29,920
+a saída anda em volta do seu círculo a uma taxa de exatamente 1 radiano por segundo.
+
+396
+00:23:30,400 --> 00:23:33,599
+Então, em particular, aumentar a parte imaginária em
+
+397
+00:23:33,599 --> 00:23:36,860
+exatamente 2 pi causa uma rotação completa na saída.
+
+398
+00:23:37,640 --> 00:23:41,586
+Dito de outro jeito, esses segmentos de reta verticais que venho desenhando,
+
+399
+00:23:41,586 --> 00:23:44,856
+cada um com altura exatamente 2 pi, são mapeados direitinho em
+
+400
+00:23:44,856 --> 00:23:47,400
+um círculo completo quando você aplica a função.
+
+401
+00:23:48,560 --> 00:23:52,236
+Você vai notar como desenhei esses segmentos de reta verticais específicos com
+
+402
+00:23:52,236 --> 00:23:56,337
+espaçamento uniforme na direção real, em que a parte real de um para o próximo aumenta
+
+403
+00:23:56,337 --> 00:23:56,620
+em 1.
+
+404
+00:23:57,000 --> 00:24:01,449
+Os círculos correspondentes à direita diferem entre si por um fator de escala constante,
+
+405
+00:24:01,449 --> 00:24:03,320
+especificamente o fator de escala e.
+
+406
+00:24:04,220 --> 00:24:06,601
+Antes, para a função mais simples z ao quadrado,
+
+407
+00:24:06,601 --> 00:24:10,620
+eu mostrei isso como uma transformação, movendo todas as entradas até as saídas.
+
+408
+00:24:11,020 --> 00:24:15,110
+E nesse caso, para e elevado a z, se você estiver curioso pra ver como essa mesma
+
+409
+00:24:15,110 --> 00:24:18,038
+ideia fica, o mais fácil é pegar um subconjunto da grade,
+
+410
+00:24:18,038 --> 00:24:22,228
+como este aqui do espaço de entrada, e aqui está como fica mover cada quadrado até
+
+411
+00:24:22,228 --> 00:24:23,440
+a saída correspondente.
+
+412
+00:24:24,080 --> 00:24:26,988
+Conforme a gente realmente usa essa função para os nossos objetivos da
+
+413
+00:24:26,988 --> 00:24:29,896
+galeria de gravuras, vai ser muito útil fixar isso na cabeça pensando
+
+414
+00:24:29,896 --> 00:24:32,680
+nessas linhas verticais e nos círculos em que elas se transformam.
+
+415
+00:24:33,500 --> 00:24:36,160
+Na verdade, tem um jeito bem divertido de que eu gosto de pensar
+
+416
+00:24:36,160 --> 00:24:38,820
+sobre como essas linhas verticais viram círculos concêntricos e
+
+417
+00:24:38,820 --> 00:24:41,480
+como elas conseguem carregar junto o espaço de entrada inteiro.
+
+418
+00:24:41,780 --> 00:24:46,091
+O que eu gosto de imaginar é meio que enrolar todo esse plano z em um tubo,
+
+419
+00:24:46,091 --> 00:24:50,000
+de modo que todas aquelas linhas verticais acabem virando círculos.
+
+420
+00:24:50,480 --> 00:24:53,180
+Mais especificamente, cada círculo teria uma circunferência de 2 pi.
+
+421
+00:24:54,240 --> 00:24:58,654
+Depois, imagine pegar esse tubo, alinhar ele acima da origem do espaço de saída
+
+422
+00:24:58,654 --> 00:25:01,726
+e então meio que achatá-lo sobre esse espaço de saída,
+
+423
+00:25:01,726 --> 00:25:06,196
+transformando todos os círculos desse tubo nesses anéis concêntricos de tamanho
+
+424
+00:25:06,196 --> 00:25:07,760
+exponencialmente crescente.
+
+425
+00:25:08,700 --> 00:25:11,873
+É assim que eu gosto de pensar, mas seja qual for a forma que você escolher,
+
+426
+00:25:11,873 --> 00:25:15,422
+o que eu quero que fique gravado na sua cabeça é a ideia de linhas verticais virando
+
+427
+00:25:15,422 --> 00:25:15,840
+círculos.
+
+428
+00:25:16,340 --> 00:25:19,582
+Agora, o outro ponto muito importante a destacar aqui é
+
+429
+00:25:19,582 --> 00:25:23,000
+que várias entradas diferentes podem cair na mesma saída.
+
+430
+00:25:23,820 --> 00:25:29,160
+Por exemplo, e elevado a zero é um, mas e elevado a 2 pi i também é um.
+
+431
+00:25:29,540 --> 00:25:34,280
+O mesmo vale pra e elevado a menos 2 pi i e e elevado a 4 pi i e assim por diante.
+
+432
+00:25:34,540 --> 00:25:38,031
+Na verdade, a sequência infinita ao longo de qualquer linha vertical,
+
+433
+00:25:38,031 --> 00:25:41,420
+espaçada de 2 pi em 2 pi, vai acabar toda colapsada junta conforme
+
+434
+00:25:41,420 --> 00:25:44,860
+essa linha vertical vai meio que se enrolando até virar um círculo.
+
+435
+00:25:45,260 --> 00:25:48,103
+A gente diz que o mapa exponencial é muitos-para-um,
+
+436
+00:25:48,103 --> 00:25:51,875
+embora talvez não seja óbvio como essa repetição na direção vertical
+
+437
+00:25:51,875 --> 00:25:56,140
+vai ser essencial pra nossa recriação final do efeito da galeria de gravuras.
+
+438
+00:25:56,900 --> 00:25:59,744
+Beleza, então as exponenciais nos dão o primeiro ingrediente,
+
+439
+00:25:59,744 --> 00:26:02,075
+caracterizado por transformar linhas em círculos,
+
+440
+00:26:02,075 --> 00:26:05,712
+e o segundo ingrediente de que a gente precisa é a inversa dessa exponencial,
+
+441
+00:26:05,712 --> 00:26:09,022
+conhecida como logaritmo natural, em que basicamente a ideia é que ele
+
+442
+00:26:09,022 --> 00:26:11,120
+desenrola esses círculos de volta em linhas.
+
+443
+00:26:11,500 --> 00:26:15,625
+Agora, isso vai ser especialmente divertido de visualizar e especialmente relevante
+
+444
+00:26:15,625 --> 00:26:19,650
+pra nossa história se a gente imaginar pintar esse plano complexo da direita com
+
+445
+00:26:19,650 --> 00:26:23,477
+uma imagem de Droste, digamos o exemplo com que estávamos trabalhando antes,
+
+446
+00:26:23,477 --> 00:26:27,800
+com a criatura pi olhando pra uma imagem de uma casa onde essa mesma criatura pi mora.
+
+447
+00:26:28,300 --> 00:26:31,752
+Em outras palavras, finalmente chegou a hora de eu e você respondermos aquela
+
+448
+00:26:31,752 --> 00:26:34,980
+pergunta sobre o que significa tirar o logaritmo natural de uma imagem.
+
+449
+00:26:36,400 --> 00:26:37,980
+Beleza, então pensa nisso por um segundo.
+
+450
+00:26:38,460 --> 00:26:42,606
+Você já sabe que um segmento de reta vertical como este aqui à esquerda,
+
+451
+00:26:42,606 --> 00:26:47,040
+com altura de 2 pi, vira um círculo quando você aplica o mapa e elevado a z.
+
+452
+00:26:47,540 --> 00:26:50,878
+Então o logaritmo natural vai pegar um círculo de pontos nessa
+
+453
+00:26:50,878 --> 00:26:54,540
+imagem e depois endireitar ele, transformando-o numa dessas linhas.
+
+454
+00:26:55,440 --> 00:26:59,955
+Do mesmo jeito, se você olhasse pra um círculo que fosse exatamente e vezes menor,
+
+455
+00:26:59,955 --> 00:27:03,258
+ele também seria endireitado numa linha com a mesma altura,
+
+456
+00:27:03,258 --> 00:27:05,240
+posicionada uma unidade à esquerda.
+
+457
+00:27:05,820 --> 00:27:10,086
+E, de forma parecida, cada círculo entre esses dois vai ser desenrolado em
+
+458
+00:27:10,086 --> 00:27:14,295
+uma dessas linhas verticais entre as duas anteriores, e mais geralmente,
+
+459
+00:27:14,295 --> 00:27:18,735
+anéis cada vez menores da imagem vão todos ser desenrolados nesses segmentos
+
+460
+00:27:18,735 --> 00:27:23,520
+de reta verticais, cada um com altura de 2 pi, cada vez mais à esquerda na imagem.
+
+461
+00:27:24,080 --> 00:27:27,432
+O resultado que a gente obtém é meio viajante, mas é bem legal quando você pensa nisso,
+
+462
+00:27:27,432 --> 00:27:29,860
+e tem várias coisas importantes que eu quero que você perceba.
+
+463
+00:27:30,060 --> 00:27:33,611
+Você provavelmente já percebeu que isso se repete à medida que você vai pra esquerda,
+
+464
+00:27:33,611 --> 00:27:37,330
+e eu vou te convidar a refletir por um minuto sobre por que isso pode estar acontecendo,
+
+465
+00:27:37,330 --> 00:27:39,586
+lá no fundo da sua cabeça, mas antes dessa repetição,
+
+466
+00:27:39,586 --> 00:27:42,260
+eu quero falar de uma direção diferente na qual isso se repete.
+
+467
+00:27:42,800 --> 00:27:46,760
+Do jeito que eu desenhei até agora, a parte imaginária dos valores
+
+468
+00:27:46,760 --> 00:27:50,900
+à esquerda vai de 0 até 2 pi, mas isso na verdade é meio arbitrário.
+
+469
+00:27:51,400 --> 00:27:55,932
+Lembra: se você continuar deixando aquele valor z à esquerda subir mais 2 pi unidades,
+
+470
+00:27:55,932 --> 00:27:59,832
+o valor correspondente e elevado a z à direita simplesmente vai continuar
+
+471
+00:27:59,832 --> 00:28:03,837
+dando a volta naquele mesmo círculo de novo, então espero que você concorde
+
+472
+00:28:03,837 --> 00:28:07,842
+que pelo menos parece tentador deixar nossa imagem se repetir nessa direção
+
+473
+00:28:07,842 --> 00:28:10,740
+vertical ao longo de cada uma dessas linhas verticais.
+
+474
+00:28:12,800 --> 00:28:16,986
+E também acontece no outro sentido: conforme você deixa a parte imaginária à esquerda
+
+475
+00:28:16,986 --> 00:28:21,172
+ficar menor, descendo, o valor correspondente à direita continua apenas dando voltas
+
+476
+00:28:21,172 --> 00:28:25,555
+naquele mesmo círculo, então talvez o padrão que você vê também devesse se repetir desse
+
+477
+00:28:25,555 --> 00:28:25,900
+jeito.
+
+478
+00:28:26,560 --> 00:28:30,779
+Pra ser mais explícito, a regra que eu estou usando pra desenhar essa imagem à
+
+479
+00:28:30,779 --> 00:28:33,969
+esquerda é que, pra cada ponto z naquele plano à esquerda,
+
+480
+00:28:33,969 --> 00:28:38,242
+você olha o valor correspondente e elevado a z à direita e então atribui a ele
+
+481
+00:28:38,242 --> 00:28:39,540
+uma cor correspondente.
+
+482
+00:28:40,060 --> 00:28:42,644
+Então, por exemplo, esta criatura pi deformada,
+
+483
+00:28:42,644 --> 00:28:45,942
+esta aqui e esta outra aqui correspondem todas, na verdade,
+
+484
+00:28:45,942 --> 00:28:50,560
+à mesma parte da imagem à direita, a grande criatura pi no canto inferior esquerdo.
+
+485
+00:28:51,040 --> 00:28:55,800
+Outra forma de pensar nisso é que, como a função e elevado a z é muitos-para-um,
+
+486
+00:28:55,800 --> 00:28:59,906
+a sensação que a gente tem é que o logaritmo natural, a sua inversa,
+
+487
+00:28:59,906 --> 00:29:04,666
+quer ser uma função multivalorada, algo em que uma entrada leva a várias saídas
+
+488
+00:29:04,666 --> 00:29:05,380
+diferentes.
+
+489
+00:29:06,320 --> 00:29:10,078
+Agora, na prática, muitas vezes você não quer que uma função tenha várias saídas;
+
+490
+00:29:10,078 --> 00:29:13,557
+às vezes isso até contradiz a própria definição de função no seu contexto,
+
+491
+00:29:13,557 --> 00:29:16,897
+então as pessoas costumam simplesmente escolher uma faixa desse plano à
+
+492
+00:29:16,897 --> 00:29:19,680
+esquerda pra ser o conjunto de saídas do logaritmo natural.
+
+493
+00:29:20,060 --> 00:29:24,060
+Em análise complexa, isso é chamado de escolher um corte de ramo para a função.
+
+494
+00:29:24,560 --> 00:29:29,101
+Mas, pros nossos propósitos, em que a gente quer recriar e entender a obra do Escher,
+
+495
+00:29:29,101 --> 00:29:32,146
+é até legal pensar no log como uma função multivalorada,
+
+496
+00:29:32,146 --> 00:29:36,793
+em que cada ponto à direita corresponde a uma sequência repetida de pontos à esquerda,
+
+497
+00:29:36,793 --> 00:29:40,800
+espaçados verticalmente por dois pi, indo infinitamente nas duas direções.
+
+498
+00:29:41,580 --> 00:29:45,145
+Agora, no nosso caso especial, você também vê esse padrão repetido à medida
+
+499
+00:29:45,145 --> 00:29:48,520
+que vai pra esquerda, mas isso já é uma coisa completamente diferente.
+
+500
+00:29:48,820 --> 00:29:50,520
+Você não veria isso na maioria das imagens.
+
+501
+00:29:51,020 --> 00:29:55,246
+Isso surge especificamente porque estamos trabalhando com uma imagem de Droste
+
+502
+00:29:55,246 --> 00:29:59,580
+autossimilar, uma que parece idêntica conforme você dá zoom por um certo fator.
+
+503
+00:29:59,760 --> 00:30:04,320
+Isso sai diretamente de uma propriedade central dos logaritmos e das exponenciais.
+
+504
+00:30:04,880 --> 00:30:08,092
+Exponenciais transformam adição em multiplicação,
+
+505
+00:30:08,092 --> 00:30:11,960
+e logaritmos transformam multiplicação de volta em adição.
+
+506
+00:30:12,860 --> 00:30:17,499
+Por exemplo, imagine pegar algum valor pequeno w nesse plano à direita,
+
+507
+00:30:17,499 --> 00:30:23,380
+e também considerar 16 vezes esse valor, que fica escalado 16 vezes mais longe da origem.
+
+508
+00:30:24,280 --> 00:30:28,463
+Agora, se olharmos para o valor correspondente, log de w à esquerda,
+
+509
+00:30:28,463 --> 00:30:31,661
+esse ato de multiplicar por 16 agora parece adição,
+
+510
+00:30:31,661 --> 00:30:36,398
+especificamente um deslocamento para a direita pelo logaritmo natural de 16,
+
+511
+00:30:36,398 --> 00:30:38,120
+que é só algum número real.
+
+512
+00:30:39,340 --> 00:30:44,219
+Na verdade, esse retângulo aqui na nossa imagem logarítmica bizarra e deformada,
+
+513
+00:30:44,219 --> 00:30:47,390
+que tem uma largura de log 16 e uma altura de 2 pi,
+
+514
+00:30:47,390 --> 00:30:50,500
+contém toda a informação sobre a imagem à direita.
+
+515
+00:30:50,900 --> 00:30:53,866
+Ele corresponde a esse anel da imagem de Drosta,
+
+516
+00:30:53,866 --> 00:30:58,994
+e se você deslocasse esse retângulo exatamente log de 16 unidades para a esquerda,
+
+517
+00:30:58,994 --> 00:31:03,071
+obteria uma versão reduzida desse anel exatamente 16 vezes menor,
+
+518
+00:31:03,071 --> 00:31:06,840
+que se encaixa perfeitamente como uma peça de quebra-cabeça.
+
+519
+00:31:07,360 --> 00:31:10,722
+E se você repetir isso infinitas vezes, isso te dá esse
+
+520
+00:31:10,722 --> 00:31:13,840
+encaixe infinito que caracteriza o zoom de Drosta.
+
+521
+00:31:14,720 --> 00:31:17,907
+Do jeito que desenhei as coisas até agora, temos esse corte na imagem
+
+522
+00:31:17,907 --> 00:31:21,187
+logarítmica do lado direito, e neste ponto você já sabe bem que linhas
+
+523
+00:31:21,187 --> 00:31:23,774
+verticais à esquerda correspondem a círculos à direita,
+
+524
+00:31:23,774 --> 00:31:27,192
+então provavelmente consegue adivinhar que isso corresponde ao fato de eu
+
+525
+00:31:27,192 --> 00:31:29,594
+ter dado um raio máximo para essa imagem de Drosta,
+
+526
+00:31:29,594 --> 00:31:31,580
+mas claro que você não precisa fazer isso.
+
+527
+00:31:31,720 --> 00:31:35,111
+Em princípio, ela pode se estender infinitamente em todas as direções,
+
+528
+00:31:35,111 --> 00:31:38,598
+seguindo o mesmo padrão auto-semelhante conforme você aumenta a escala,
+
+529
+00:31:38,598 --> 00:31:42,231
+e o resultado para a imagem logarítmica à esquerda seria se estender tanto
+
+530
+00:31:42,231 --> 00:31:46,300
+para a direita quanto você quiser, de novo com um padrão de ladrilhamento repetido.
+
+531
+00:31:47,400 --> 00:31:51,776
+Então, para concluir, a imagem logarítmica à esquerda é periódica verticalmente,
+
+532
+00:31:51,776 --> 00:31:54,620
+basicamente porque a rotação à direita é periódica.
+
+533
+00:31:54,980 --> 00:31:56,260
+Isso aconteceria com qualquer imagem.
+
+534
+00:31:56,560 --> 00:31:59,294
+E então, nesse caso especial de uma imagem de Drosta,
+
+535
+00:31:59,294 --> 00:32:03,214
+ela também é periódica horizontalmente, porque a imagem de Drosta se repete
+
+536
+00:32:03,214 --> 00:32:04,400
+conforme você dá zoom.
+
+537
+00:32:04,640 --> 00:32:07,249
+Essa propriedade duplamente periódica é o que vamos
+
+538
+00:32:07,249 --> 00:32:09,960
+aproveitar no fim das contas para o resultado final.
+
+539
+00:32:10,820 --> 00:32:12,800
+E agora temos toda a base de que precisamos.
+
+540
+00:32:13,000 --> 00:32:16,609
+Agora finalmente posso descrever para você a função que transforma
+
+541
+00:32:16,609 --> 00:32:19,780
+o zoom de Drosta nesse loop autocontido em estilo Escher.
+
+542
+00:32:20,320 --> 00:32:23,423
+Antes de simplesmente entrar direto nisso, a gente meio que cobriu muita coisa,
+
+543
+00:32:23,423 --> 00:32:25,780
+então talvez valha a pena dar um espaço para isso assentar.
+
+544
+00:32:26,180 --> 00:32:29,279
+E eu estava querendo tirar 30 segundinhos rápidos em algum momento deste vídeo para
+
+545
+00:32:29,279 --> 00:32:32,640
+falar sobre o talento 3b1b, então agora talvez seja um bom momento quanto qualquer outro.
+
+546
+00:32:32,940 --> 00:32:36,039
+Essa é a feira virtual de carreiras que estou testando este ano,
+
+547
+00:32:36,039 --> 00:32:39,137
+e a ideia básica é que você, uma pessoa que passa o tempo livre
+
+548
+00:32:39,137 --> 00:32:41,607
+aprendendo sobre coisas como logaritmos complexos,
+
+549
+00:32:41,607 --> 00:32:44,657
+provavelmente tem interesse em trabalhar com equipes curiosas,
+
+550
+00:32:44,657 --> 00:32:46,400
+técnicas e com a mesma mentalidade.
+
+551
+00:32:46,780 --> 00:32:49,591
+Então, se você está procurando ou aberto a um novo emprego,
+
+552
+00:32:49,591 --> 00:32:51,640
+dá uma olhada nas organizações em 3b1b.co.
+
+553
+00:32:52,160 --> 00:32:52,560
+talent.
+
+554
+00:32:52,940 --> 00:32:56,414
+Quando você explorar essa página, vai encontrar entrevistas entre mim e as equipes
+
+555
+00:32:56,414 --> 00:33:00,101
+relevantes, quebra-cabeças e desafios técnicos que elas escolheram destacar para você,
+
+556
+00:33:00,101 --> 00:33:03,660
+e várias outras coisas pensadas para te dar uma noção da cultura técnica da equipe.
+
+557
+00:33:04,160 --> 00:33:08,466
+E eu meio que gosto da ideia de expor esse público a oportunidades de carreira alinhadas,
+
+558
+00:33:08,466 --> 00:33:11,030
+então sempre que você estiver procurando um emprego,
+
+559
+00:33:11,030 --> 00:33:13,400
+seja agora ou mais tarde, não deixe de conferir.
+
+560
+00:33:14,300 --> 00:33:15,860
+Certo, então voltando ao nosso objetivo principal.
+
+561
+00:33:16,140 --> 00:33:20,083
+Como é que podemos usar tudo o que construímos sobre funções complexas e
+
+562
+00:33:20,083 --> 00:33:23,972
+transformações que geram mapas conformes e coisas assim para construir
+
+563
+00:33:23,972 --> 00:33:28,080
+algum tipo de função que recria o efeito da galeria de gravuras do Escher?
+
+564
+00:33:28,680 --> 00:33:31,631
+Talvez fique mais fácil se eu simplesmente jogar o esboço completo da função,
+
+565
+00:33:31,631 --> 00:33:33,700
+e aí podemos passar por cada etapa com mais detalhes.
+
+566
+00:33:34,440 --> 00:33:38,346
+Primeiro, pegue um logaritmo, gerando esse padrão bizarro de ladrilhamento
+
+567
+00:33:38,346 --> 00:33:41,777
+duplamente periódico, e depois você gira e escala esse padrão de
+
+568
+00:33:41,777 --> 00:33:46,000
+ladrilhamento do jeito certo, e então a partir daí você aplica uma exponencial,
+
+569
+00:33:46,000 --> 00:33:49,220
+que desfaz a deformação, mas desta vez com uma certa torção.
+
+570
+00:33:50,080 --> 00:33:52,847
+Isso pode parecer um pouco bizarro, mas na verdade existe uma forma
+
+571
+00:33:52,847 --> 00:33:55,780
+bem legal de motivar e entender o que realmente está acontecendo aqui.
+
+572
+00:33:56,300 --> 00:33:59,153
+Dá mais uma olhada naquela imagem original de Drosta,
+
+573
+00:33:59,153 --> 00:34:02,974
+e lembra como queremos pegar essa grande criatura de torta e de alguma
+
+574
+00:34:02,974 --> 00:34:07,280
+forma identificá-la com a cópia menor auto-semelhante, com zoom 16 vezes maior.
+
+575
+00:34:07,540 --> 00:34:10,659
+Quero que você pense numa linha conectando as duas.
+
+576
+00:34:11,219 --> 00:34:15,131
+Uma forma de colocar o objetivo que a gente tem é que queremos que a
+
+577
+00:34:15,131 --> 00:34:19,100
+função final transforme essa linha num loop fechado no espaço final.
+
+578
+00:34:19,540 --> 00:34:24,105
+As extremidades da linha lá em cima representam as criaturas de pi grande e pequena,
+
+579
+00:34:24,105 --> 00:34:28,126
+então qualquer função que identifique essas criaturas deveria, no mínimo,
+
+580
+00:34:28,126 --> 00:34:29,159
+fechar essa linha.
+
+581
+00:34:29,600 --> 00:34:33,600
+Agora pense em como essa linha fica no logaritmo da imagem.
+
+582
+00:34:33,600 --> 00:34:36,328
+A grande criatura de pi corresponde a todas essas
+
+583
+00:34:36,328 --> 00:34:39,000
+várias cópias aqui ao lado da linha imaginária.
+
+584
+00:34:39,639 --> 00:34:42,232
+Como a gente falou, quando você reduz a imagem,
+
+585
+00:34:42,232 --> 00:34:45,266
+isso corresponde a se deslocar para a esquerda no log,
+
+586
+00:34:45,266 --> 00:34:49,900
+então essas cópias na imagem logarítmica representam aquela pequena criatura de pi.
+
+587
+00:34:50,300 --> 00:34:52,680
+E na verdade, em vez de usar essa linha horizontal,
+
+588
+00:34:52,680 --> 00:34:56,413
+a gente vai querer aproveitar o fato de que essa imagem logarítmica é periódica
+
+589
+00:34:56,413 --> 00:34:57,720
+em duas direções separadas.
+
+590
+00:34:58,360 --> 00:35:02,869
+Então, em vez disso, o que vamos usar é uma linha diagonal que conecta
+
+591
+00:35:02,869 --> 00:35:07,700
+essa cópia do personagem grande a essa cópia inferior esquerda do pequeno.
+
+592
+00:35:07,940 --> 00:35:10,467
+Isso pode parecer sem muita motivação no momento, e realmente é,
+
+593
+00:35:10,467 --> 00:35:13,073
+mas a melhor forma de explicar o porquê é simplesmente te mostrar
+
+594
+00:35:13,073 --> 00:35:15,047
+como isso se desenrola, e depois, se você quiser,
+
+595
+00:35:15,047 --> 00:35:17,653
+a gente pode comparar com o que teria acontecido se você tentasse
+
+596
+00:35:17,653 --> 00:35:18,640
+usar a linha horizontal.
+
+597
+00:35:19,200 --> 00:35:22,507
+Agora esse novo componente para baixo na imagem logarítmica corresponde a
+
+598
+00:35:22,507 --> 00:35:26,040
+adicionar uma certa rotação no sentido horário ao caminho na imagem original.
+
+599
+00:35:26,460 --> 00:35:30,377
+Lembre-se, nosso objetivo é transformar isso num loop na imagem final,
+
+600
+00:35:30,377 --> 00:35:34,407
+mas eu e você acabamos de passar tipo 10 minutos falando bastante sobre
+
+601
+00:35:34,407 --> 00:35:38,940
+uma função que transforma segmentos de reta em círculos, ou seja, e elevado a z.
+
+602
+00:35:39,320 --> 00:35:43,493
+O que você precisa fazer é fazer esse segmento de reta acabar perfeitamente
+
+603
+00:35:43,493 --> 00:35:47,833
+vertical com uma altura de 2 pi, e fazer isso basicamente se resume a girá-lo
+
+604
+00:35:47,833 --> 00:35:52,340
+e redimensioná-lo do jeito certo para dar a ele esse comprimento e essa direção.
+
+605
+00:35:52,940 --> 00:35:56,447
+Agora, se você lembrar, quando a gente estava aquecendo com números complexos,
+
+606
+00:35:56,447 --> 00:35:59,864
+falamos sobre como multiplicar por uma constante te dá alguma combinação de
+
+607
+00:35:59,864 --> 00:36:03,282
+rotação e redimensionamento, e neste caso, uma característica artística que
+
+608
+00:36:03,282 --> 00:36:06,609
+talvez a gente queira é que nossa grande criatura de pi no canto inferior
+
+609
+00:36:06,609 --> 00:36:10,071
+esquerdo permaneça fixa nessa posição, e isso significaria que esse ponto na
+
+610
+00:36:10,071 --> 00:36:12,859
+nossa imagem logarítmica precisa ficar parado no mesmo lugar,
+
+611
+00:36:12,859 --> 00:36:16,321
+então em vez de girar em torno da origem, o que a gente realmente quer é que
+
+612
+00:36:16,321 --> 00:36:17,760
+tudo gire em torno desse ponto.
+
+613
+00:36:18,280 --> 00:36:21,240
+Digamos que a gente rotule esse ponto como algo tipo z zero,
+
+614
+00:36:21,240 --> 00:36:24,792
+então é assim que a fórmula atualizada ficaria para essa rotação e esse
+
+615
+00:36:24,792 --> 00:36:28,689
+redimensionamento, mas na real quase todo o conteúdo se resume a escolher essa
+
+616
+00:36:28,689 --> 00:36:32,388
+constante c pela qual você vai multiplicar, e se você gosta de exercícios,
+
+617
+00:36:32,388 --> 00:36:36,187
+talvez curta realmente tirar um momento para descobrir qual valor específico
+
+618
+00:36:36,187 --> 00:36:37,420
+essa constante deve ter.
+
+619
+00:36:38,200 --> 00:36:41,845
+Mas aqui, como a gente está sendo bem visual e eu quero me divertir um pouco,
+
+620
+00:36:41,845 --> 00:36:45,347
+deixa eu te mostrar essa constante no seu próprio pequeno plano complexo,
+
+621
+00:36:45,347 --> 00:36:49,560
+e também mostrar o que acontece se eu meio que pegá-la e mover um pouco pra lá e pra cá.
+
+622
+00:36:50,060 --> 00:36:53,358
+Escolhas diferentes te dão redimensionamentos e rotações diferentes,
+
+623
+00:36:53,358 --> 00:36:57,335
+que depois de exponenciar geram todas essas imagens caleidoscópicas completamente
+
+624
+00:36:57,335 --> 00:36:57,820
+bizarras.
+
+625
+00:36:58,420 --> 00:37:01,787
+Uma forma de pensar na operação inteira é como um jogo em que
+
+626
+00:37:01,787 --> 00:37:05,043
+você está tentando encontrar o valor exato que faz tudo se
+
+627
+00:37:05,043 --> 00:37:08,520
+alinhar como precisa naquela imagem no canto inferior direito.
+
+628
+00:37:09,120 --> 00:37:12,800
+Quando ela é ajustada para esse valor adequado e a gente obtém esse efeito recriado
+
+629
+00:37:12,800 --> 00:37:16,391
+do Escher, nessa imagem final no canto inferior direito eu estive mostrando esse
+
+630
+00:37:16,391 --> 00:37:19,760
+buraco no meio, análogo ao buraco que o Escher tinha na obra original dele.
+
+631
+00:37:20,640 --> 00:37:22,420
+Mas isso na verdade é totalmente artificial.
+
+632
+00:37:22,780 --> 00:37:25,345
+A imagem de saída da função naturalmente preenche
+
+633
+00:37:25,345 --> 00:37:28,120
+isso com seu próprio espiral repetitivo para dentro.
+
+634
+00:37:28,120 --> 00:37:31,645
+Afinal, o padrão de ladrilhamento girado à esquerda se estende
+
+635
+00:37:31,645 --> 00:37:35,738
+infinitamente por todo o plano, então quando você toma sua exponencial,
+
+636
+00:37:35,738 --> 00:37:38,580
+ele também preenche tudo, exceto o ponto em zero.
+
+637
+00:37:39,880 --> 00:37:40,400
+E é isso!
+
+638
+00:37:40,540 --> 00:37:42,040
+Essa é a operação básica.
+
+639
+00:37:42,520 --> 00:37:45,301
+Traduza para esse espaço logarítmico de aparência bizarra,
+
+640
+00:37:45,301 --> 00:37:47,506
+gire e redimensione para realinhar as coisas,
+
+641
+00:37:47,506 --> 00:37:49,760
+e depois traduza de volta com uma exponencial.
+
+642
+00:37:51,500 --> 00:37:54,872
+Neste ponto, depois de recriar nossa própria variação de Escher,
+
+643
+00:37:54,872 --> 00:37:59,561
+pode ser legal passar por como esse mesmo processo fica no exemplo específico do Escher,
+
+644
+00:37:59,561 --> 00:38:04,197
+aquela cidade litorânea maltesa contendo uma galeria de gravuras com uma pessoa olhando
+
+645
+00:38:04,197 --> 00:38:05,620
+para uma imagem da cidade.
+
+646
+00:38:06,420 --> 00:38:10,627
+Como antes, o passo número um é colocar essa cena no seu próprio pequeno plano complexo,
+
+647
+00:38:10,627 --> 00:38:13,160
+onde o ponto limite infinito em torno do qual tudo é
+
+648
+00:38:13,160 --> 00:38:15,120
+redimensionado fica posicionado em zero.
+
+649
+00:38:16,340 --> 00:38:20,596
+O passo dois é tomar um logaritmo disso, o que nesse caso nos dá uma transformação
+
+650
+00:38:20,596 --> 00:38:24,540
+igualmente bizarra da cena inteira, mas desta vez há uma pequena diferença.
+
+651
+00:38:24,980 --> 00:38:28,320
+Como o Escher estava trabalhando com um zoom bem mais profundo,
+
+652
+00:38:28,320 --> 00:38:31,766
+com um fator de escala de 256, os ladrilhos repetidos nesse novo
+
+653
+00:38:31,766 --> 00:38:35,000
+exemplo na verdade ocupam uma parte maior do plano complexo.
+
+654
+00:38:36,280 --> 00:38:39,733
+Passo três, de novo, é girar e escalar isso, o que depende de
+
+655
+00:38:39,733 --> 00:38:43,300
+multiplicar pela escolha apropriada de uma constante complexa.
+
+656
+00:38:43,760 --> 00:38:48,196
+A restrição é garantir que essa imagem girada continue se repetindo a cada 2 pi
+
+657
+00:38:48,196 --> 00:38:52,800
+unidades na vertical, mas ao longo de uma parte da imagem que antes era diagonal.
+
+658
+00:38:53,300 --> 00:38:56,951
+E aí, no passo quatro, você passa tudo isso por e elevado a z,
+
+659
+00:38:56,951 --> 00:39:01,133
+e o que você obtém é algo muito parecido com a imagem final do Escher,
+
+660
+00:39:01,133 --> 00:39:06,080
+uma imagem em que dar a volta em um loop corresponde a ampliar por um fator de 256.
+
+661
+00:39:07,720 --> 00:39:10,768
+E de novo, quando a gente enquadra isso dessa forma com funções complexas,
+
+662
+00:39:10,768 --> 00:39:11,880
+não existe buraco no meio.
+
+663
+00:39:12,160 --> 00:39:14,768
+Esse resultado final é em si uma imagem Drosta,
+
+664
+00:39:14,768 --> 00:39:17,987
+embora desta vez com uma torção, em que existe um tipo de
+
+665
+00:39:17,987 --> 00:39:22,760
+autossimilaridade espiralando infinitamente para baixo o quanto você quiser dar zoom.
+
+666
+00:39:24,000 --> 00:39:26,880
+Tem algumas coisas que vale a pena notar sobre esse processo todo.
+
+667
+00:39:27,480 --> 00:39:30,310
+Antes de mais nada, se você escrever essa ideia como uma fórmula,
+
+668
+00:39:30,310 --> 00:39:33,575
+em que você pega um log, multiplica por uma constante e depois exponencia,
+
+669
+00:39:33,575 --> 00:39:37,362
+isso na verdade pode ser simplificado para parecer simplesmente elevar a sua entrada à
+
+670
+00:39:37,362 --> 00:39:39,060
+potência de alguma constante complexa.
+
+671
+00:39:39,540 --> 00:39:43,200
+E se você reintroduzir aquele fator de deslocamento, isso só introduz outra constante.
+
+672
+00:39:43,980 --> 00:39:46,947
+Por um lado, é muito satisfatório que esse processo inteiro complicado
+
+673
+00:39:46,947 --> 00:39:49,150
+possa ser reduzido a tão poucos símbolos na página,
+
+674
+00:39:49,150 --> 00:39:52,880
+mas eu acho que isso corre o risco de meio que esconder o que de fato está acontecendo.
+
+675
+00:39:53,740 --> 00:39:55,816
+E aí, eu tinha mencionado que as coisas não funcionariam
+
+676
+00:39:55,816 --> 00:39:57,780
+se você tentasse usar só aquelas linhas horizontais.
+
+677
+00:39:58,040 --> 00:40:01,085
+Se você estiver curioso, aqui está como fica se você tentar isso,
+
+678
+00:40:01,085 --> 00:40:04,740
+o que significaria girar tudo em 90 graus e escalar na quantidade apropriada.
+
+679
+00:40:05,320 --> 00:40:07,043
+Você até consegue algo meio interessante, mas
+
+680
+00:40:07,043 --> 00:40:08,880
+simplesmente não é o que a gente está buscando.
+
+681
+00:40:09,180 --> 00:40:11,702
+E se você pensar bem, o que basicamente está acontecendo
+
+682
+00:40:11,702 --> 00:40:14,360
+é que você está trocando os papéis da rotação e da escala.
+
+683
+00:40:16,680 --> 00:40:20,640
+Saindo um pouco disso tudo, essa segunda perspectiva em que a obra gira toda em torno
+
+684
+00:40:20,640 --> 00:40:24,507
+de rotacionar em um espaço logarítmico parece completamente diferente da abordagem
+
+685
+00:40:24,507 --> 00:40:28,280
+mais intuitiva do Escher usando a grade distorcida dele e a deformação da malha.
+
+686
+00:40:28,760 --> 00:40:31,180
+Mas existe um fio condutor ligando as duas perspectivas.
+
+687
+00:40:31,900 --> 00:40:34,725
+Por exemplo, agora você consegue entender exatamente como
+
+688
+00:40:34,725 --> 00:40:37,500
+a gente recriou e modificou a grade que o Escher tinha.
+
+689
+00:40:37,940 --> 00:40:41,419
+Basicamente, você pega essa mesma função que a gente foi construindo,
+
+690
+00:40:41,419 --> 00:40:45,100
+mas em vez de aplicá-la a uma imagem, aplica a uma grade quadrada comum.
+
+691
+00:40:45,780 --> 00:40:47,760
+Bom, na verdade não exatamente uma grade quadrada comum.
+
+692
+00:40:48,020 --> 00:40:51,371
+O ideal é trabalhar com uma que fique mais densa à medida que você dá zoom,
+
+693
+00:40:51,371 --> 00:40:53,560
+para que ela pareça a mesma em todas as escalas.
+
+694
+00:40:54,200 --> 00:40:58,180
+Quando você faz isso, o logaritmo te dá esse padrão de ladrilhamento curvo muito bonito.
+
+695
+00:40:58,720 --> 00:41:02,044
+E aí, a partir disso, você faz o mesmo truque de girar as coisas do
+
+696
+00:41:02,044 --> 00:41:04,327
+jeito certo e depois aplicar uma exponencial,
+
+697
+00:41:04,327 --> 00:41:07,850
+com o resultado ficando bem próximo de algo que o Escher passou muitas
+
+698
+00:41:07,850 --> 00:41:09,140
+horas árduas construindo.
+
+699
+00:41:09,680 --> 00:41:14,137
+E lembre-se: o motivo inteiro de a gente estar usando a linguagem dos números complexos,
+
+700
+00:41:14,137 --> 00:41:16,721
+a razão de eu ter feito você passar por tudo isso,
+
+701
+00:41:16,721 --> 00:41:19,760
+é que essa propriedade conforme aparece como um subproduto.
+
+702
+00:41:20,180 --> 00:41:22,825
+Os quadradinhos minúsculos da grade original continuam sendo,
+
+703
+00:41:22,825 --> 00:41:25,340
+pelo menos aproximadamente, quadrados no resultado final.
+
+704
+00:41:26,000 --> 00:41:29,466
+O Escher disse que fazer essa obra deu nele umas dores de cabeça monumentais,
+
+705
+00:41:29,466 --> 00:41:32,438
+e embora talvez eu e você também tenhamos aguentado algumas dores
+
+706
+00:41:32,438 --> 00:41:35,229
+de cabeça por motivos bem diferentes, a recompensa é que essa
+
+707
+00:41:35,229 --> 00:41:38,200
+propriedade é algo que a gente consegue sem esforço extra nenhum.
+
+708
+00:41:39,000 --> 00:41:42,554
+Agora, pra deixar claro, você com certeza não precisa entender derivadas complexas ou
+
+709
+00:41:42,554 --> 00:41:46,024
+logaritmos para apreciar a obra do Escher, e eu não gostaria de dar a entender que
+
+710
+00:41:46,024 --> 00:41:46,400
+precisa.
+
+711
+00:41:46,740 --> 00:41:49,265
+Mas, quando você entende esse lado mais matemático,
+
+712
+00:41:49,265 --> 00:41:53,126
+isso te dá a capacidade de ter um tipo bem diferente de apreciação pelo que o
+
+713
+00:41:53,126 --> 00:41:54,760
+Escher estava realmente fazendo.
+
+714
+00:41:55,180 --> 00:41:58,025
+E é isso que eu acho fascinante em tudo isso, a conexão real
+
+715
+00:41:58,025 --> 00:42:00,680
+que eu quero passar entre essas duas linhas narrativas.
+
+716
+00:42:01,140 --> 00:42:05,289
+Se você olhar pra carreira do Escher, ao longo dela ele foi atraído por certos conceitos,
+
+717
+00:42:05,289 --> 00:42:07,900
+coisas como representar o infinito em um espaço finito.
+
+718
+00:42:08,280 --> 00:42:11,213
+E ao mesmo tempo, ele parecia ser guiado por uma certa estética,
+
+719
+00:42:11,213 --> 00:42:13,963
+muitas vezes alguma regra rígida implícita, como a ideia de
+
+720
+00:42:13,963 --> 00:42:17,400
+quadradinhos pequenos continuarem sendo quadradinhos pequenos nessa malha.
+
+721
+00:42:17,760 --> 00:42:21,450
+O resultado final, quando conceito e estética se combinam desse jeito,
+
+722
+00:42:21,450 --> 00:42:25,350
+é que uma peça do Escher geralmente parece a solução de um quebra-cabeça,
+
+723
+00:42:25,350 --> 00:42:28,460
+mas um em que nem é óbvio que uma solução deveria existir.
+
+724
+00:42:29,040 --> 00:42:32,819
+Agora, o que eu acho tão instigante é que esses quebra-cabeças visuais
+
+725
+00:42:32,819 --> 00:42:36,760
+aos quais ele chegou não são apenas análogos ao ato de fazer matemática.
+
+726
+00:42:36,840 --> 00:42:40,381
+As estruturas específicas pelas quais ele foi intuitivamente atraído muitas
+
+727
+00:42:40,381 --> 00:42:43,780
+vezes escondem dentro delas uma matemática muito real e muito profunda.
+
+728
+00:42:44,260 --> 00:42:47,034
+No nosso exemplo, a estrutura mais profunda não é só o fato
+
+729
+00:42:47,034 --> 00:42:49,620
+de que a peça pode ser descrita com funções complexas.
+
+730
+00:42:50,120 --> 00:42:53,102
+As ideias que a gente tocou nessa linha narrativa estão, na verdade,
+
+731
+00:42:53,102 --> 00:42:56,260
+muito mais perto do que você talvez imagine das fronteiras da pesquisa.
+
+732
+00:42:56,840 --> 00:42:59,734
+Se você voltar pra nossa abordagem na segunda metade,
+
+733
+00:42:59,734 --> 00:43:04,374
+lembre como ela dependia de usar esse padrão duplamente periódico no plano complexo,
+
+734
+00:43:04,374 --> 00:43:06,940
+algo que se repete em duas direções separadas.
+
+735
+00:43:07,860 --> 00:43:10,031
+Na verdade existe um nome especial para funções de
+
+736
+00:43:10,031 --> 00:43:12,420
+números complexos que são duplamente periódicas assim.
+
+737
+00:43:12,640 --> 00:43:14,560
+Elas são conhecidas como funções elípticas.
+
+738
+00:43:14,900 --> 00:43:18,950
+Seria coisa demais explicar aqui exatamente por que essas funções são tão úteis,
+
+739
+00:43:18,950 --> 00:43:23,052
+mas uma coisa que eu quero destacar é que aqueles dois matemáticos que mencionei
+
+740
+00:43:23,052 --> 00:43:26,596
+no começo, os que forneceram a análise dessa peça, De Smit e Lenstra,
+
+741
+00:43:26,596 --> 00:43:30,748
+são ambos teóricos dos números, e funções elípticas têm um papel muito importante
+
+742
+00:43:30,748 --> 00:43:35,001
+na teoria dos números moderna, servindo como uma espécie de ponte para outras áreas
+
+743
+00:43:35,001 --> 00:43:35,760
+da matemática.
+
+744
+00:43:36,400 --> 00:43:39,824
+Isso talvez explique, pelo menos em parte, como eles puderam olhar para
+
+745
+00:43:39,824 --> 00:43:43,440
+essa peça e pensar em construir aquela função que a gente apresentou aqui.
+
+746
+00:43:44,660 --> 00:43:47,984
+Quando eu olho para a obra do Escher, seja a galeria de gravuras ou muitos
+
+747
+00:43:47,984 --> 00:43:51,442
+outros favoritos, o motivo de eu amar tanto essas peças é que elas despertam
+
+748
+00:43:51,442 --> 00:43:54,900
+em mim uma sensação muito específica que é difícil encontrar em outro lugar.
+
+749
+00:43:55,280 --> 00:43:57,740
+É uma sensação de as coisas se encaixarem perfeitamente no lugar.
+
+750
+00:43:58,140 --> 00:43:59,580
+Mas não é exatamente isso.
+
+751
+00:43:59,620 --> 00:44:02,320
+É algo mais do que só o prazer de ver um quebra-cabeça resolvido.
+
+752
+00:44:02,540 --> 00:44:05,028
+É uma apreciação do gênio criativo necessário até
+
+753
+00:44:05,028 --> 00:44:07,820
+mesmo para imaginar o quebra-cabeça em primeiro lugar.
+
+754
+00:44:08,140 --> 00:44:11,600
+O único outro lugar onde eu tenho essa sensação é fazendo matemática.
+
+755
+00:44:11,940 --> 00:44:17,053
+Então o fato de um artista e um matemático poderem ser atraídos pelas mesmas estruturas,
+
+756
+00:44:17,053 --> 00:44:20,946
+mas por razões completamente diferentes, me sugere que existe algo
+
+757
+00:44:20,946 --> 00:44:24,200
+universal naquilo que exatamente parece atrair os dois.
+

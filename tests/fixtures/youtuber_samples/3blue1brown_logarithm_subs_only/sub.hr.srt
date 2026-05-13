@@ -1,0 +1,2748 @@
+1
+00:00:00,000 --> 00:00:04,240
+Kad god radim jedan od ovih videa, ponekad se dogodi poseban trenutak u kojem čin
+
+2
+00:00:04,240 --> 00:00:07,956
+animiranja uključuje rješavanje cijele hrpe malih tehničkih zagonetki,
+
+3
+00:00:07,956 --> 00:00:12,248
+a onda mi matematika koju pokušavam objasniti klikne na način na koji prije nije,
+
+4
+00:00:12,248 --> 00:00:14,080
+čim je vidim kako oživi na ekranu.
+
+5
+00:00:14,480 --> 00:00:17,420
+Najbolje verzije tih trenutaka često mi daju do znanja da će video
+
+6
+00:00:17,420 --> 00:00:20,271
+biti jedan od mojih najdražih, a slaganje završetka ovog dijela
+
+7
+00:00:20,271 --> 00:00:23,300
+ovdje bio je upravo jedan takav trenutak kad sam dobio taj osjećaj.
+
+8
+00:00:27,040 --> 00:00:30,140
+Naša priča danas zapravo ne počinje u učionici matematike.
+
+9
+00:00:30,460 --> 00:00:31,860
+Počinjemo u učionici likovnog.
+
+10
+00:00:32,720 --> 00:00:36,448
+Zamisli da stojiš u galeriji i gledaš sliku broda u luci,
+
+11
+00:00:36,448 --> 00:00:41,158
+a cijeli se svijet iskrivljuje dok ti pogled klizi prema gore i udesno,
+
+12
+00:00:41,158 --> 00:00:43,120
+gdje vidiš selo na toj obali.
+
+13
+00:00:43,640 --> 00:00:47,887
+Među zbijenim zgradama, svijet se iskrivljuje još više dok ti pogled klizi
+
+14
+00:00:47,887 --> 00:00:52,420
+prema dolje do ulaza u jednu zgradu, koji vodi u hodnik pun umjetničkih djela.
+
+15
+00:00:53,200 --> 00:00:56,880
+A na kraju tog hodnika, evo opet tebe, kako gledaš sliku broda.
+
+16
+00:00:58,520 --> 00:00:59,860
+Ovo je M.C.
+
+17
+00:00:59,980 --> 00:01:05,340
+Escherova litografija iz 1956., Print Gallery, ili na nizozemskom, Prentendentunstelling.
+
+18
+00:01:05,960 --> 00:01:10,117
+U pismu koje je napisao svom sinu, opisujući kako je stvorio mladića koji sa
+
+19
+00:01:10,117 --> 00:01:12,961
+zanimanjem gleda grafiku na kojoj se nalazi on sam,
+
+20
+00:01:12,961 --> 00:01:16,626
+Escher je ovo nazvao najneobičnijom stvari koju sam ikad napravio,
+
+21
+00:01:16,626 --> 00:01:18,540
+što kod njega stvarno puno govori.
+
+22
+00:01:18,900 --> 00:01:23,076
+Escherova umjetnost omiljena je diljem svijeta i često sadrži paradoksalne teme
+
+23
+00:01:23,076 --> 00:01:27,200
+ili jedinstveno zadovoljavajuće geometrijske uzorke s nekom vrstom karaktera.
+
+24
+00:01:27,500 --> 00:01:30,226
+Ta je ljubav posebno izražena među matematičarima,
+
+25
+00:01:30,226 --> 00:01:34,915
+jer se njegova umjetnost često dotiče iznenađujuće dubokih pojmova unutar matematike,
+
+26
+00:01:34,915 --> 00:01:38,840
+unatoč tome što sam Escher nije imao formalnu naobrazbu u tom području.
+
+27
+00:01:39,520 --> 00:01:43,380
+Print Gallery nudi savršen primjer te neočekivane dubine.
+
+28
+00:01:43,380 --> 00:01:47,073
+Godine 2003. matematičari De Smit i Lenstra ponudili su sjajnu
+
+29
+00:01:47,073 --> 00:01:50,349
+analizu onoga što se zapravo događa u ovom djelu i tog
+
+30
+00:01:50,349 --> 00:01:54,220
+zapanjujućeg samodostatnog ciklusa koji je Escher uspio postići.
+
+31
+00:01:54,720 --> 00:01:59,462
+Jedan od mojih glavnih ciljeva s ovim videom je ponuditi vizualno raspakiravanje njihove
+
+32
+00:01:59,462 --> 00:02:03,935
+analize, s namjerom da ti, kao i uvijek, dam osjećaj da si ovo i sam mogao ponovno
+
+33
+00:02:03,935 --> 00:02:04,420
+otkriti.
+
+34
+00:02:05,120 --> 00:02:08,508
+Nešto što neočekivano iskače iz te analize jest odgovor
+
+35
+00:02:08,508 --> 00:02:12,080
+na pitanje što bi točno trebalo biti u sredini ove slike.
+
+36
+00:02:12,580 --> 00:02:15,240
+Na prvu bi to moglo zvučati kao nepovezano pitanje.
+
+37
+00:02:15,600 --> 00:02:19,444
+Ako mu prilaziš iz gornjeg desnog kuta, čini se kao da bi tamo trebale biti
+
+38
+00:02:19,444 --> 00:02:23,340
+zgrade iz sela, ali ako dolaziš slijeva, više izgleda kao dio okvira slike.
+
+39
+00:02:23,620 --> 00:02:27,740
+Ali ako mu priđeš odozdo, djeluje prikladnije da bude dio same galerije.
+
+40
+00:02:28,160 --> 00:02:31,896
+Nekako je sva dvosmislenost oko toga gdje se točno nalaziš
+
+41
+00:02:31,896 --> 00:02:35,760
+u cijelom ovom prizoru sažeta u onaj prazni krug u sredini.
+
+42
+00:02:36,220 --> 00:02:38,362
+I čisto iz zezancije, budući da smo u 2020-ima,
+
+43
+00:02:38,362 --> 00:02:40,960
+pustio sam jedan difuzijski model da pokuša to popuniti.
+
+44
+00:02:41,500 --> 00:02:43,280
+Nimalo iznenađujuće, jako se muči.
+
+45
+00:02:43,860 --> 00:02:45,200
+Jednostavno to uopće ne kuži.
+
+46
+00:02:45,740 --> 00:02:48,080
+A da ipak dam malo priznanja tom jadnom stroju, naravno da se muči.
+
+47
+00:02:48,480 --> 00:02:52,320
+Ovo djeluje kao suštinski dvosmislen i loše definiran dio prizora.
+
+48
+00:02:52,780 --> 00:02:57,288
+Ali svejedno, nadam se da ćeš se do kraja složiti da postoji jedno, i zapravo samo jedno,
+
+49
+00:02:57,288 --> 00:03:01,340
+rješenje koje djeluje kao pravi komadić slagalice koji možeš ubaciti na mjesto.
+
+50
+00:03:02,100 --> 00:03:05,821
+Prije nego što zaronimo u matematiku, želim ti dati čisto intuitivan opis toga
+
+51
+00:03:05,821 --> 00:03:09,780
+kako je Escher zapravo napravio ovo djelo, a to se dijeli na tri različita koraka.
+
+52
+00:03:10,340 --> 00:03:17,160
+Prvi korak je krenuti s izravnanom verzijom istog općeg koncepta, gdje čovjek gleda sliku.
+
+53
+00:03:17,640 --> 00:03:22,551
+Ta slika sadrži luku, koja sadrži grad, koji sadrži grafičku galeriju,
+
+54
+00:03:22,551 --> 00:03:26,620
+koja sadrži tog istog čovjeka, i tako dalje i tako dalje.
+
+55
+00:03:26,720 --> 00:03:28,820
+Mogao bi zumirati unedogled, koliko god ti srce želi.
+
+56
+00:03:30,380 --> 00:03:34,198
+Ta ideja samoslične slike, gdje je slika sadržana unutar same sebe,
+
+57
+00:03:34,198 --> 00:03:36,820
+ima poseban naziv među grafičkim dizajnerima.
+
+58
+00:03:37,180 --> 00:03:39,636
+Poznata je kao Droste efekt, nazvan po tvrtki za
+
+59
+00:03:39,636 --> 00:03:42,040
+kakao koja ga je koristila u svom brendiranju.
+
+60
+00:03:42,560 --> 00:03:45,476
+Zapravo, čini se da je to bio prilično čest marketinški
+
+61
+00:03:45,476 --> 00:03:48,020
+trik za razne proizvode s početka 20. stoljeća.
+
+62
+00:03:48,480 --> 00:03:53,608
+Samoslična Droste slika koju je Escher koristio, međutim, uključuje puno,
+
+63
+00:03:53,608 --> 00:03:59,367
+puno dublji zum od bilo koje od ovih, gdje je samoslična kopija 256 puta manja od
+
+64
+00:03:59,367 --> 00:04:00,140
+originala.
+
+65
+00:04:00,520 --> 00:04:02,420
+Vidjet ćeš za minutu odakle dolazi taj broj.
+
+66
+00:04:03,160 --> 00:04:08,440
+Escherova genijalnost je u tome što je nekako intuitivno shvatio da mora postojati
+
+67
+00:04:08,440 --> 00:04:14,042
+način da se ovaj koncept slike ugniježđene unutar same sebe pretvori u ovu iskrivljenu
+
+68
+00:04:14,042 --> 00:04:19,579
+petlju, gdje se približavanje događa implicitno dok pogled promatrača luta oko kruga.
+
+69
+00:04:21,180 --> 00:04:23,841
+Usput, možda se pitaš odakle mi ta ispravljena verzija,
+
+70
+00:04:23,841 --> 00:04:27,614
+a odgovor je da su nam ona dvojica matematičara koje sam spomenuo velikodušno
+
+71
+00:04:27,614 --> 00:04:28,920
+dopustili da je koristimo.
+
+72
+00:04:28,920 --> 00:04:32,785
+To je nešto što su oni zapravo rekonstruirali iz originalnog Escherovog rada
+
+73
+00:04:32,785 --> 00:04:36,600
+uz pomoć dvoje nizozemskih umjetnika, Hansa Richtera i Jacqueline Hofstre.
+
+74
+00:04:37,140 --> 00:04:39,900
+Način na koji su to rekonstruirali je zapravo super zanimljiv.
+
+75
+00:04:40,280 --> 00:04:44,460
+Na neki način govoreći, uključuje uzimanje logaritma originalnog rada.
+
+76
+00:04:44,920 --> 00:04:47,740
+Znam da ta rečenica trenutno vjerojatno zvuči kao besmislica,
+
+77
+00:04:47,740 --> 00:04:51,300
+ali kasnije u ovom videu, obećavam, to će imati i više nego dovoljno smisla.
+
+78
+00:04:52,220 --> 00:04:55,448
+Da objasnim osnovnu ideju kako je Escher napravio ovu petlju,
+
+79
+00:04:55,448 --> 00:04:59,681
+želim upotrijebiti primjer koji je jednostavniji od onoga na kojem je on radio,
+
+80
+00:04:59,681 --> 00:05:03,174
+pa ćemo otvoriti ovu prilagođenu samosličnu Drasta sliku na kojoj
+
+81
+00:05:03,174 --> 00:05:07,460
+pita-stvorenje gleda u uokvirenu sliku kuće u kojoj živi to isto pita-stvorenje.
+
+82
+00:05:08,140 --> 00:05:12,140
+U ovom primjeru samoslična kopija je samo 16 puta manja od originala,
+
+83
+00:05:12,140 --> 00:05:15,560
+i to jednostavno čini sve puno lakšim za vidjeti odjednom.
+
+84
+00:05:15,980 --> 00:05:20,640
+Ono što ću napraviti je zadržati odvojeni radni prostor ovdje desno kako bismo
+
+85
+00:05:20,640 --> 00:05:25,240
+skicirali opći cilj koji imamo na umu, gdje o tome možeš razmišljati tako da
+
+86
+00:05:25,240 --> 00:05:29,840
+želiš rasporediti taj faktor uvećanja od 16 puta preko četiri kuta kvadrata.
+
+87
+00:05:30,560 --> 00:05:33,391
+Recimo, na primjer, da želiš da se samo pita-stvorenje
+
+88
+00:05:33,391 --> 00:05:36,380
+pojavi otprilike u istoj veličini u donjem lijevom kutu.
+
+89
+00:05:36,880 --> 00:05:41,779
+Onda, ako u originalu uvećaš za faktor 2, uzet ćemo ono što bi bilo u gornjem lijevom
+
+90
+00:05:41,779 --> 00:05:46,620
+dijelu te uvećane verzije i smjestiti to u gornji lijevi dio našeg radnog prostora.
+
+91
+00:05:47,340 --> 00:05:52,275
+Slično tome, uvećaj za još jedan faktor 2, pa uzmi gornji desni dio te uvećane
+
+92
+00:05:52,275 --> 00:05:57,780
+verzije i sad postavi proširenu verziju toga u gornji desni dio našeg radnog prostora.
+
+93
+00:05:58,600 --> 00:06:01,441
+Na kraju, još jedan korak: uvećaj za još jedan faktor 2,
+
+94
+00:06:01,441 --> 00:06:04,434
+uzmi ono što je u donjem desnom dijelu te uvećane verzije,
+
+95
+00:06:04,434 --> 00:06:07,580
+povećaj to i smjesti u donji desni dio našeg radnog prostora.
+
+96
+00:06:08,280 --> 00:06:12,880
+Ta četiri izrezana kuta daju grubu ideju onoga što ovdje želimo stvoriti.
+
+97
+00:06:13,180 --> 00:06:17,565
+Sve dok možeš pronaći gladak način da popuniš praznine između njih,
+
+98
+00:06:17,565 --> 00:06:20,969
+dok pogled promatrača luta oko kruga na ovoj slici,
+
+99
+00:06:20,969 --> 00:06:25,813
+ono što vidi će se sve više i više uvećavati dok se elegantno ne spoji sa
+
+100
+00:06:25,813 --> 00:06:29,020
+samosličnim dijelom slike koji je 16 puta manji.
+
+101
+00:06:29,680 --> 00:06:33,421
+Mogli bismo samo pokušati sve to naivno spojiti, nešto poput ovoga,
+
+102
+00:06:33,421 --> 00:06:37,274
+ali iskreno to baš i ne izgleda dobro, i sigurno nije tako glatko ni
+
+103
+00:06:37,274 --> 00:06:42,020
+elegantno kao ono što je Escher uspio postići, tako da je još nešto posla pred nama.
+
+104
+00:06:42,940 --> 00:06:45,920
+Ova knjiga koju sam, usput rečeno, prelistavao, The Magic of M.C.
+
+105
+00:06:46,040 --> 00:06:50,794
+Escher, nešto je što sam kupio tijekom divnog posjeta Escher muzeju u Haagu, koji bih ti,
+
+106
+00:06:50,794 --> 00:06:53,945
+ako se ikad nađeš u Nizozemskoj, stvarno toplo preporučio,
+
+107
+00:06:53,945 --> 00:06:58,432
+a kad otvorimo dio o galeriji grafika, nudi nam mali uvid u to kakav je zapravo bio
+
+108
+00:06:58,432 --> 00:06:59,340
+Escherov proces.
+
+109
+00:06:59,800 --> 00:07:03,440
+Kod njega je drugi korak bio napraviti ovu iskrivljenu mrežu.
+
+110
+00:07:03,940 --> 00:07:07,592
+Za ove animacije ovdje koristit ću malo izmijenjenu verziju te mreže koju je
+
+111
+00:07:07,592 --> 00:07:11,580
+matematički jednostavno malo ljepše generirati, ali prikazuje istu ključnu poantu.
+
+112
+00:07:11,980 --> 00:07:17,774
+U njegovom slučaju, samoslična Droste slika na kojoj je radio ima faktor skaliranja 256,
+
+113
+00:07:17,774 --> 00:07:22,382
+pa bi rasporediti to preko četiri kuta za njega značilo skaliranje za
+
+114
+00:07:22,382 --> 00:07:25,740
+faktor četiri dok prelaziš iz jednog kuta u drugi.
+
+115
+00:07:26,540 --> 00:07:30,643
+A ako pažljivo pogledaš njegovu mrežu, recimo jedan od kvadrata dolje desno,
+
+116
+00:07:30,643 --> 00:07:35,339
+primijeti kako, ako pratiš gornju i donju liniju koje omeđuju taj kvadrat prema donjem
+
+117
+00:07:35,339 --> 00:07:40,036
+lijevom dijelu slike, te iste linije na kraju omeđuju kvadrat koji je sada četiri puta
+
+118
+00:07:40,036 --> 00:07:40,360
+veći.
+
+119
+00:07:40,720 --> 00:07:44,053
+I onda slično tome, ako pogledaš linije koje omeđuju lijevu i desnu
+
+120
+00:07:44,053 --> 00:07:47,137
+stranu malog kvadrata iz tog područja i pratiš ih prema gore,
+
+121
+00:07:47,137 --> 00:07:50,420
+na kraju se smjeste oko kvadrata koji je lijepo četiri puta veći.
+
+122
+00:07:50,860 --> 00:07:54,900
+Dakle, mreža na neki način kodira skaliranje iz jednog kuta u sljedeći koje želimo.
+
+123
+00:07:55,440 --> 00:07:59,917
+E sad, za naš mali projekt, gdje trebamo povećati samo za faktor dva iz svakog kuta
+
+124
+00:07:59,917 --> 00:08:04,340
+u sljedeći, koristit ćemo izmijenjenu verziju ovoga, ali opća ideja će biti ista.
+
+125
+00:08:05,660 --> 00:08:08,649
+Možda se prirodno pitaš odakle, pobogu, dolazi ova mreža,
+
+126
+00:08:08,649 --> 00:08:12,162
+ali to pitanje zapravo želim odgoditi i preskočiti na treći korak,
+
+127
+00:08:12,162 --> 00:08:16,358
+a to je kako zapravo možeš koristiti ovu mrežu zajedno sa samosličnom Droseovom
+
+128
+00:08:16,358 --> 00:08:18,560
+slikom da stvoriš Escherov konačni efekt.
+
+129
+00:08:19,200 --> 00:08:24,155
+Ovo funkcionira tako da se prvo postavi obična kvadratna mreža preko originalne slike,
+
+130
+00:08:24,155 --> 00:08:28,880
+i onda recimo da želiš da ovaj dio ovdje završi u ovom kutu naše konačne verzije.
+
+131
+00:08:29,280 --> 00:08:33,624
+Ono što bi napravio je da uzmeš svaki sićušni kvadrat unutar toga i onda preneseš
+
+132
+00:08:33,624 --> 00:08:37,700
+njegov sadržaj u odgovarajući sićušni kvadrat u iskrivljenoj verziji mreže.
+
+133
+00:08:38,100 --> 00:08:42,505
+Od tamo je svaki susjedni kvadrat u našoj originalnoj mreži prisiljen
+
+134
+00:08:42,505 --> 00:08:46,336
+ići u odgovarajući susjedni kvadrat u iskrivljenoj verziji,
+
+135
+00:08:46,336 --> 00:08:51,060
+pa možeš nekako samo nastaviti pratiti kamo slika mora ići prateći mrežu.
+
+136
+00:08:52,000 --> 00:08:56,563
+A činjenica da su linije mreže u iskrivljenoj verziji razmaknute za faktor
+
+137
+00:08:56,563 --> 00:09:01,003
+dva dok ideš od dolje lijevo prema gore lijevo znači da se mjerilo naše
+
+138
+00:09:01,003 --> 00:09:05,320
+scene automatski poveća za taj faktor dva dok se krećeš uz tu liniju.
+
+139
+00:09:06,660 --> 00:09:11,282
+Ideja ovog procesa je da je, kao umjetniku, relativno jednostavno ići dio po dio,
+
+140
+00:09:11,282 --> 00:09:15,961
+precrtavajući ono što je unutar jednog sićušnog kvadrata u drugi sićušni kvadrat,
+
+141
+00:09:15,961 --> 00:09:18,700
+jer na toj maloj skali stvari nisu iskrivljene.
+
+142
+00:09:19,180 --> 00:09:23,352
+To je sigurno puno, puno lakše nego pokušavati iz ničega zamisliti i nacrtati
+
+143
+00:09:23,352 --> 00:09:27,740
+odgovarajuću iskrivljenu završnu sliku počevši samo s praznim listom pred sobom.
+
+144
+00:09:28,960 --> 00:09:32,204
+Dakle, u biti, kad imaš ovu iskrivljenu mrežu pri ruci,
+
+145
+00:09:32,204 --> 00:09:36,275
+proces precrtavanja svakog malog kvadrata postaje ugodno automatski,
+
+146
+00:09:36,275 --> 00:09:39,637
+a ako pustimo taj automatski proces da ide skroz u krug,
+
+147
+00:09:39,637 --> 00:09:43,412
+lijepo se zatvori s početnim položajem, a da bi se to dogodilo,
+
+148
+00:09:43,412 --> 00:09:48,544
+potrebno je da je naša originalna slika imala tu samosličnost kad se zumiraš za faktor
+
+149
+00:09:48,544 --> 00:09:48,780
+16.
+
+150
+00:09:49,380 --> 00:09:52,899
+Nadam se da ćeš se složiti da je konačni rezultat koji imamo prilično lijep,
+
+151
+00:09:52,899 --> 00:09:55,908
+ponovno stvara isti opći efekt, ali više od svega mislim da Kazu
+
+152
+00:09:55,908 --> 00:09:58,640
+omogućuje da dublje cijeni Escherovu vlastitu kompoziciju.
+
+153
+00:09:59,080 --> 00:10:03,360
+On je zapravo bio vrlo promišljen u izboru motiva na svim različitim skalama.
+
+154
+00:10:03,880 --> 00:10:08,818
+Da citiram, sasvim namjerno sam odabrao serijske tipove objekata,
+
+155
+00:10:08,818 --> 00:10:13,300
+kao na primjer niz slika na zidu ili blokove kuća u gradu.
+
+156
+00:10:13,720 --> 00:10:16,663
+Bez cikličkih elemenata, bilo bi mi još teže prenijeti
+
+157
+00:10:16,663 --> 00:10:18,680
+svoje značenje slučajnom promatraču.
+
+158
+00:10:20,060 --> 00:10:23,715
+Ova ideja gdje imaš ravnu referentnu sliku pa onda iskrivljenu mrežu,
+
+159
+00:10:23,715 --> 00:10:26,787
+i koristiš to dvoje zajedno da stvoriš iskrivljenu scenu,
+
+160
+00:10:26,787 --> 00:10:28,800
+čest je postupak u grafičkom dizajnu.
+
+161
+00:10:29,100 --> 00:10:32,298
+Poznata je kao mesh warp, a Escher je nije izmislio za ovaj slučaj,
+
+162
+00:10:32,298 --> 00:10:35,640
+nego je to nešto što je i prije više puta koristio u drugim radovima.
+
+163
+00:10:36,180 --> 00:10:42,490
+Za našu priču poanta je da je sva logika pretvaranja Drosteova zuma u petlju apstrahirana
+
+164
+00:10:42,490 --> 00:10:48,020
+i pročišćena u ovoj mreži, što prirodno postavlja pitanje: odakle ona dolazi?
+
+165
+00:10:48,180 --> 00:10:49,000
+Kako se ovo napravi?
+
+166
+00:10:49,800 --> 00:10:55,048
+Možeš nekako zamisliti da bi kao početni naivni pristup mogao pokušati linearno
+
+167
+00:10:55,048 --> 00:11:00,960
+skalirati sve iz jednog kuta u sljedeći, ali kad bi to odmah napravio, vidio bi problem.
+
+168
+00:11:01,440 --> 00:11:06,336
+Ta dva procesa skaliranja stvaraju različite pritiske na pojedine kvadrate, gdje se,
+
+169
+00:11:06,336 --> 00:11:11,231
+na primjer, ovaj kvadrat želi raširiti u ovom smjeru zbog zumiranja s desne strane,
+
+170
+00:11:11,231 --> 00:11:16,360
+ali se također želi raširiti u ovom drugom smjeru zbog odzumiranja dok ideš prema gore.
+
+171
+00:11:16,940 --> 00:11:20,112
+Escher je očito bio potaknut da to razriješi zakrivljavanjem
+
+172
+00:11:20,112 --> 00:11:22,280
+svih linija kako bi ublažio tu napetost.
+
+173
+00:11:23,160 --> 00:11:26,836
+Ali postoji još jedno ključno ograničenje kojim se, čini se, vodio,
+
+174
+00:11:26,836 --> 00:11:29,964
+nešto što je vjerojatno olakšalo proces prijenosa slike,
+
+175
+00:11:29,964 --> 00:11:34,792
+zbog čega je konačni rezultat izgledao prirodnije i zbog čega će se svakom matematičaru
+
+176
+00:11:34,792 --> 00:11:37,700
+zadubljenom u kompleksnu analizu odmah naćuliti uši.
+
+177
+00:11:38,020 --> 00:11:43,240
+U njegovoj konačnoj iskrivljenoj mreži, ti sićušni kvadrati su, pa, kvadrati.
+
+178
+00:11:43,680 --> 00:11:46,560
+Da budem jasan, to uopće nije istina za većinu mesh warpova.
+
+179
+00:11:46,760 --> 00:11:51,344
+U većini slučajeva, iskrivljene linije mreže koje nacrtaš ne sijeku se nužno pod
+
+180
+00:11:51,344 --> 00:11:56,100
+pravim kutovima, a mala područja koja omeđuju će općenito biti mali paralelogrami.
+
+181
+00:11:56,500 --> 00:12:01,219
+S tim se i dalje može raditi, umjetnik i dalje nekako može napraviti prijenos,
+
+182
+00:12:01,219 --> 00:12:05,213
+ali je vjerojatno precrtavanje s originala na iskrivljenu verziju
+
+183
+00:12:05,213 --> 00:12:09,266
+nezgodnije kad imaš tu distorziju, pa bi bilo puno ljepše kad bi u
+
+184
+00:12:09,266 --> 00:12:13,320
+iskrivljenoj mreži mali kvadrati ostali barem približno kvadratni.
+
+185
+00:12:13,760 --> 00:12:17,111
+A kad pažljivo pogledaš mrežu koju je Escher koristio za svoju galeriju grafika,
+
+186
+00:12:17,111 --> 00:12:18,200
+vidiš da ima to svojstvo.
+
+187
+00:12:18,600 --> 00:12:22,332
+Sve se linije sijeku pod pravim kutovima, i na dovoljno maloj skali,
+
+188
+00:12:22,332 --> 00:12:25,240
+područja koja omeđuju stvarno su približno kvadrati.
+
+189
+00:12:25,800 --> 00:12:29,174
+Umjetnički gledano, ovo ima lijep učinak da, iako je cijela
+
+190
+00:12:29,174 --> 00:12:32,834
+scena dramatično iskrivljena i deformirana na globalnoj razini,
+
+191
+00:12:32,834 --> 00:12:36,380
+kad zumiraš na lokalnu razinu, sve je relativno neizobličeno.
+
+192
+00:12:36,760 --> 00:12:40,480
+To je ono zbog čega je svaki lokalni dio Escherove slike lako prepoznatljiv.
+
+193
+00:12:41,720 --> 00:12:44,920
+A matematički, tu priča stvarno postaje zanimljiva.
+
+194
+00:12:45,440 --> 00:12:50,005
+Vidiš, ova ideja funkcije iz dvodimenzionalnog prostora u dvodimenzionalni prostor,
+
+195
+00:12:50,005 --> 00:12:52,590
+gdje sitni kvadrati ostaju približno kvadrati,
+
+196
+00:12:52,590 --> 00:12:55,120
+ima posebnu ulogu i posebno ime u matematici.
+
+197
+00:12:55,380 --> 00:12:59,276
+Zove se konformno preslikavanje, a jedno područje gdje se stalno pojavljuje je u
+
+198
+00:12:59,276 --> 00:13:03,562
+proučavanju funkcija s ulazima koji su kompleksni brojevi i izlazima koji su kompleksni
+
+199
+00:13:03,562 --> 00:13:04,000
+brojevi.
+
+200
+00:13:04,960 --> 00:13:08,387
+U ovom trenutku ćemo napraviti korak unatrag, izaći iz učionice
+
+201
+00:13:08,387 --> 00:13:11,759
+likovnog i prošetati do odjela matematike, gdje ti želim dati
+
+202
+00:13:11,759 --> 00:13:14,860
+mini lekciju o nekim od temeljnih ideja iz tog područja.
+
+203
+00:13:16,540 --> 00:13:19,792
+Osnovni plan odavde je da prvo želim kratko ponoviti gradivo,
+
+204
+00:13:19,792 --> 00:13:23,097
+proći neke osnove kompleksnih brojeva i kompleksnih funkcija,
+
+205
+00:13:23,097 --> 00:13:27,521
+a onda želim provesti neko smisleno vrijeme gradeći intuiciju za to kako logaritmi
+
+206
+00:13:27,521 --> 00:13:30,080
+izgledaju u ovom kontekstu kompleksnih brojeva.
+
+207
+00:13:30,480 --> 00:13:34,356
+A onda, kad to savladaš, proći ćemo kroz potpuno drukčiji način na koji možeš razmišljati
+
+208
+00:13:34,356 --> 00:13:37,840
+o ponovnom stvaranju ovog efekta koji je Escher imao u svojoj galeriji grafika.
+
+209
+00:13:38,980 --> 00:13:40,860
+Za zagrijavanje, krenimo s ponavljanjem osnova.
+
+210
+00:13:41,260 --> 00:13:45,189
+O realnim brojevima obično razmišljamo kao da žive na jednodimenzionalnoj liniji,
+
+211
+00:13:45,189 --> 00:13:48,100
+brojevnom pravcu, a kompleksni brojevi su dvodimenzionalni.
+
+212
+00:13:48,640 --> 00:13:53,756
+Točnije, zamišljamo imaginarnu konstantu i, definiranu kao kvadratni
+
+213
+00:13:53,756 --> 00:13:58,496
+korijen od A svaka druga točka na toj ravnini predstavlja neku
+
+214
+00:13:58,496 --> 00:14:03,160
+kombinaciju realnog broja s nekim realnim višekratnikom od i.
+
+215
+00:14:03,700 --> 00:14:07,889
+Uobičajeno je koristiti varijablu z kad govorimo o općem kompleksnom broju,
+
+216
+00:14:07,889 --> 00:14:11,240
+a igra koju želimo igrati je razumjeti razne funkcije od z.
+
+217
+00:14:11,840 --> 00:14:15,840
+Vrlo jednostavan, ali važan primjer je pomnožiti z nekom konstantom.
+
+218
+00:14:16,320 --> 00:14:22,500
+Funkcija f od z jednako dva puta z ima učinak da sve poveća za faktor dva.
+
+219
+00:14:23,040 --> 00:14:27,280
+Ali što je s množenjem s nečim imaginarnim, poput i, kvadratnog korijena iz minus jedan?
+
+220
+00:14:27,880 --> 00:14:34,280
+Pa znaš da množenje jedan s i daje i, a po definiciji, i puta i je minus jedan.
+
+221
+00:14:34,700 --> 00:14:38,226
+Primijetit ćeš da su oba to rotacije od 90 stupnjeva, i općenitije,
+
+222
+00:14:38,226 --> 00:14:42,120
+množenje bilo koje vrijednosti z s i ima učinak rotacije za 90 stupnjeva.
+
+223
+00:14:42,940 --> 00:14:46,871
+A još općenitije od toga, kad množiš bilo kojom kompleksnom konstantom,
+
+224
+00:14:46,871 --> 00:14:49,640
+učinak je neka kombinacija skaliranja i rotacije.
+
+225
+00:14:50,160 --> 00:14:51,896
+I postoji zgodan način da točno razmišljaš o tome
+
+226
+00:14:51,896 --> 00:14:53,420
+koliko bi se trebalo skalirati i rotirati.
+
+227
+00:14:54,000 --> 00:14:58,243
+Nula puta bilo što je nula, pa ishodište mora ostati fiksirano na mjestu,
+
+228
+00:14:58,243 --> 00:15:02,080
+a onda jedan puta bilo koja konstanta c daje tu istu konstantu c.
+
+229
+00:15:02,620 --> 00:15:07,223
+To znači da se ta točka na jedan mora povući i završiti točno na onoj konstanti c
+
+230
+00:15:07,223 --> 00:15:11,940
+o kojoj govorimo, i to u potpunosti određuje koliko će biti skaliranja i rotacije.
+
+231
+00:15:12,400 --> 00:15:14,880
+Od tamo, ostatak mreže ostaje krut koliko god može.
+
+232
+00:15:15,440 --> 00:15:18,300
+Ključna stvar koju treba naglasiti za našu priču je da,
+
+233
+00:15:18,300 --> 00:15:22,200
+ako sve što radiš jest množenje nekom konstantom, oblici se uvijek čuvaju.
+
+234
+00:15:22,660 --> 00:15:26,337
+Bilo što što želiš nacrtati, poput kvadrata, može se skalirati ili rotirati,
+
+235
+00:15:26,337 --> 00:15:28,320
+ali osim toga nema nikakvih izobličenja.
+
+236
+00:15:29,080 --> 00:15:31,440
+Sad stvari postaju zanimljivije kod složenijih funkcija.
+
+237
+00:15:32,120 --> 00:15:36,940
+Jednostavan, ali netrivijalan primjer bio bi preslikavanje svakog broja z u z na kvadrat.
+
+238
+00:15:37,580 --> 00:15:40,640
+Dakle, ulaz dva morat će prijeći u dva na kvadrat, što je četiri.
+
+239
+00:15:41,100 --> 00:15:44,520
+Ulaz i morat će prijeći u i na kvadrat, što je minus jedan.
+
+240
+00:15:45,100 --> 00:15:48,040
+Sam minus jedan morao bi se preslikati u plus jedan.
+
+241
+00:15:48,480 --> 00:15:52,578
+A evo kako to izgleda u cijelosti ako pustim svaku točku među linijama
+
+242
+00:15:52,578 --> 00:15:56,500
+mreže ovog ulaznog prostora da prijeđe na svoj odgovarajući izlaz.
+
+243
+00:15:57,160 --> 00:16:00,454
+To je baš lijep efekt i, za razliku od množenja konstantom,
+
+244
+00:16:00,454 --> 00:16:02,520
+oblik se apsolutno više ne zadržava.
+
+245
+00:16:02,940 --> 00:16:04,680
+Linije mreže se savijaju i izobličuju.
+
+246
+00:16:05,280 --> 00:16:09,200
+Ipak, i ovo je ključna stvar, obrati pažnju na to što se događa na maloj skali.
+
+247
+00:16:09,520 --> 00:16:12,440
+Na primjer, ako se fokusiramo samo na ovaj mali kvadrat iz ulaznog prostora.
+
+248
+00:16:12,940 --> 00:16:15,520
+Dok opet gledaš kako se transformacija odvija,
+
+249
+00:16:15,520 --> 00:16:19,840
+možeš vidjeti da se oblik približno zadržava, barem na dovoljno maloj skali.
+
+250
+00:16:20,160 --> 00:16:23,248
+Mali kvadrati iz naše izvorne mreže ostaju približno
+
+251
+00:16:23,248 --> 00:16:25,980
+kvadratni čak i nakon što ih funkcija obradi.
+
+252
+00:16:26,500 --> 00:16:29,980
+Da upotrijebimo stručni izraz, funkcija z na kvadrat je konformno preslikavanje.
+
+253
+00:16:30,940 --> 00:16:33,180
+A izbor z na kvadrat ovdje stvarno nije ništa posebno.
+
+254
+00:16:33,540 --> 00:16:37,200
+Evo kako izgleda ako svaku točku z preslikaš u z na treću.
+
+255
+00:16:37,580 --> 00:16:39,340
+Kvadrati ostaju približno kvadratni.
+
+256
+00:16:40,120 --> 00:16:43,105
+Dobro, možda ovaj primjer kvadrata koji ističem na izlazu ne izgleda baš
+
+257
+00:16:43,105 --> 00:16:46,380
+točno kao kvadrat, ali zapravo je to samo zato što je na početku bio prevelik.
+
+258
+00:16:46,700 --> 00:16:50,320
+Da budem jasan, ovo konformno svojstvo o kojem pričam je granično svojstvo.
+
+259
+00:16:50,660 --> 00:16:53,247
+Određeni kvadrat možda neće postati točno kvadrat,
+
+260
+00:16:53,247 --> 00:16:55,627
+ali ideja je da kako sve više i više zumiraš,
+
+261
+00:16:55,627 --> 00:16:59,508
+birajući kvadratna područja iz ulaznog prostora koja su sve manja i manja,
+
+262
+00:16:59,508 --> 00:17:03,440
+dobiveni izlaz će se doista sve bolje i bolje moći aproksimirati kvadratom.
+
+263
+00:17:04,000 --> 00:17:08,140
+I nema ničeg posebno posebnog ni u izboru polinoma poput z na kvadrat ili z na treću.
+
+264
+00:17:08,420 --> 00:17:12,185
+Za gotovo bilo koju funkciju kompleksnih brojeva koje se možeš sjetiti zapisati,
+
+265
+00:17:12,185 --> 00:17:13,220
+ovo svojstvo vrijedi.
+
+266
+00:17:13,599 --> 00:17:15,599
+Oblik se zadržava na dovoljno maloj skali.
+
+267
+00:17:15,940 --> 00:17:16,880
+Gotovo kao da je čarolija.
+
+268
+00:17:17,680 --> 00:17:20,220
+Upotreba kompleksnih brojeva ovdje je jako važna.
+
+269
+00:17:20,380 --> 00:17:24,988
+Ako bi umjesto toga o točkama u 2D prostoru razmišljao jednostavno kao o paru realnih
+
+270
+00:17:24,988 --> 00:17:29,758
+brojeva s nekim xy koordinatama i zapišeš neku proizvoljnu funkciju od x i y da dobiješ
+
+271
+00:17:29,758 --> 00:17:34,475
+novi par brojeva, ono što je puno, puno tipičnije kad pustiš da se točke u tom ulaznom
+
+272
+00:17:34,475 --> 00:17:38,920
+prostoru transformiraju jest da se izlazi tih sitnih kvadrata zgnječe i izobliče.
+
+273
+00:17:39,220 --> 00:17:42,505
+Čak i kad sve više i više zumiraš, rezultirajući granični
+
+274
+00:17:42,505 --> 00:17:46,020
+oblik obično izgleda kao paralelogram, ne nužno kao kvadrat.
+
+275
+00:17:46,660 --> 00:17:49,620
+Dakle, kompleksne funkcije stvarno jesu posebne na ovaj način.
+
+276
+00:17:50,160 --> 00:17:53,880
+A osnovni razlog zašto mali kvadrati ostaju kvadrati svodi se na račun.
+
+277
+00:17:54,580 --> 00:17:58,520
+Ono što gledaš jest što znači da te funkcije imaju derivacije.
+
+278
+00:17:59,380 --> 00:18:03,786
+To možda zvuči malo čudno, ali analogija koju možeš imati na umu je da za većinu
+
+279
+00:18:03,786 --> 00:18:07,421
+funkcija realnih brojeva, ako ih vizualiziraš na uobičajen način,
+
+280
+00:18:07,421 --> 00:18:10,561
+samo s grafom gdje su ulazi na x-osi, a izlazi na y-osi,
+
+281
+00:18:10,561 --> 00:18:14,692
+dok zumiraš sve više i više prema bilo kojoj određenoj točki na tom grafu,
+
+282
+00:18:14,692 --> 00:18:17,060
+on sve više i više izgleda kao ravna crta.
+
+283
+00:18:17,500 --> 00:18:21,765
+To jest, stopa promjene, koliko delta f dobiješ za zadani delta x,
+
+284
+00:18:21,765 --> 00:18:23,380
+približava se konstanti.
+
+285
+00:18:24,020 --> 00:18:26,825
+To je doslovno ono što znači da funkcija ima derivaciju,
+
+286
+00:18:26,825 --> 00:18:29,180
+ali to nije jedini način da se to vizualizira.
+
+287
+00:18:29,440 --> 00:18:31,640
+Evo jednog drugačijeg načina da vidiš isti koncept.
+
+288
+00:18:32,220 --> 00:18:37,000
+Umjesto da gledamo graf funkcije, razmislimo o istoj funkciji kao o transformaciji.
+
+289
+00:18:37,460 --> 00:18:40,940
+To jest, pustit ćeš svaku od tih točaka na pravcu realnih brojeva da
+
+290
+00:18:40,940 --> 00:18:44,420
+prijeđe na svoj odgovarajući izlaz na ovom drugom brojevnom pravcu.
+
+291
+00:18:45,140 --> 00:18:48,233
+Ono što ćeš primijetiti jest da jednako razmaknute točke iz
+
+292
+00:18:48,233 --> 00:18:51,378
+ulaznog prostora mogu biti iskrivljene u izlaznom prostoru,
+
+293
+00:18:51,378 --> 00:18:54,680
+što znači da stopa promjene funkcije općenito nije konstantna.
+
+294
+00:18:55,020 --> 00:18:58,760
+Taj razmak između naših točaka može se mijenjati od jednog dijela slike do drugog.
+
+295
+00:18:59,260 --> 00:19:03,546
+Ali znamo da se, kako zumiraš sve više i više prema nekom određenom izlazu,
+
+296
+00:19:03,546 --> 00:19:05,660
+stopa promjene približava konstanti.
+
+297
+00:19:06,100 --> 00:19:08,400
+Točke izgledaju sve ravnomjernije raspoređene.
+
+298
+00:19:09,260 --> 00:19:14,161
+Točnije, ako uzmeš sićušni komadić točaka oko nekog određenog ulaza i preslikaš
+
+299
+00:19:14,161 --> 00:19:17,076
+ih u izlazni prostor oko odgovarajućeg izlaza,
+
+300
+00:19:17,076 --> 00:19:21,915
+možeš približno poravnati sve točke samo tako da sve skaliraš nekim određenim
+
+301
+00:19:21,915 --> 00:19:23,280
+konstantnim faktorom.
+
+302
+00:19:23,980 --> 00:19:27,713
+To je ista analitička činjenica koju ti govori nagib grafa,
+
+303
+00:19:27,713 --> 00:19:30,180
+samo u drugačijem vizualnom kontekstu.
+
+304
+00:19:30,620 --> 00:19:34,283
+Ali taj se kontekst puno lakše prenosi na razmišljanje o funkcijama
+
+305
+00:19:34,283 --> 00:19:38,000
+kompleksnih vrijednosti kao transformacijama u kompleksnoj ravnini.
+
+306
+00:19:38,540 --> 00:19:43,294
+Tamo ćemo o okolini oko zadanog ulaza razmišljati kao o sićušnoj mreži točaka,
+
+307
+00:19:43,294 --> 00:19:48,413
+kao i prije, i pustit ćemo svaku točku na toj mreži da prijeđe na svoj odgovarajući
+
+308
+00:19:48,413 --> 00:19:48,840
+izlaz.
+
+309
+00:19:49,800 --> 00:19:52,585
+U ovom slučaju, ono što znači da se stopa promjene
+
+310
+00:19:52,585 --> 00:19:55,760
+približava konstanti u osnovi je potpuno ista jednadžba.
+
+311
+00:19:56,360 --> 00:20:01,620
+Vizualno si zamisli da ako uzmeš taj sićušni komadić kvadrata oko ulaza i preslikaš ga na
+
+312
+00:20:01,620 --> 00:20:06,880
+odgovarajući izlaz, možeš to približno uskladiti s linijama izlazne mreže tako da množiš
+
+313
+00:20:06,880 --> 00:20:10,012
+nekim određenim konstantnim faktorom, što, sjeti se,
+
+314
+00:20:10,012 --> 00:20:14,621
+u kontekstu kompleksnih brojeva znači da to na neki način rotiraš i skaliraš,
+
+315
+00:20:14,621 --> 00:20:17,340
+ovisno o vrijednosti te kompleksne konstante.
+
+316
+00:20:17,940 --> 00:20:21,946
+Budući da rotacija i skaliranje čuvaju oblik, to znači da svi sićušni kvadrati
+
+317
+00:20:21,946 --> 00:20:25,900
+iz ulaznog prostora ostaju barem približno kvadrati pod tom transformacijom.
+
+318
+00:20:27,300 --> 00:20:29,586
+Dakle, kad se odmaknemo korak unatrag, evo ključne poante,
+
+319
+00:20:29,586 --> 00:20:31,280
+razloga zašto uopće pričamo o svemu ovome.
+
+320
+00:20:31,560 --> 00:20:35,891
+Iako su konformna preslikavanja poput onoga koje je Escher koristio za svoju galeriju
+
+321
+00:20:35,891 --> 00:20:40,069
+grafika nevjerojatno ograničena i vrlo neobična među općim načinima na koje bi se
+
+322
+00:20:40,069 --> 00:20:44,400
+dvodimenzionalni prostor mogao kontinuirano gnječiti i rastezati, ipak, kao magijom,
+
+323
+00:20:44,400 --> 00:20:46,999
+samo time što govoriš jezikom kompleksnih brojeva,
+
+324
+00:20:46,999 --> 00:20:50,464
+nekako možeš stvarati čitave obitelji tih konformnih preslikavanja,
+
+325
+00:20:50,464 --> 00:20:52,400
+a da se zapravo ni ne trudiš previše.
+
+326
+00:20:52,860 --> 00:20:56,280
+Sve što radiš jest kombiniraš i uparuješ standardne funkcije kompleksnih brojeva.
+
+327
+00:20:56,640 --> 00:20:59,374
+Jedino ograničenje je da te funkcije moraju imati derivacije,
+
+328
+00:20:59,374 --> 00:21:02,600
+ali to će vrijediti za većinu funkcija koje ti padnu na pamet zapisati.
+
+329
+00:21:03,620 --> 00:21:06,964
+Za našu priču, za dešifriranje onoga što se događa s galerijom grafika,
+
+330
+00:21:06,964 --> 00:21:10,260
+to znači da imamo sasvim novi način da preoblikujemo ključno pitanje.
+
+331
+00:21:10,760 --> 00:21:15,370
+Možeš li konstruirati neku namjerno skrojenu kompleksnu funkciju tako
+
+332
+00:21:15,370 --> 00:21:20,180
+da čin zumiranja oko ulaza izgleda kao hodanje po petlji među izlazima?
+
+333
+00:21:21,900 --> 00:21:25,201
+Sad, u ovom trenutku, sa samo apsolutnim minimumom ekspresnog uvoda
+
+334
+00:21:25,201 --> 00:21:28,650
+u kompleksnu analizu iza sebe, teško je znati odakle krenuti ako prvo
+
+335
+00:21:28,650 --> 00:21:32,148
+ne izgradimo širu paletu funkcija s kojima možemo raditi i ne steknemo
+
+336
+00:21:32,148 --> 00:21:35,400
+osjećaj za to kako se one zapravo ponašaju za kompleksne brojeve.
+
+337
+00:21:35,740 --> 00:21:40,306
+U ovom slučaju zapravo postoje samo dvije funkcije koje trebaš razumjeti,
+
+338
+00:21:40,306 --> 00:21:42,120
+e na z i prirodni logaritam.
+
+339
+00:21:42,880 --> 00:21:45,712
+Želim se smiriti i posvetiti neko smisleno vrijeme razumijevanju obje,
+
+340
+00:21:45,712 --> 00:21:48,180
+i mislim da ćeš se složiti da je to vrijeme dobro potrošeno.
+
+341
+00:21:48,580 --> 00:21:51,815
+Svatko zaslužuje, po mom mišljenju, barem jednom u životu
+
+342
+00:21:51,815 --> 00:21:54,880
+doživjeti radost razumijevanja kompleksnog logaritma.
+
+343
+00:21:55,280 --> 00:21:59,620
+Prvo ipak, nužan preduvjet je razumjeti kompleksnu eksponencijalnu funkciju.
+
+344
+00:22:00,580 --> 00:22:03,922
+Redovni gledatelji će već biti upoznati s tim kako izgleda kad digneš
+
+345
+00:22:03,922 --> 00:22:07,360
+e na potenciju kompleksnog broja, ali malo ponavljanja nikad ne škodi.
+
+346
+00:22:07,840 --> 00:22:11,897
+Možemo početi slagati tu transformaciju tako da se usredotočimo na
+
+347
+00:22:11,897 --> 00:22:16,200
+poznatije primjere realnih ulaza i realnih izlaza koji im odgovaraju.
+
+348
+00:22:16,600 --> 00:22:21,620
+Na primjer, e na 0 je 1, pa se ova točka na 0 preslikava u ovu točku na 1.
+
+349
+00:22:22,200 --> 00:22:25,775
+A onda svaki put kad pustiš da taj ulaz naraste za 1,
+
+350
+00:22:25,775 --> 00:22:30,700
+izlaz naraste za faktor e, što znači da nam zapravo dosta brzo pobjegne.
+
+351
+00:22:31,320 --> 00:22:36,424
+A onda s druge strane, kako smanjuješ taj ulaz i puštaš ga da ode u negativne brojeve,
+
+352
+00:22:36,424 --> 00:22:40,400
+svaki korak ulijevo odgovara smanjivanju izlaza, opet za faktor e.
+
+353
+00:22:40,740 --> 00:22:44,360
+Posebno ćeš primijetiti da je u ovom slučaju izlaz uvijek pozitivan broj.
+
+354
+00:22:44,860 --> 00:22:47,422
+Naravno, ovo postaje puno zanimljivije kad dopustimo
+
+355
+00:22:47,422 --> 00:22:49,640
+da i ulazi i izlazi budu kompleksni brojevi.
+
+356
+00:22:50,140 --> 00:22:52,989
+I ovdje se sve što trebaš znati svodi na to što
+
+357
+00:22:52,989 --> 00:22:56,020
+se događa dok povećavaš imaginarni dio tog ulaza.
+
+358
+00:22:56,380 --> 00:23:00,700
+A ono što se tada događa je da odgovarajući izlaz kruži po kružnici.
+
+359
+00:23:02,120 --> 00:23:06,153
+Ako se pitaš zašto te imaginarni ulazi u eksponencijalnoj funkciji vode po
+
+360
+00:23:06,153 --> 00:23:10,240
+kružnici na ovaj način, o tome smo pričali puno, puno puta na ovom kanalu.
+
+361
+00:23:10,520 --> 00:23:12,680
+Pogledaj neke od linkova na ekranu i u opisu.
+
+362
+00:23:13,160 --> 00:23:18,263
+Ključna stvar koju ću ovdje ponoviti je da je ono što funkciju e na z čini jako zgodnom,
+
+363
+00:23:18,263 --> 00:23:21,569
+za razliku od eksponencijalnih funkcija s drugim bazama,
+
+364
+00:23:21,569 --> 00:23:25,860
+to da dok se tvoj ulaz pomiče prema gore brzinom od 1 jedinice u sekundi,
+
+365
+00:23:25,860 --> 00:23:29,920
+izlaz kruži po svojoj kružnici brzinom od točno 1 radijana u sekundi.
+
+366
+00:23:30,400 --> 00:23:33,565
+Dakle, konkretno, povećanje imaginarnog dijela za
+
+367
+00:23:33,565 --> 00:23:36,860
+točno 2 pi uzrokuje jednu punu rotaciju na izlazu.
+
+368
+00:23:37,640 --> 00:23:42,713
+Rečeno drugačije, ovi okomiti odsječci koje sam crtao, svaki visine točno 2 pi,
+
+369
+00:23:42,713 --> 00:23:47,400
+uredno se preslikavaju na jednu cijelu kružnicu kad primijeniš funkciju.
+
+370
+00:23:48,560 --> 00:23:52,415
+Primijetit ćeš da sam ove posebne okomite odsječke nacrtao tako da su jednako
+
+371
+00:23:52,415 --> 00:23:56,620
+razmaknuti u realnom smjeru, gdje se realni dio od jednog do sljedećeg poveća za 1.
+
+372
+00:23:57,000 --> 00:24:02,081
+Odgovarajuće kružnice s desne strane razlikuju se svaka za isti faktor skaliranja,
+
+373
+00:24:02,081 --> 00:24:03,320
+konkretno faktor e.
+
+374
+00:24:04,220 --> 00:24:08,672
+Ranije sam za jednostavniju funkciju z na kvadrat pokazao to kao transformaciju,
+
+375
+00:24:08,672 --> 00:24:10,620
+pomičući sve ulaze prema izlazima.
+
+376
+00:24:11,020 --> 00:24:15,220
+A u ovom slučaju, za e na z, ako te zanima kako izgleda ta ista ideja,
+
+377
+00:24:15,220 --> 00:24:19,360
+najlakše je uzeti podskup mreže, kao ovaj ovdje iz ulaznog prostora,
+
+378
+00:24:19,360 --> 00:24:23,440
+i ovako izgleda kad svaki kvadrat premjestiš na odgovarajući izlaz.
+
+379
+00:24:24,080 --> 00:24:27,980
+Dok zapravo budemo koristili ovu funkciju za naše ciljeve s galerijom otisaka,
+
+380
+00:24:27,980 --> 00:24:32,080
+bit će jako korisno da si u glavi usidriš ove okomite linije i kružnice u koje se
+
+381
+00:24:32,080 --> 00:24:32,680
+pretvaraju.
+
+382
+00:24:33,500 --> 00:24:36,347
+Zapravo, postoji jedan baš zaigran način na koji volim razmišljati
+
+383
+00:24:36,347 --> 00:24:38,892
+o tome kako se te okomite linije pretvaraju u koncentrične
+
+384
+00:24:38,892 --> 00:24:41,480
+kružnice i kako sa sobom mogu povući cijeli ulazni prostor.
+
+385
+00:24:41,780 --> 00:24:46,396
+Ja to volim zamišljati kao da cijelu tu z-ravninu nekako zarolaš u cijev,
+
+386
+00:24:46,396 --> 00:24:50,000
+tako da sve te okomite linije na kraju postanu kružnice.
+
+387
+00:24:50,480 --> 00:24:53,180
+Konkretno, svaka kružnica imala bi opseg 2 pi.
+
+388
+00:24:54,240 --> 00:24:58,727
+Zatim zamisli da tu cijev postaviš iznad ishodišta izlaznog prostora i onda
+
+389
+00:24:58,727 --> 00:25:01,658
+je nekako spljoštiš prema tom izlaznom prostoru,
+
+390
+00:25:01,658 --> 00:25:05,726
+pretvarajući sve kružnice iz te cijevi u ove koncentrične prstenove
+
+391
+00:25:05,726 --> 00:25:07,760
+eksponencijalno rastuće veličine.
+
+392
+00:25:08,700 --> 00:25:10,834
+To je jednostavno način na koji ja to volim zamišljati,
+
+393
+00:25:10,834 --> 00:25:13,240
+ali kako god ti to odlučiš promatrati, ono što želim da ti se
+
+394
+00:25:13,240 --> 00:25:15,840
+ureže u mozak je ideja da se okomite linije pretvaraju u kružnice.
+
+395
+00:25:16,340 --> 00:25:19,699
+Sad, druga jako važna stvar koju ovdje treba naglasiti je
+
+396
+00:25:19,699 --> 00:25:23,000
+da više različitih ulaza može završiti na istom izlazu.
+
+397
+00:25:23,820 --> 00:25:29,160
+Na primjer, e na nulu je jedan, ali e na 2 pi i je također jedan.
+
+398
+00:25:29,540 --> 00:25:34,280
+Isto vrijedi za e na minus 2 pi i i e na 4 pi i i tako dalje.
+
+399
+00:25:34,540 --> 00:25:39,796
+Zapravo, beskonačni niz duž bilo koje zadane vertikalne linije, razmaknut za 2 pi,
+
+400
+00:25:39,796 --> 00:25:44,860
+sve će se stopiti zajedno dok se ta vertikalna linija nekako smota u kružnicu.
+
+401
+00:25:45,260 --> 00:25:48,678
+Kažemo da je eksponencijalno preslikavanje više-prema-jedan,
+
+402
+00:25:48,678 --> 00:25:52,437
+iako možda nije očito kako će to ponavljanje u vertikalnom smjeru
+
+403
+00:25:52,437 --> 00:25:56,140
+biti ključno za našu konačnu rekreaciju efekta galerije otisaka.
+
+404
+00:25:56,900 --> 00:26:01,528
+Dakle, eksponencijali nam daju prvi sastojak, obilježen time da pretvaraju linije u
+
+405
+00:26:01,528 --> 00:26:05,711
+kružnice, a drugi sastojak koji nam treba je inverz takvog eksponencijala,
+
+406
+00:26:05,711 --> 00:26:10,562
+poznat kao prirodni logaritam, gdje je osnovna ideja da on te kružnice odmotava natrag
+
+407
+00:26:10,562 --> 00:26:11,120
+u linije.
+
+408
+00:26:11,500 --> 00:26:16,529
+Sad, ovo će biti posebno zabavno za vizualizirati i posebno važno za našu priču ako
+
+409
+00:26:16,529 --> 00:26:20,710
+zamislimo da ovu kompleksnu ravninu desno obojimo Drosteovom slikom,
+
+410
+00:26:20,710 --> 00:26:25,800
+recimo primjerom s kojim smo ranije radili, s pi stvorenjem koje gleda sliku kuće u
+
+411
+00:26:25,800 --> 00:26:27,800
+kojoj živi to isto pi stvorenje.
+
+412
+00:26:28,300 --> 00:26:31,928
+Drugim riječima, napokon je došlo vrijeme da ti i ja odgovorimo
+
+413
+00:26:31,928 --> 00:26:34,980
+na pitanje što znači uzeti prirodni logaritam slike.
+
+414
+00:26:36,400 --> 00:26:37,980
+Dobro, razmisli o ovome na trenutak.
+
+415
+00:26:38,460 --> 00:26:43,096
+Već znaš da se vertikalni odsječak poput ovoga lijevo, visine 2 pi,
+
+416
+00:26:43,096 --> 00:26:47,040
+pretvara u kružnicu kad primijeniš preslikavanje e na z.
+
+417
+00:26:47,540 --> 00:26:51,040
+Dakle, prirodni logaritam će uzeti kružnicu točaka na
+
+418
+00:26:51,040 --> 00:26:54,540
+toj slici i onda je ispraviti u jednu od tih linija.
+
+419
+00:26:55,440 --> 00:26:59,811
+Slično tome, ako pogledaš kružnicu koja je točno e puta manja,
+
+420
+00:26:59,811 --> 00:27:05,240
+i ona bi se ispravila u liniju iste visine smještenu jednu jedinicu ulijevo.
+
+421
+00:27:05,820 --> 00:27:10,277
+A onda će se, na sličan način, svaka kružnica između te dvije odmotati
+
+422
+00:27:10,277 --> 00:27:14,925
+u jednu od ovih vertikalnih linija između te zadnje dvije, i općenitije,
+
+423
+00:27:14,925 --> 00:27:20,018
+sve manji i manji prstenovi sa slike odmotavat će se u ove vertikalne odsječke,
+
+424
+00:27:20,018 --> 00:27:23,520
+svaki visine 2 pi, sve dalje i dalje ulijevo na slici.
+
+425
+00:27:24,080 --> 00:27:27,573
+Rezultat koji dobijemo je pomalo tripast, ali prilično je fora kad razmisliš o tome,
+
+426
+00:27:27,573 --> 00:27:29,860
+i ima nekoliko važnih stvari koje želim da primijetiš.
+
+427
+00:27:30,060 --> 00:27:33,336
+Vjerojatno si primijetio da se ponavlja kako ideš ulijevo,
+
+428
+00:27:33,336 --> 00:27:37,911
+i pozvat ću te da minutu u pozadini uma razmisliš zašto bi to mogao biti slučaj,
+
+429
+00:27:37,911 --> 00:27:42,260
+ali prije tog ponavljanja želim pričati o drugom smjeru u kojem se ponavlja.
+
+430
+00:27:42,800 --> 00:27:48,049
+Kako sam to dosad nacrtao, imaginarni dio za vrijednosti lijevo ide od 0 do 2 pi,
+
+431
+00:27:48,049 --> 00:27:50,900
+ali to je zapravo nekako proizvoljan izbor.
+
+432
+00:27:51,400 --> 00:27:56,499
+Sjeti se, ako nastaviš puštati da ta vrijednost z lijevo ide gore za još 2 pi jedinice,
+
+433
+00:27:56,499 --> 00:28:01,656
+odgovarajuća vrijednost e na z desno samo bi nastavila obilaziti istu tu kružnicu opet,
+
+434
+00:28:01,656 --> 00:28:06,579
+pa se nadam da ćeš se složiti da djeluje barem primamljivo pustiti da se naša slika
+
+435
+00:28:06,579 --> 00:28:10,740
+ponavlja u tom vertikalnom smjeru duž svake od tih vertikalnih linija.
+
+436
+00:28:12,800 --> 00:28:17,749
+I vrijedi i u drugom smjeru, kako imaginarni dio lijevo postaje manji dok ideš dolje,
+
+437
+00:28:17,749 --> 00:28:21,999
+odgovarajuća vrijednost desno samo nastavlja obilaziti tu istu kružnicu,
+
+438
+00:28:21,999 --> 00:28:25,900
+pa bi se uzorak koji vidiš možda trebao ponavljati i na taj način.
+
+439
+00:28:26,560 --> 00:28:30,842
+Da budem konkretniji, pravilo koje koristim za crtanje ove slike
+
+440
+00:28:30,842 --> 00:28:34,856
+lijevo je da za svaku točku z u toj ravnini lijevo pogledaš
+
+441
+00:28:34,856 --> 00:28:39,540
+odgovarajuću vrijednost e na z desno, i onda joj dodijeliš istu boju.
+
+442
+00:28:40,060 --> 00:28:45,198
+Tako, na primjer, ovo izobličeno pi stvorenje i ovo i ovo zapravo svi
+
+443
+00:28:45,198 --> 00:28:50,560
+odgovaraju istom dijelu slike desno, velikom pi stvorenju dolje lijevo.
+
+444
+00:28:51,040 --> 00:28:56,105
+Još jedan način da o ovome razmišljaš je da zato što je funkcija e na z više-prema-jedan,
+
+445
+00:28:56,105 --> 00:28:59,690
+dojam koji dobivamo jest da prirodni logaritam, njegov inverz,
+
+446
+00:28:59,690 --> 00:29:04,185
+želi biti viševrijednosna funkcija, nešto gdje jedan ulaz odgovara višestrukim
+
+447
+00:29:04,185 --> 00:29:05,380
+različitim izlazima.
+
+448
+00:29:06,320 --> 00:29:09,910
+No u praksi, mnogo puta ne želiš da funkcija ima više izlaza,
+
+449
+00:29:09,910 --> 00:29:14,030
+ponekad to čak proturječi samoj definiciji funkcije u tvom kontekstu,
+
+450
+00:29:14,030 --> 00:29:18,444
+pa će ljudi često jednostavno odabrati pojas ove ravnine lijevo kao izlaze
+
+451
+00:29:18,444 --> 00:29:19,680
+prirodnog logaritma.
+
+452
+00:29:20,060 --> 00:29:24,060
+U kompleksnoj analizi to se zove odabir reza grane za funkciju.
+
+453
+00:29:24,560 --> 00:29:28,590
+Za naše potrebe, gdje želimo rekreirati i razumjeti Escherovo djelo,
+
+454
+00:29:28,590 --> 00:29:33,036
+zapravo je zgodno o logaritmu razmišljati kao o viševrijednosnoj funkciji,
+
+455
+00:29:33,036 --> 00:29:36,947
+gdje svaka točka desno odgovara ponavljajućem nizu točaka lijevo,
+
+456
+00:29:36,947 --> 00:29:40,800
+razmaknutih okomito za dva pi, koji ide beskonačno u oba smjera.
+
+457
+00:29:41,580 --> 00:29:46,518
+U našem posebnom slučaju vidiš i taj ponavljajući uzorak dok ideš ulijevo,
+
+458
+00:29:46,518 --> 00:29:48,520
+ali to je nešto sasvim drugo.
+
+459
+00:29:48,820 --> 00:29:50,520
+To ne bi vidio kod većine slika.
+
+460
+00:29:51,020 --> 00:29:55,438
+To nastaje baš zato što radimo sa samosličnom Drosteovom slikom,
+
+461
+00:29:55,438 --> 00:29:59,580
+onom koja izgleda identično kad zumiraš za određeni faktor.
+
+462
+00:29:59,760 --> 00:30:04,320
+To proizlazi izravno iz jednog temeljnog svojstva logaritama i eksponencijala.
+
+463
+00:30:04,880 --> 00:30:08,241
+Eksponencijali pretvaraju zbrajanje u množenje,
+
+464
+00:30:08,241 --> 00:30:11,960
+a logaritmi pretvaraju množenje natrag u zbrajanje.
+
+465
+00:30:12,860 --> 00:30:17,439
+Na primjer, zamisli da uzmeš neku malu vrijednost w na ovoj ravnini desno,
+
+466
+00:30:17,439 --> 00:30:20,533
+i da također uzmeš u obzir 16 puta tu vrijednost,
+
+467
+00:30:20,533 --> 00:30:23,380
+koja je skalirana 16 puta dalje od ishodišta.
+
+468
+00:30:24,280 --> 00:30:29,008
+A sad, ako pogledamo odgovarajuću vrijednost, logaritam od w, lijevo,
+
+469
+00:30:29,008 --> 00:30:32,365
+taj čin množenja s 16 sad izgleda kao zbrajanje,
+
+470
+00:30:32,365 --> 00:30:38,120
+točnije kao pomak udesno za prirodni logaritam od 16, što je samo neki realan broj.
+
+471
+00:30:39,340 --> 00:30:45,132
+Zapravo, ovaj pravokutnik ovdje u našoj bizarnoj iskrivljenoj logaritamskoj slici,
+
+472
+00:30:45,132 --> 00:30:50,500
+koji ima širinu log 16 i visinu 2 pi, sadrži sve informacije o slici desno.
+
+473
+00:30:50,900 --> 00:30:56,162
+Odgovara ovom prstenu Drosta slike, i kad bi taj pravokutnik pomaknuo
+
+474
+00:30:56,162 --> 00:31:01,959
+točno za log od 16 jedinica ulijevo, dobio bi umanjenu verziju tog prstena,
+
+475
+00:31:01,959 --> 00:31:06,840
+točno 16 puta manju, koja se savršeno uklapa kao dio slagalice.
+
+476
+00:31:07,360 --> 00:31:10,420
+A ako to ponoviš beskonačno mnogo puta, dobiješ ovo
+
+477
+00:31:10,420 --> 00:31:13,840
+beskonačno ugniježđivanje koje karakterizira Drosta zum.
+
+478
+00:31:14,720 --> 00:31:19,391
+Kako sam zasad nacrtao stvari, imamo ovaj odsječak logaritamske slike na desnoj strani,
+
+479
+00:31:19,391 --> 00:31:24,063
+i u ovom trenutku već dobro znaš da okomite linije lijevo odgovaraju kružnicama desno,
+
+480
+00:31:24,063 --> 00:31:28,251
+pa vjerojatno možeš pogoditi da to odgovara činjenici da sam toj Drosta slici
+
+481
+00:31:28,251 --> 00:31:31,580
+zadao maksimalni radijus, ali naravno, ne moraš to napraviti.
+
+482
+00:31:31,720 --> 00:31:35,696
+U principu, može se protezati beskonačno daleko u svim smjerovima,
+
+483
+00:31:35,696 --> 00:31:38,528
+prateći isti samoslični uzorak kako povećavaš,
+
+484
+00:31:38,528 --> 00:31:43,709
+a rezultat za logaritamsku sliku lijevo bio bi da se proteže koliko god želiš udesno,
+
+485
+00:31:43,709 --> 00:31:46,300
+opet s ponavljajućim uzorkom popločavanja.
+
+486
+00:31:47,400 --> 00:31:51,658
+Dakle, za kraj, logaritamska slika lijevo je periodična po vertikali,
+
+487
+00:31:51,658 --> 00:31:54,620
+u osnovi zato što je rotacija desno periodična.
+
+488
+00:31:54,980 --> 00:31:56,260
+To bi se dogodilo za bilo koju sliku.
+
+489
+00:31:56,560 --> 00:32:01,681
+A onda je u ovom posebnom slučaju Drosta slike također periodična po horizontali,
+
+490
+00:32:01,681 --> 00:32:04,400
+jer se Drosta slika ponavlja kako zumiraš.
+
+491
+00:32:04,640 --> 00:32:09,960
+To dvostruko periodično svojstvo je ono što ćemo na kraju iskoristiti za završni rezultat.
+
+492
+00:32:10,820 --> 00:32:12,800
+I sad imamo sve temelje koji nam trebaju.
+
+493
+00:32:13,000 --> 00:32:16,168
+Sad ti napokon mogu opisati funkciju koja pretvara
+
+494
+00:32:16,168 --> 00:32:19,780
+Drosta zum u ovu samodostatnu petlju u Escherovom stilu.
+
+495
+00:32:20,320 --> 00:32:23,302
+Prije nego što samo uskočimo ravno u to, pokrili smo stvarno puno toga,
+
+496
+00:32:23,302 --> 00:32:25,780
+pa bi možda vrijedilo dati malo prostora da sve to sjedne.
+
+497
+00:32:26,180 --> 00:32:29,897
+I mislio sam negdje u ovom videu odvojiti brzih 30 sekundi da pričam o 3b1b talentu,
+
+498
+00:32:29,897 --> 00:32:32,640
+pa je sad možda jednako dobar trenutak kao i bilo koji drugi.
+
+499
+00:32:32,940 --> 00:32:36,206
+To je virtualni sajam karijera s kojim eksperimentiram ove godine,
+
+500
+00:32:36,206 --> 00:32:39,423
+a osnovna ideja je da si ti, osoba koja provodi slobodno vrijeme
+
+501
+00:32:39,423 --> 00:32:41,748
+učeći o stvarima poput kompleksnih logaritama,
+
+502
+00:32:41,748 --> 00:32:44,173
+vjerojatno zainteresiran za rad s istomišljenim,
+
+503
+00:32:44,173 --> 00:32:46,400
+znatiželjnim i tehnički potkovanim timovima.
+
+504
+00:32:46,780 --> 00:32:51,640
+Dakle, ako tražiš novi posao ili si otvoren za njega, pogledaj organizacije na 3b1b.co.
+
+505
+00:32:52,160 --> 00:32:52,560
+talent.
+
+506
+00:32:52,940 --> 00:32:56,769
+Kad istražiš tu stranicu, naći ćeš intervjue između mene i odgovarajućih timova,
+
+507
+00:32:56,769 --> 00:32:59,879
+tehničke zagonetke i izazove koje su odabrali istaknuti za tebe,
+
+508
+00:32:59,879 --> 00:33:03,660
+i razne druge stvari koje ti trebaju dočarati kakva je kultura tehničkog tima.
+
+509
+00:33:04,160 --> 00:33:08,925
+I nekako mi se sviđa ideja da ovu publiku izložim usklađenim karijernim prilikama,
+
+510
+00:33:08,925 --> 00:33:13,400
+pa kad god budeš tražio posao, bilo sad ili kasnije, svakako baci oko na to.
+
+511
+00:33:14,300 --> 00:33:15,860
+Dobro, vratimo se našem glavnom cilju.
+
+512
+00:33:16,140 --> 00:33:20,191
+Kako to da možemo iskoristiti sve što smo izgradili oko kompleksnih funkcija
+
+513
+00:33:20,191 --> 00:33:24,455
+i transformacija koje daju konformna preslikavanja i svega toga da konstruiramo
+
+514
+00:33:24,455 --> 00:33:28,080
+neku vrstu funkcije koja rekreira efekt Escherove galerije grafika?
+
+515
+00:33:28,680 --> 00:33:31,379
+Možda je najlakše ako samo iznesem cijeli nacrt funkcije,
+
+516
+00:33:31,379 --> 00:33:33,700
+a onda možemo proći kroz svaki korak detaljnije.
+
+517
+00:33:34,440 --> 00:33:39,849
+Prvo uzmeš logaritam, koji daje ovaj bizarni dvostruko periodični uzorak popločavanja,
+
+518
+00:33:39,849 --> 00:33:43,560
+a onda taj uzorak rotiraš i skaliraš na točno pravi način,
+
+519
+00:33:43,560 --> 00:33:49,220
+i zatim odatle uzmeš eksponencijal, koji ga odmotava, ali ovaj put s određenim zaokretom.
+
+520
+00:33:50,080 --> 00:33:53,015
+Ovo bi moglo djelovati pomalo bizarno, ali zapravo postoji jako lijep
+
+521
+00:33:53,015 --> 00:33:55,780
+način da se motivira i da se shvati što se ovdje zapravo događa.
+
+522
+00:33:56,300 --> 00:34:01,790
+Pogledaj opet onu izvornu Drosta sliku i sjeti se kako želimo uzeti ovo veliko biće
+
+523
+00:34:01,790 --> 00:34:07,280
+od pite i nekako ga poistovjetiti s manjom samosličnom kopijom, zumiranom 16 puta.
+
+524
+00:34:07,540 --> 00:34:10,659
+Želim da zamisliš crtu koja povezuje to dvoje.
+
+525
+00:34:11,219 --> 00:34:15,072
+Jedan način da postavimo cilj koji imamo jest da želimo da konačna
+
+526
+00:34:15,072 --> 00:34:19,100
+funkcija takvu crtu pretvori u zatvorenu petlju u završnom prostoru.
+
+527
+00:34:19,540 --> 00:34:23,628
+Krajnje točke te crte gore predstavljaju veliko i malo pi stvorenje,
+
+528
+00:34:23,628 --> 00:34:28,017
+pa bi funkcija koja poistovjećuje ta stvorenja trebala, u najmanju ruku,
+
+529
+00:34:28,017 --> 00:34:29,159
+zatvoriti tu crtu.
+
+530
+00:34:29,600 --> 00:34:33,600
+Sad razmisli kako ta crta izgleda u logaritmu slike.
+
+531
+00:34:33,600 --> 00:34:36,567
+Veliko pi stvorenje odgovara svim ovim višestrukim
+
+532
+00:34:36,567 --> 00:34:39,000
+kopijama ovdje pokraj imaginarne linije.
+
+533
+00:34:39,639 --> 00:34:44,906
+Kao što smo rekli, kad smanjiš sliku, to odgovara pomaku ulijevo u logaritmu,
+
+534
+00:34:44,906 --> 00:34:49,900
+pa ove kopije na logaritamskoj slici predstavljaju to malo pi stvorenje.
+
+535
+00:34:50,300 --> 00:34:52,971
+I zapravo, umjesto da koristimo ovu horizontalnu crtu,
+
+536
+00:34:52,971 --> 00:34:56,681
+htjet ćemo iskoristiti činjenicu da je ova logaritamska slika periodična u
+
+537
+00:34:56,681 --> 00:34:57,720
+dva odvojena smjera.
+
+538
+00:34:58,360 --> 00:35:03,220
+Zato ćemo umjesto toga raditi s dijagonalnom crtom koja povezuje
+
+539
+00:35:03,220 --> 00:35:07,700
+ovu kopiju velikog lika s ovom dolje lijevo kopijom malog.
+
+540
+00:35:07,940 --> 00:35:10,098
+To ti možda trenutno djeluje nemotivirano, i je,
+
+541
+00:35:10,098 --> 00:35:13,740
+ali najbolji način da objasnim zašto jest da ti samo pokažem kako se ovo odvija,
+
+542
+00:35:13,740 --> 00:35:17,336
+a poslije, ako želiš, možemo usporediti s onim što bi se dogodilo da si pokušao
+
+543
+00:35:17,336 --> 00:35:18,640
+koristiti horizontalnu crtu.
+
+544
+00:35:19,200 --> 00:35:22,783
+Sad ova nova komponenta prema dolje na logaritamskoj slici odgovara dodavanju
+
+545
+00:35:22,783 --> 00:35:26,040
+malo rotacije u smjeru kazaljke na satu putanji na originalnoj slici.
+
+546
+00:35:26,460 --> 00:35:30,731
+Sjeti se, cilj nam je ovo pretvoriti u petlju na završnoj slici,
+
+547
+00:35:30,731 --> 00:35:35,069
+ali ti i ja smo upravo proveli nekih 10 minuta opširno pričajući
+
+548
+00:35:35,069 --> 00:35:38,940
+o funkciji koja pretvara dužine u kružnice, naime e na z.
+
+549
+00:35:39,320 --> 00:35:43,764
+Ono što trebaš napraviti jest dovesti tu dužinu tako da završi savršeno
+
+550
+00:35:43,764 --> 00:35:48,271
+okomito s visinom od 2 pi, a to se u osnovi svodi na to da je zarotiraš
+
+551
+00:35:48,271 --> 00:35:52,340
+i skaliraš baš na pravi način kako bi dobila tu duljinu i smjer.
+
+552
+00:35:52,940 --> 00:35:56,264
+Ako se sjećaš, dok smo se zagrijavali s kompleksnim brojevima,
+
+553
+00:35:56,264 --> 00:36:01,035
+pričali smo o tome kako množenje konstantom daje neku kombinaciju rotacije i skaliranja,
+
+554
+00:36:01,035 --> 00:36:05,055
+a u ovom slučaju jedna umjetnička značajka koju bismo možda htjeli jest da
+
+555
+00:36:05,055 --> 00:36:08,915
+naše veliko pi stvorenje dolje lijevo ostane fiksirano na toj poziciji,
+
+556
+00:36:08,915 --> 00:36:13,203
+a to bi značilo da ta točka na našoj logaritamskoj slici mora ostati na mjestu,
+
+557
+00:36:13,203 --> 00:36:17,760
+pa umjesto da se okreće oko ishodišta, zapravo želimo da se sve okreće oko te točke.
+
+558
+00:36:18,280 --> 00:36:21,139
+Recimo da tu točku označimo s nešto poput z nula,
+
+559
+00:36:21,139 --> 00:36:25,282
+onda bi ovako izgledala ažurirana formula za tu rotaciju i skaliranje,
+
+560
+00:36:25,282 --> 00:36:29,834
+ali zapravo se većina svega svodi na odabir te konstante c kojom ćeš množiti,
+
+561
+00:36:29,834 --> 00:36:34,619
+i ako voliš zadatke, možda će ti biti gušt stvarno odvojiti trenutak i izračunati
+
+562
+00:36:34,619 --> 00:36:37,420
+koju točno vrijednost ta konstanta treba imati.
+
+563
+00:36:38,200 --> 00:36:42,154
+Ali ovdje, budući da sve radimo vrlo vizualno i želim se malo zabaviti,
+
+564
+00:36:42,154 --> 00:36:45,773
+pokazat ću ti tu konstantu u njezinoj maloj kompleksnoj ravnini,
+
+565
+00:36:45,773 --> 00:36:49,560
+a onda i što se događa ako je nekako zgrabim i malo pomičem uokolo.
+
+566
+00:36:50,060 --> 00:36:53,394
+Različiti odabiri daju ti različito skaliranje i rotaciju,
+
+567
+00:36:53,394 --> 00:36:57,820
+što nakon eksponenciranja daje sve ove potpuno bizarne kaleidoskopske slike.
+
+568
+00:36:58,420 --> 00:37:03,619
+Jedan način da razmišljaš o cijeloj operaciji jest kao o igri u kojoj pokušavaš pronaći
+
+569
+00:37:03,619 --> 00:37:08,520
+baš pravu vrijednost koja sve poravna onako kako treba na onoj slici dolje desno.
+
+570
+00:37:09,120 --> 00:37:12,540
+Kad je postavljeno na tu odgovarajuću vrijednost i dobijemo ovaj ponovno
+
+571
+00:37:12,540 --> 00:37:16,008
+stvoreni Escherov efekt, na toj završnoj slici dolje desno pokazivao sam
+
+572
+00:37:16,008 --> 00:37:19,760
+ovu rupu u sredini, analognu rupi koju je Escher imao u svom originalnom radu.
+
+573
+00:37:20,640 --> 00:37:22,420
+Ali to je zapravo potpuno umjetno.
+
+574
+00:37:22,780 --> 00:37:25,607
+Izlazna slika funkcije prirodno to ispunjava vlastitim
+
+575
+00:37:25,607 --> 00:37:28,120
+ponavljajućim spiralnim uvijanjem prema unutra.
+
+576
+00:37:28,120 --> 00:37:33,193
+Uostalom, zarotirani uzorak popločavanja lijevo proteže se beskonačno kroz cijelu
+
+577
+00:37:33,193 --> 00:37:38,580
+ravninu, pa kad uzmeš njegov eksponencijal, on također ispuni sve, osim točke u nuli.
+
+578
+00:37:39,880 --> 00:37:40,400
+I to je to!
+
+579
+00:37:40,540 --> 00:37:42,040
+To je osnovna operacija.
+
+580
+00:37:42,520 --> 00:37:45,327
+Prevedeš u ovaj bizarno izgledajući logaritamski prostor,
+
+581
+00:37:45,327 --> 00:37:49,760
+zarotiraš i skaliraš da ponovno poravnaš stvari, a onda se vratiš natrag eksponencijalom.
+
+582
+00:37:51,500 --> 00:37:55,351
+U ovom trenutku, nakon što smo napravili vlastitu varijaciju na Eschera,
+
+583
+00:37:55,351 --> 00:37:59,951
+možda bi bilo lijepo proći kroz to kako taj isti proces izgleda za Escherov konkretan
+
+584
+00:37:59,951 --> 00:38:04,657
+primjer, onaj malteški primorski gradić koji sadrži galeriju grafika i osobu koja gleda
+
+585
+00:38:04,657 --> 00:38:05,620
+sliku toga grada.
+
+586
+00:38:06,420 --> 00:38:10,905
+Kao i prije, prvi korak je smjestiti ovu scenu na vlastitu malu kompleksnu ravninu,
+
+587
+00:38:10,905 --> 00:38:15,120
+gdje je beskonačna granična točka oko koje se sve skalira postavljena u nulu.
+
+588
+00:38:16,340 --> 00:38:20,353
+Drugi korak, uzmeš logaritam toga, što nam u ovom slučaju daje slično
+
+589
+00:38:20,353 --> 00:38:24,540
+bizarnu transformaciju cijele scene, ali ovaj put postoji mala razlika.
+
+590
+00:38:24,980 --> 00:38:29,495
+Budući da je Escher radio s puno dubljim uvećanjem, s faktorom skale 256,
+
+591
+00:38:29,495 --> 00:38:35,000
+ponavljajući uzorci u ovom novom primjeru zapravo zauzimaju širi dio kompleksne ravnine.
+
+592
+00:38:36,280 --> 00:38:39,185
+Treći korak je, opet, zarotirati i skalirati to,
+
+593
+00:38:39,185 --> 00:38:43,300
+što ovisi o množenju odgovarajuće odabranom kompleksnom konstantom.
+
+594
+00:38:43,760 --> 00:38:48,185
+Uvjet je osigurati da se ta zarotirana slika i dalje ponavlja svakih 2
+
+595
+00:38:48,185 --> 00:38:52,800
+pi jedinica okomito, ali duž dijela slike koji je prije bio dijagonalan.
+
+596
+00:38:53,300 --> 00:38:56,773
+A onda četvrti korak: sve to provučeš kroz e na z,
+
+597
+00:38:56,773 --> 00:39:01,357
+i ono što dobiješ je nešto vrlo slično Escherovoj konačnoj slici,
+
+598
+00:39:01,357 --> 00:39:06,080
+slika u kojoj hodanje oko petlje odgovara uvećavanju za faktor 256.
+
+599
+00:39:07,720 --> 00:39:11,880
+I opet, kad to ovako postavimo kroz kompleksne funkcije, nema nikakve rupe u sredini.
+
+600
+00:39:12,160 --> 00:39:16,364
+Taj konačni rezultat je i sam Drosteova slika, samo ovaj put s obratom,
+
+601
+00:39:16,364 --> 00:39:21,161
+gdje postoji neka vrsta samosličnosti koja se spiralno spušta beskonačno daleko,
+
+602
+00:39:21,161 --> 00:39:22,760
+koliko god želiš zumirati.
+
+603
+00:39:24,000 --> 00:39:26,880
+Postoji nekoliko stvari koje vrijedi primijetiti u cijelom ovom procesu.
+
+604
+00:39:27,480 --> 00:39:30,789
+Prvo, ako ovu ideju zapišeš kao formulu, gdje uzmeš logaritam,
+
+605
+00:39:30,789 --> 00:39:34,844
+pomnožiš ga konstantom i onda potenciraš, to se zapravo može pojednostaviti
+
+606
+00:39:34,844 --> 00:39:39,060
+tako da izgleda kao da samo dižeš ulaz na potenciju neke kompleksne konstante.
+
+607
+00:39:39,540 --> 00:39:43,200
+A ako ponovno uvedeš taj faktor pomaka, on samo uvodi još jednu konstantu.
+
+608
+00:39:43,980 --> 00:39:46,995
+S jedne strane, jako je lijepo što se cijeli ovaj komplicirani
+
+609
+00:39:46,995 --> 00:39:49,476
+proces može svesti na tako malo simbola na papiru,
+
+610
+00:39:49,476 --> 00:39:52,880
+ali mislim da to ipak pomalo riskira zamagliti što se zapravo događa.
+
+611
+00:39:53,740 --> 00:39:55,740
+I onda, spomenuo sam da stvari ne bi funkcionirale
+
+612
+00:39:55,740 --> 00:39:57,780
+kad bi pokušao koristiti samo te vodoravne linije.
+
+613
+00:39:58,040 --> 00:40:00,462
+Ako te zanima, ovako to izgleda kad to pokušaš,
+
+614
+00:40:00,462 --> 00:40:04,740
+što bi značilo zarotirati sve za 90 stupnjeva i skalirati odgovarajućom količinom.
+
+615
+00:40:05,320 --> 00:40:08,880
+Dobiješ nešto na neki način zanimljivo, ali jednostavno nije ono što tražimo.
+
+616
+00:40:09,180 --> 00:40:11,688
+I ako malo razmisliš, ono što se u biti događa
+
+617
+00:40:11,688 --> 00:40:14,360
+jest da zamjenjuješ uloge rotacije i skaliranja.
+
+618
+00:40:16,680 --> 00:40:19,508
+Kad se malo odmakneš od svega ovoga, ova druga perspektiva,
+
+619
+00:40:19,508 --> 00:40:22,768
+u kojoj se cijela stvar vrti oko rotacije u logaritamskom prostoru,
+
+620
+00:40:22,768 --> 00:40:26,842
+djeluje potpuno drukčije od Escherovog intuitivnijeg pristupa s njegovom izobličenom
+
+621
+00:40:26,842 --> 00:40:28,280
+mrežom i deformiranjem mreže.
+
+622
+00:40:28,760 --> 00:40:31,180
+Ali postoji nit koja povezuje obje perspektive.
+
+623
+00:40:31,900 --> 00:40:34,700
+Kao prvo, sad možeš razumjeti kako točno ponovno
+
+624
+00:40:34,700 --> 00:40:37,500
+stvaramo i mijenjamo mrežu koju je Escher imao.
+
+625
+00:40:37,940 --> 00:40:40,761
+U osnovi uzmeš istu onu funkciju koju smo izgradili,
+
+626
+00:40:40,761 --> 00:40:45,100
+ali umjesto da je primijeniš na sliku, primijeniš je na običnu kvadratnu mrežu.
+
+627
+00:40:45,780 --> 00:40:47,760
+Dobro, zapravo ne baš na sasvim običnu kvadratnu mrežu.
+
+628
+00:40:48,020 --> 00:40:51,476
+Najbolje je raditi s onom koja postaje gušća kako više zumiraš,
+
+629
+00:40:51,476 --> 00:40:53,560
+tako da izgleda isto na svim skalama.
+
+630
+00:40:54,200 --> 00:40:58,180
+Kad to napraviš, logaritam ti daje ovaj jako lijep zakrivljeni uzorak popločavanja.
+
+631
+00:40:58,720 --> 00:41:02,046
+A onda od tamo napraviš isti trik: zarotiraš stvari na točno
+
+632
+00:41:02,046 --> 00:41:05,482
+pravi način i zatim uzmeš eksponencijal, s rezultatom koji je
+
+633
+00:41:05,482 --> 00:41:09,140
+prilično blizak onome što je Escher satima mukotrpno konstruirao.
+
+634
+00:41:09,680 --> 00:41:13,235
+I zapamti, cijeli razlog zašto koristimo jezik kompleksnih brojeva,
+
+635
+00:41:13,235 --> 00:41:16,365
+razlog zašto sam te tjerao da prolaziš kroz sve te korake,
+
+636
+00:41:16,365 --> 00:41:19,760
+jest to što ovo konformno svojstvo dolazi kao usputni rezultat.
+
+637
+00:41:20,180 --> 00:41:25,340
+Mali kvadrati iz izvorne mreže ostaju, barem približno, kvadrati i u konačnom rezultatu.
+
+638
+00:41:26,000 --> 00:41:29,613
+Escher je rekao da mu je izrada ovog djela zadala strašne glavobolje,
+
+639
+00:41:29,613 --> 00:41:34,168
+i iako smo možda ti i ja morali izdržati nekoliko glavobolja iz sasvim drugih razloga,
+
+640
+00:41:34,168 --> 00:41:38,200
+nagrada je u tome što je ovo svojstvo nešto što dobivamo bez dodatnog truda.
+
+641
+00:41:39,000 --> 00:41:42,494
+Da budem jasan, sigurno ne moraš razumjeti kompleksne derivacije ili
+
+642
+00:41:42,494 --> 00:41:46,400
+logaritme da bi uživao u Escherovu radu, i ne bih htio sugerirati da moraš.
+
+643
+00:41:46,740 --> 00:41:49,340
+Međutim, kad razumiješ tu matematičkiju stranu,
+
+644
+00:41:49,340 --> 00:41:53,377
+to ti daje mogućnost za jednu sasvim drukčiju vrstu cijenjenja onoga što
+
+645
+00:41:53,377 --> 00:41:54,760
+je Escher zapravo radio.
+
+646
+00:41:55,180 --> 00:41:57,743
+I to je ono što mi je u svemu ovome fascinantno,
+
+647
+00:41:57,743 --> 00:42:00,680
+prava poveznica koju želim dati između te dvije priče.
+
+648
+00:42:01,140 --> 00:42:05,056
+Ako pogledaš Escherovu karijeru, kroz cijelu nju privlačili su ga određeni koncepti,
+
+649
+00:42:05,056 --> 00:42:07,900
+stvari poput prikazivanja beskonačnosti u konačnom prostoru.
+
+650
+00:42:08,280 --> 00:42:11,419
+A istovremeno se činilo da ga vodi određena estetika,
+
+651
+00:42:11,419 --> 00:42:16,038
+često neko implicitno strogo pravilo poput ideje da mali kvadrati ostanu mali
+
+652
+00:42:16,038 --> 00:42:17,400
+kvadrati u ovoj mreži.
+
+653
+00:42:17,760 --> 00:42:21,502
+Krajnji rezultat kad se koncept i estetika ovako spoje jest da određeno
+
+654
+00:42:21,502 --> 00:42:24,612
+Escherovo djelo često djeluje kao rješenje neke zagonetke,
+
+655
+00:42:24,612 --> 00:42:28,460
+ali takve kod koje nije ni očito da bi rješenje uopće trebalo postojati.
+
+656
+00:42:29,040 --> 00:42:32,619
+Ono što mi je posebno poticajno za razmišljanje jest to da te vizualne
+
+657
+00:42:32,619 --> 00:42:36,760
+zagonetke do kojih je došao nisu samo analogne samom činu bavljenja matematikom.
+
+658
+00:42:36,840 --> 00:42:40,402
+Konkretne strukture koje su ga intuitivno privlačile često
+
+659
+00:42:40,402 --> 00:42:43,780
+u sebi skrivaju vrlo stvarnu i vrlo duboku matematiku.
+
+660
+00:42:44,260 --> 00:42:46,884
+U našem primjeru, dublja struktura nije samo to
+
+661
+00:42:46,884 --> 00:42:49,620
+da se djelo može opisati kompleksnim funkcijama.
+
+662
+00:42:50,120 --> 00:42:53,163
+Ideje kojih smo se dotaknuli u ovoj priči zapravo su puno
+
+663
+00:42:53,163 --> 00:42:56,260
+bliže istraživačkim granicama nego što bi možda očekivao.
+
+664
+00:42:56,840 --> 00:42:59,338
+Ako se vratiš na naš pristup u drugoj polovici,
+
+665
+00:42:59,338 --> 00:43:02,900
+sjeti se kako se oslanjao na korištenje ovog dvostruko periodičnog
+
+666
+00:43:02,900 --> 00:43:06,940
+uzorka u kompleksnoj ravnini, nečega što se ponavlja u dva odvojena smjera.
+
+667
+00:43:07,860 --> 00:43:10,352
+Zapravo postoji poseban naziv za funkcije kompleksnih
+
+668
+00:43:10,352 --> 00:43:12,420
+brojeva koje su ovako dvostruko periodične.
+
+669
+00:43:12,640 --> 00:43:14,560
+Poznate su kao eliptičke funkcije.
+
+670
+00:43:14,900 --> 00:43:18,949
+Bilo bi previše da ovdje točno objašnjavam zašto su te funkcije toliko korisne,
+
+671
+00:43:18,949 --> 00:43:22,947
+ali jedna stvar koju želim istaknuti jest da su ona dva matematičara koja sam
+
+672
+00:43:22,947 --> 00:43:27,149
+spomenuo na početku, oni koji su napravili analizu ovog djela, De Smit i Lenstra,
+
+673
+00:43:27,149 --> 00:43:31,198
+obojica teoretičari brojeva, a eliptičke funkcije imaju vrlo istaknutu ulogu u
+
+674
+00:43:31,198 --> 00:43:35,760
+modernoj teoriji brojeva, pružajući neku vrstu mosta prema drugim dijelovima matematike.
+
+675
+00:43:36,400 --> 00:43:39,920
+To možda barem djelomično objašnjava kako su mogli pogledati ovo djelo
+
+676
+00:43:39,920 --> 00:43:43,440
+i doći na ideju da konstruiraju onu funkciju koju smo ovdje izložili.
+
+677
+00:43:44,660 --> 00:43:48,186
+Kad gledam Escherov rad, bilo da je riječ o Grafičkoj galeriji ili mnogim
+
+678
+00:43:48,186 --> 00:43:51,471
+drugim favoritima, razlog zašto toliko volim ta djela jest to što u
+
+679
+00:43:51,471 --> 00:43:54,900
+meni bude jedan vrlo specifičan osjećaj koji je teško pronaći drugdje.
+
+680
+00:43:55,280 --> 00:43:57,740
+To je osjećaj da sve savršeno sjedne na svoje mjesto.
+
+681
+00:43:58,140 --> 00:43:59,580
+Ali nije baš samo to.
+
+682
+00:43:59,620 --> 00:44:02,320
+To je nešto više od samog zadovoljstva gledanja kako je neka zagonetka riješena.
+
+683
+00:44:02,540 --> 00:44:07,820
+To je divljenje kreativnom geniju potrebnom da se takva zagonetka uopće osmisli.
+
+684
+00:44:08,140 --> 00:44:11,600
+Jedino drugo mjesto gdje imam taj osjećaj jest kad se bavim matematikom.
+
+685
+00:44:11,940 --> 00:44:17,099
+Zato mi činjenica da umjetnika i matematičara mogu privlačiti iste strukture,
+
+686
+00:44:17,099 --> 00:44:21,185
+ali iz potpuno različitih razloga, sugerira da postoji nešto
+
+687
+00:44:21,185 --> 00:44:24,200
+univerzalno u tome što točno privlači oboje.
+

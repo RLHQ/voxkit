@@ -1,0 +1,1208 @@
+1
+00:00:00,000 --> 00:00:01,791
+Steam has new hardware out.
+
+2
+00:00:01,791 --> 00:00:02,625
+It's a controller.
+
+3
+00:00:02,625 --> 00:00:04,000
+Costs $100.
+
+4
+00:00:04,000 --> 00:00:06,375
+Sold out everywhere within hours of release.
+
+5
+00:00:06,375 --> 00:00:07,666
+I got mine by staying up late
+
+6
+00:00:07,666 --> 00:00:09,375
+and frantically hitting refresh.
+
+7
+00:00:09,375 --> 00:00:10,500
+It's so expensive,
+
+8
+00:00:10,500 --> 00:00:11,500
+yet so popular.
+
+9
+00:00:11,500 --> 00:00:13,875
+Half of that is because Steam has always had a great reputation.
+
+10
+00:00:13,875 --> 00:00:14,583
+The other half is because
+
+11
+00:00:14,583 --> 00:00:16,500
+it's actually quite special.
+
+12
+00:00:16,500 --> 00:00:19,333
+If you're the target audience Gabe Newell has in mind,
+
+13
+00:00:19,333 --> 00:00:20,500
+it might even be
+
+14
+00:00:20,500 --> 00:00:23,708
+the ultimate choice surpassing all other controllers.
+
+15
+00:00:23,708 --> 00:00:25,833
+So this video will tell you everything
+
+16
+00:00:25,833 --> 00:00:28,458
+you need to know about the Steam Controller.
+
+17
+00:00:28,458 --> 00:00:29,666
+All its features,
+
+18
+00:00:29,666 --> 00:00:30,625
+and most importantly,
+
+19
+00:00:30,625 --> 00:00:32,500
+whether it's worth buying.
+
+20
+00:00:36,916 --> 00:00:38,291
+Looking at the design, the Steam Controller
+
+21
+00:00:38,291 --> 00:00:42,041
+is a symmetrical full-featured PC controller.
+
+22
+00:00:42,041 --> 00:00:43,708
+The joysticks are symmetrically placed.
+
+23
+00:00:43,708 --> 00:00:45,041
+Buttons are A, B, X, Y.
+
+24
+00:00:45,041 --> 00:00:46,916
+There are a few extra Steam-themed buttons.
+
+25
+00:00:46,916 --> 00:00:48,333
+Four back buttons on the rear.
+
+26
+00:00:48,333 --> 00:00:50,083
+No 3.5mm headphone jack.
+
+27
+00:00:50,083 --> 00:00:50,500
+Oh,
+
+28
+00:00:50,500 --> 00:00:52,000
+what's that?
+
+29
+00:00:52,000 --> 00:00:54,083
+It's a screw hole.
+
+30
+00:00:54,083 --> 00:00:55,916
+Clearly easy to disassemble.
+
+31
+00:00:55,916 --> 00:00:57,833
+Unlike other PC controllers,
+
+32
+00:00:57,833 --> 00:01:00,791
+these two trackpads inherited from the Steam Deck
+
+33
+00:01:00,833 --> 00:01:02,000
+are what make
+
+34
+00:01:02,000 --> 00:01:05,000
+the Steam Controller's shape square and wide.
+
+35
+00:01:05,000 --> 00:01:06,000
+The joystick position
+
+36
+00:01:06,000 --> 00:01:09,333
+is pushed to a somewhat less reachable spot.
+
+37
+00:01:09,333 --> 00:01:13,125
+Here's how it looks in the hands of our colleague with large hands.
+
+38
+00:01:13,166 --> 00:01:15,250
+It feels a bit tight,
+
+39
+00:01:15,250 --> 00:01:16,500
+not very comfortable.
+
+40
+00:01:16,500 --> 00:01:18,041
+But this hard-to-reach aspect
+
+41
+00:01:18,041 --> 00:01:19,583
+for those with small hands who
+
+42
+00:01:19,583 --> 00:01:22,083
+can't fully grip it anyway,
+
+43
+00:01:22,083 --> 00:01:24,000
+is actually not that hard to accept.
+
+44
+00:01:24,000 --> 00:01:26,500
+Honestly, I got used to it pretty quickly.
+
+45
+00:01:26,500 --> 00:01:28,833
+These joysticks are quite high-tech.
+
+46
+00:01:28,833 --> 00:01:30,833
+They're called TMR joysticks.
+
+47
+00:01:30,833 --> 00:01:32,208
+You may have heard of
+
+48
+00:01:32,208 --> 00:01:34,250
+Hall effect joysticks that almost never drift.
+
+49
+00:01:34,250 --> 00:01:36,041
+TMR is the next generation of Hall effect,
+
+50
+00:01:36,041 --> 00:01:37,666
+more accurate and lower power consumption.
+
+51
+00:01:37,666 --> 00:01:40,083
+And it hardly drifts at all.
+
+52
+00:01:40,125 --> 00:01:41,666
+Probably because it's large.
+
+53
+00:01:41,666 --> 00:01:44,833
+So it's heavier than a regular controller.
+
+54
+00:01:44,875 --> 00:01:47,500
+The upside is extremely long battery life.
+
+55
+00:01:47,500 --> 00:01:48,250
+The Steam Controller
+
+56
+00:01:48,250 --> 00:01:51,000
+can last about thirty-something hours.
+
+57
+00:01:51,000 --> 00:01:54,000
+I feel like the PS5 controller barely lasts 6 hours.
+
+58
+00:01:54,000 --> 00:01:57,041
+Overall, the feel is okay.
+
+59
+00:01:57,041 --> 00:01:58,833
+All buttons are membrane switches.
+
+60
+00:01:58,833 --> 00:02:00,125
+The joysticks are very smooth.
+
+61
+00:02:00,125 --> 00:02:02,375
+But the back buttons are a bit easy to accidentally press.
+
+62
+00:02:02,375 --> 00:02:05,500
+Grip feel is better than the Steam Deck handheld.
+
+63
+00:02:05,500 --> 00:02:07,916
+But still a bit worse than first-party controllers.
+
+64
+00:02:07,916 --> 00:02:08,875
+Build quality too.
+
+65
+00:02:08,875 --> 00:02:11,208
+Surface texture is also slightly lacking.
+
+66
+00:02:11,416 --> 00:02:12,166
+To be honest,
+
+67
+00:02:12,166 --> 00:02:15,416
+it's like a Steam Deck with the screen cut off.
+
+68
+00:02:15,416 --> 00:02:16,041
+Hehe.
+
+69
+00:02:16,041 --> 00:02:19,333
+It's the opposite design philosophy of the PlayStation Portal.
+
+70
+00:02:19,708 --> 00:02:21,166
+Next is compatibility.
+
+71
+00:02:21,166 --> 00:02:22,500
+Steam's official statement is
+
+72
+00:02:22,500 --> 00:02:26,083
+it only supports all operating systems that can install Steam.
+
+73
+00:02:26,083 --> 00:02:29,416
+That means it doesn't support PS5, Switch, or Xbox.
+
+74
+00:02:29,416 --> 00:02:31,125
+Nor iOS or Android.
+
+75
+00:02:31,125 --> 00:02:34,000
+But it supports Windows, macOS, and Linux.
+
+76
+00:02:34,000 --> 00:02:35,916
+Including SteamOS, of course.
+
+77
+00:02:36,083 --> 00:02:36,875
+This compatibility
+
+78
+00:02:36,875 --> 00:02:38,250
+actually reflects well
+
+79
+00:02:38,250 --> 00:02:40,000
+the purpose of the Steam Controller.
+
+80
+00:02:40,000 --> 00:02:42,500
+Most controllers are made for console games,
+
+81
+00:02:42,500 --> 00:02:44,208
+with PC compatibility as an afterthought.
+
+82
+00:02:44,291 --> 00:02:45,500
+But Steam wanted to make
+
+83
+00:02:45,500 --> 00:02:47,875
+a controller specifically for PC games.
+
+84
+00:02:47,875 --> 00:02:51,000
+So it needed things ordinary controllers don't have:
+
+85
+00:02:51,166 --> 00:02:52,000
+trackpads,
+
+86
+00:02:52,083 --> 00:02:52,750
+paddles,
+
+87
+00:02:52,750 --> 00:02:55,625
+and the Steam Input software that ties it all together.
+
+88
+00:02:56,458 --> 00:02:57,541
+The trackpads,
+
+89
+00:02:58,000 --> 00:02:58,666
+at first glance,
+
+90
+00:02:58,666 --> 00:03:00,708
+seem similar to the Steam Deck's trackpads,
+
+91
+00:03:00,708 --> 00:03:02,291
+just a nice bonus.
+
+92
+00:03:02,291 --> 00:03:03,833
+You might not use them much.
+
+93
+00:03:03,833 --> 00:03:05,000
+But on Windows,
+
+94
+00:03:05,000 --> 00:03:07,500
+the trackpads are a lifesaver.
+
+95
+00:03:07,500 --> 00:03:08,291
+The Steam Controller
+
+96
+00:03:08,291 --> 00:03:10,916
+isn't actually the first controller Steam released.
+
+97
+00:03:11,625 --> 00:03:12,500
+This one is.
+
+98
+00:03:12,500 --> 00:03:14,333
+The trackpads are much larger,
+
+99
+00:03:14,333 --> 00:03:18,125
+even squeezing out the original d-pad and joystick.
+
+100
+00:03:18,916 --> 00:03:21,125
+Valve is so persistent about trackpads
+
+101
+00:03:21,125 --> 00:03:22,125
+because PC games
+
+102
+00:03:22,125 --> 00:03:23,250
+want to enter the living room,
+
+103
+00:03:23,250 --> 00:03:24,041
+connect to the TV,
+
+104
+00:03:24,041 --> 00:03:25,583
+but without a keyboard and mouse to rely on,
+
+105
+00:03:25,583 --> 00:03:28,541
+the controller must handle most operations.
+
+106
+00:03:33,041 --> 00:03:34,333
+Then there's the Puck,
+
+107
+00:03:34,333 --> 00:03:37,833
+the small 2.4G receiver that comes with the Steam Controller.
+
+108
+00:03:37,833 --> 00:03:40,833
+This thing is pucking amazing.
+
+109
+00:03:40,833 --> 00:03:43,541
+It also has magnetic charging functionality.
+
+110
+00:03:43,583 --> 00:03:45,291
+Input latency is much lower than Bluetooth.
+
+111
+00:03:45,291 --> 00:03:46,375
+The signal is very good.
+
+112
+00:03:46,375 --> 00:03:49,000
+And one Puck can connect four controllers.
+
+113
+00:03:49,000 --> 00:03:50,083
+Most importantly,
+
+114
+00:03:50,083 --> 00:03:51,666
+the Puck combined with the touchpad
+
+115
+00:03:51,666 --> 00:03:55,791
+completely changes the interaction method for Windows games in the living room.
+
+116
+00:03:55,875 --> 00:03:56,958
+First step:
+
+117
+00:03:57,000 --> 00:03:58,166
+wake up Windows.
+
+118
+00:03:58,375 --> 00:03:59,375
+In the past,
+
+119
+00:03:59,375 --> 00:04:01,458
+you had to run over and press the power button.
+
+120
+00:04:01,458 --> 00:04:02,791
+But the Steam Controller is different.
+
+121
+00:04:02,791 --> 00:04:03,833
+By default,
+
+122
+00:04:03,833 --> 00:04:05,500
+it is not recognized by the computer as a controller,
+
+123
+00:04:05,500 --> 00:04:06,500
+but as a keyboard and mouse.
+
+124
+00:04:06,500 --> 00:04:08,250
+And when connected via the Puck,
+
+125
+00:04:08,250 --> 00:04:09,833
+it is still a USB keyboard and mouse.
+
+126
+00:04:09,833 --> 00:04:13,208
+You can wake up the PC from the couch with the controller.
+
+127
+00:04:17,291 --> 00:04:18,333
+Isn't that great?
+
+128
+00:04:18,333 --> 00:04:19,583
+When the computer first starts up,
+
+129
+00:04:19,583 --> 00:04:20,916
+the right touchpad is the mouse,
+
+130
+00:04:20,916 --> 00:04:22,291
+the left touchpad is the scroll wheel,
+
+131
+00:04:22,291 --> 00:04:23,708
+the left trigger is right-click,
+
+132
+00:04:23,708 --> 00:04:25,250
+the right trigger is left-click,
+
+133
+00:04:25,250 --> 00:04:26,583
+A is Enter,
+
+134
+00:04:26,583 --> 00:04:27,666
+B is Escape,
+
+135
+00:04:27,666 --> 00:04:29,791
+the D-pad corresponds to the arrow keys on the keyboard.
+
+136
+00:04:29,791 --> 00:04:30,166
+At this point,
+
+137
+00:04:30,166 --> 00:04:31,291
+we can perform simple operations
+
+138
+00:04:31,291 --> 00:04:32,708
+in the Windows interface.
+
+139
+00:04:32,708 --> 00:04:33,416
+After that,
+
+140
+00:04:33,416 --> 00:04:34,791
+press the Steam button again
+
+141
+00:04:34,791 --> 00:04:36,333
+to wake up Steam.
+
+142
+00:04:36,333 --> 00:04:37,416
+When Steam is running,
+
+143
+00:04:37,416 --> 00:04:39,000
+the controller has more functions,
+
+144
+00:04:39,000 --> 00:04:40,708
+such as bringing up the virtual keyboard.
+
+145
+00:04:40,708 --> 00:04:42,208
+Press the Steam button again
+
+146
+00:04:47,000 --> 00:04:49,000
+to enter Steam Big Picture mode,
+
+147
+00:04:49,000 --> 00:04:50,375
+an interface similar to the Steam Deck.
+
+148
+00:04:50,375 --> 00:04:51,000
+At this point,
+
+149
+00:04:51,000 --> 00:04:53,791
+the controller enters normal console-style interaction.
+
+150
+00:04:53,791 --> 00:04:56,583
+The touchpad's mission for UI interaction is thus complete.
+
+151
+00:04:56,583 --> 00:04:58,833
+If you still insist on using a mouse,
+
+152
+00:04:58,833 --> 00:05:00,750
+for example, when a software pop-up appears,
+
+153
+00:05:00,833 --> 00:05:03,041
+you can still hold down this... key
+
+154
+00:05:03,041 --> 00:05:04,291
+to trigger the trackpad.
+
+155
+00:05:04,291 --> 00:05:05,333
+You can also do this:
+
+156
+00:05:07,416 --> 00:05:08,500
+switch windows.
+
+157
+00:05:08,500 --> 00:05:11,041
+You can also use the trackpad to press the virtual keyboard.
+
+158
+00:05:11,041 --> 00:05:13,000
+Two fingers together is quite fast.
+
+159
+00:05:13,000 --> 00:05:13,875
+Long press
+
+160
+00:05:14,208 --> 00:05:16,583
+will show you various things you can trigger with the controller.
+
+161
+00:05:16,583 --> 00:05:17,583
+Other shortcuts
+
+162
+00:05:17,583 --> 00:05:18,625
+Quite a lot.
+
+163
+00:05:18,666 --> 00:05:20,375
+No need to get up during the entire operation.
+
+164
+00:05:20,375 --> 00:05:22,375
+This is currently the closest Windows experience
+
+165
+00:05:22,375 --> 00:05:24,458
+to a plug-and-play game console.
+
+166
+00:05:24,458 --> 00:05:25,625
+Once you enter the game,
+
+167
+00:05:25,625 --> 00:05:28,208
+the trackpad performs similarly to the Steam Deck.
+
+168
+00:05:28,208 --> 00:05:29,041
+As you slide,
+
+169
+00:05:29,041 --> 00:05:30,916
+there's motor vibration feedback underneath.
+
+170
+00:05:30,916 --> 00:05:32,708
+Every area can also be pressed down.
+
+171
+00:05:32,708 --> 00:05:33,291
+You can play some
+
+172
+00:05:33,291 --> 00:05:35,291
+strategy games designed specifically for keyboard and mouse.
+
+173
+00:05:35,291 --> 00:05:38,083
+A colleague who prefers to remain anonymous said
+
+174
+00:05:38,083 --> 00:05:41,000
+this trackpad is convenient for playing adult games.
+
+175
+00:05:41,166 --> 00:05:42,666
+Oh, right, this trackpad
+
+176
+00:05:42,666 --> 00:05:45,125
+is of course not just for use as a mouse.
+
+177
+00:05:45,125 --> 00:05:47,166
+It can also be configured as other buttons,
+
+178
+00:05:47,166 --> 00:05:48,250
+like keyboard keys,
+
+179
+00:05:48,250 --> 00:05:50,041
+such as numbers 1, 2, 3, 4, 5, 6,
+
+180
+00:05:50,041 --> 00:05:51,625
+for playing MMORPGs.
+
+181
+00:05:51,625 --> 00:05:53,708
+It can even trigger specific in-game functions,
+
+182
+00:05:53,708 --> 00:05:55,000
+like in DOOM Eternal.
+
+183
+00:05:55,000 --> 00:05:57,500
+Normally, switching weapons is a combination of buttons and joystick,
+
+184
+00:05:57,500 --> 00:06:00,000
+but I can directly touch the trackpad
+
+185
+00:06:00,000 --> 00:06:01,333
+to trigger the weapon wheel.
+
+186
+00:06:01,416 --> 00:06:02,833
+Release to confirm.
+
+187
+00:06:05,458 --> 00:06:06,833
+Let's talk about
+
+188
+00:06:06,833 --> 00:06:10,916
+the software that allows us to infinitely customize the Steam Controller,
+
+189
+00:06:10,916 --> 00:06:11,500
+Steam.
+
+190
+00:06:11,500 --> 00:06:12,041
+Yes,
+
+191
+00:06:12,041 --> 00:06:13,583
+it's Steam itself.
+
+192
+00:06:13,583 --> 00:06:14,500
+Because the Steam Controller
+
+193
+00:06:14,500 --> 00:06:16,333
+is recognized as a special keyboard and mouse by default,
+
+194
+00:06:16,333 --> 00:06:17,708
+you must open Steam
+
+195
+00:06:17,708 --> 00:06:19,791
+for it to work like a controller.
+
+196
+00:06:19,791 --> 00:06:21,916
+Steam itself is the driver for the controller.
+
+197
+00:06:21,916 --> 00:06:23,666
+Steam can display the controller's battery level,
+
+198
+00:06:23,666 --> 00:06:24,625
+update firmware,
+
+199
+00:06:24,625 --> 00:06:26,208
+show wireless signal strength,
+
+200
+00:06:26,208 --> 00:06:28,291
+and even find the controller like a lost TV remote.
+
+201
+00:06:28,291 --> 00:06:31,125
+You can call up your controller in Steam
+
+202
+00:06:37,083 --> 00:06:39,166
+It feels like Valve forced everyone's Steam client
+
+203
+00:06:39,166 --> 00:06:40,875
+to be stuffed with a lot of junk code
+
+204
+00:06:40,875 --> 00:06:42,583
+You wouldn't need it if you don't buy a controller
+
+205
+00:06:42,583 --> 00:06:43,666
+Just now I was talking about customization
+
+206
+00:06:43,666 --> 00:06:45,833
+I guess most people are like me
+
+207
+00:06:45,833 --> 00:06:47,083
+It's too complicated
+
+208
+00:06:47,083 --> 00:06:48,125
+I'm so lazy
+
+209
+00:06:48,125 --> 00:06:49,708
+I just use the defaults
+
+210
+00:06:49,833 --> 00:06:52,458
+But actually, you don't need to study it much
+
+211
+00:06:52,458 --> 00:06:53,500
+Just use others'
+
+212
+00:06:53,500 --> 00:06:54,500
+and that's it
+
+213
+00:06:54,500 --> 00:06:57,416
+Because Steam Deck has sold nearly 8 million units
+
+214
+00:06:57,416 --> 00:06:59,041
+So for many popular games on Steam
+
+215
+00:06:59,041 --> 00:07:00,500
+a lot of people have already uploaded
+
+216
+00:07:00,500 --> 00:07:02,458
+their own custom configuration files
+
+217
+00:07:02,458 --> 00:07:04,666
+They're in the community configurations of controller settings
+
+218
+00:07:04,666 --> 00:07:06,250
+And as soon as the Steam Controller was born
+
+219
+00:07:06,250 --> 00:07:08,500
+it could directly use these ready-made ones
+
+220
+00:07:08,833 --> 00:07:09,625
+For example
+
+221
+00:07:09,625 --> 00:07:11,083
+The Steam Controller and Steam Deck
+
+222
+00:07:11,083 --> 00:07:11,875
+like the Switch
+
+223
+00:07:11,875 --> 00:07:13,166
+both have gyroscope functionality
+
+224
+00:07:13,166 --> 00:07:14,833
+Allowing certain games to use the gyroscope
+
+225
+00:07:14,833 --> 00:07:16,291
+for aiming in shooting games
+
+226
+00:07:16,291 --> 00:07:18,291
+Compensating for the lack of precision in joysticks
+
+227
+00:07:18,375 --> 00:07:19,833
+The Splatoon series is like that
+
+228
+00:07:19,833 --> 00:07:21,791
+Gyro aiming is actually great
+
+229
+00:07:21,791 --> 00:07:23,625
+Very close to the precision of a mouse
+
+230
+00:07:23,625 --> 00:07:24,666
+And also very intuitive
+
+231
+00:07:24,666 --> 00:07:26,583
+But not many games support it
+
+232
+00:07:26,625 --> 00:07:27,416
+But that's okay
+
+233
+00:07:27,416 --> 00:07:28,625
+We can directly download
+
+234
+00:07:28,625 --> 00:07:30,833
+gyroscope settings configured by others
+
+235
+00:07:30,833 --> 00:07:31,833
+In Cyberpunk 2077
+
+236
+00:07:31,833 --> 00:07:33,500
+you can touch the touchpad
+
+237
+00:07:33,500 --> 00:07:35,666
+and the gyroscope will simulate mouse movement
+
+238
+00:07:35,666 --> 00:07:36,916
+making aiming better
+
+239
+00:07:36,916 --> 00:07:38,833
+The Satisfactory mouse and keyboard configuration
+
+240
+00:07:38,833 --> 00:07:41,833
+already has over a hundred thousand hours of playtime
+
+241
+00:07:41,833 --> 00:07:43,041
+The grips on the back of the Steam Controller
+
+242
+00:07:43,041 --> 00:07:44,833
+have additional touch sensor strips
+
+243
+00:07:44,833 --> 00:07:46,041
+called Grip Sense
+
+244
+00:07:46,041 --> 00:07:48,000
+They can also be configured to trigger pause
+
+245
+00:07:48,000 --> 00:07:49,666
+The degree of customization is very high
+
+246
+00:07:49,666 --> 00:07:50,666
+Combined with the touchpad
+
+247
+00:07:50,666 --> 00:07:52,625
+I think the Steam Controller has solved
+
+248
+00:07:52,625 --> 00:07:54,708
+most of the problems encountered when using a controller
+
+249
+00:07:54,708 --> 00:07:56,083
+to play PC games
+
+250
+00:07:58,791 --> 00:08:00,500
+Of course, all of this is based on
+
+251
+00:08:00,500 --> 00:08:03,333
+All the games you want to play are on Steam.
+
+252
+00:08:03,333 --> 00:08:06,416
+The Steam Controller really can only be used with Steam.
+
+253
+00:08:06,416 --> 00:08:08,291
+If Steam isn't running,
+
+254
+00:08:08,291 --> 00:08:10,833
+the controller isn't even recognized as a controller.
+
+255
+00:08:10,833 --> 00:08:13,291
+If you want to use it to play your Epic Games Store collection,
+
+256
+00:08:13,291 --> 00:08:14,416
+XGP, GOG,
+
+257
+00:08:14,416 --> 00:08:16,458
+or emulator games, pirated game resources,
+
+258
+00:08:16,458 --> 00:08:18,083
+by default, it simply won't work.
+
+259
+00:08:18,083 --> 00:08:20,000
+Either you add them as non-Steam games,
+
+260
+00:08:20,000 --> 00:08:21,875
+one by one, into Steam,
+
+261
+00:08:21,875 --> 00:08:22,916
+and launch them from Steam,
+
+262
+00:08:22,916 --> 00:08:25,833
+or you download this open-source plugin called SISR,
+
+263
+00:08:25,833 --> 00:08:28,125
+and keep Steam running in the background.
+
+264
+00:08:28,125 --> 00:08:30,000
+Either way, it's quite a hassle.
+
+265
+00:08:30,000 --> 00:08:30,500
+Not to mention,
+
+266
+00:08:30,500 --> 00:08:33,125
+it can't be used with any game console either.
+
+267
+00:08:33,125 --> 00:08:35,291
+This compatibility, combined with its $100 price tag,
+
+268
+00:08:35,291 --> 00:08:38,333
+makes it really hard to recommend to everyone.
+
+269
+00:08:38,458 --> 00:08:40,833
+For $100, you can buy a PS5 controller,
+
+270
+00:08:40,833 --> 00:08:42,833
+plus an extra Xbox controller,
+
+271
+00:08:42,833 --> 00:08:44,916
+or several third-party controllers.
+
+272
+00:08:44,916 --> 00:08:46,791
+And compared to the PS5 controller,
+
+273
+00:08:46,791 --> 00:08:48,583
+it doesn't even have adaptive triggers.
+
+274
+00:08:48,583 --> 00:08:50,458
+It's not a total win, you know.
+
+275
+00:08:50,458 --> 00:08:53,000
+If you just need a controller to pair with keyboard and mouse
+
+276
+00:08:53,000 --> 00:08:54,666
+for playing AAA games,
+
+277
+00:08:54,666 --> 00:08:57,000
+you might as well look at third-party controllers.
+
+278
+00:08:57,000 --> 00:09:00,666
+But if you want a gaming PC to replace a console
+
+279
+00:09:00,666 --> 00:09:02,250
+and become the center of your living room gaming,
+
+280
+00:09:02,250 --> 00:09:04,416
+without the hassle of keyboard and mouse,
+
+281
+00:09:04,416 --> 00:09:05,833
+then besides the Steam Controller,
+
+282
+00:09:05,833 --> 00:09:08,250
+you really have no other choice.
+
+283
+00:09:08,250 --> 00:09:09,875
+I think the $100 price tag
+
+284
+00:09:09,875 --> 00:09:11,583
+for this Steam Controller
+
+285
+00:09:11,583 --> 00:09:13,333
+is right at
+
+286
+00:09:13,333 --> 00:09:15,708
+the tipping point of value for money.
+
+287
+00:09:15,708 --> 00:09:18,125
+Any more expensive and it would be a bit of a rip-off.
+
+288
+00:09:18,125 --> 00:09:18,875
+Only those who truly
+
+289
+00:09:18,875 --> 00:09:21,000
+need its unique features
+
+290
+00:09:21,000 --> 00:09:23,166
+will feel it's worth the buy.
+
+291
+00:09:23,208 --> 00:09:25,000
+But then again,
+
+292
+00:09:25,000 --> 00:09:25,666
+the Steam Controller
+
+293
+00:09:25,666 --> 00:09:26,833
+was never meant
+
+294
+00:09:26,833 --> 00:09:28,708
+to be a standalone product.
+
+295
+00:09:28,708 --> 00:09:31,666
+It was supposed to be bundled with the Steam Machine.
+
+296
+00:09:31,666 --> 00:09:32,916
+It was only because of the memory crisis
+
+297
+00:09:32,916 --> 00:09:34,333
+that the controller was released first.
+
+298
+00:09:34,333 --> 00:09:35,583
+And yet, just a controller
+
+299
+00:09:35,583 --> 00:09:37,583
+can bring so many changes
+
+300
+00:09:37,583 --> 00:09:38,833
+to the living room PC gaming experience.
+
+301
+00:09:38,833 --> 00:09:40,333
+It makes you look forward even more
+
+302
+00:09:40,333 --> 00:09:42,333
+to the Steam Machine that follows
+
