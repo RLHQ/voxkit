@@ -217,3 +217,103 @@ gold cues: [...]
 ```
 
 （注：当前 `render_comparison.py` 是 ad-hoc 脚本未固化；下一轮如做 L3，顺手把它落到 `tools/` 或新增 `voxkit eval --html`。）
+
+## 10. L3 实跑数据（2026-05-13）
+
+L3 已实施为 `voxkit eval --llm`（commit `c9b94e7`），对齐算法 fix `92c6eb6`
+后跑了两个 fixture，**强力验证了 §7 的预测**：boundary metrics 跨场景不稳定，
+LLM 评分跨场景稳定。
+
+### 10.1 boundary F1 vs LLM overall 横向对比
+
+| Fixture | boundary precision | boundary recall | **boundary F1** | **LLM overall mean** | LLM overall p10 |
+|---|---|---|---|---|---|
+| 小宁子 zh (vlog) | 0.898 | 0.603 | **0.721** | **8.34** | 5.0 |
+| Kurzgesagt en (动画) | 0.180 | 0.209 | **0.194** | **8.02** | 5.0 |
+| **跨 fixture 差距** | 5.0× | 2.9× | **3.7×** | **1.04×** | 1.0× |
+
+**boundary F1 跨 fixture 差 3.7 倍，LLM overall 几乎持平（1.04 倍）**。
+
+这正是 L3 设计目标——金标作参考但允许 voxkit 不同切法，LLM 不会因为 voxkit 按
+句法切（vs 金标按字幕渲染单元切）就低分。LLM 实际给 Kurzgesagt `segmentation=8.06`，
+认可了 voxkit 切法的合理性。boundary recall=0.209 是因为 voxkit 切了 202 个金标
+没切的位置，但这些位置在 LLM 看来切得合理。
+
+### 10.2 LLM 维度细分
+
+| 维度 | 小宁子 mean / p10 | Kurzgesagt mean / p10 | 解读 |
+|---|---|---|---|
+| **semantic** (语义保留) | 8.41 / 5 | 8.16 / 5 | 跨场景一致 |
+| **terminology** (术语/数字) | 9.46 / 9 | **9.66 / 10** | 动画配音 ASR 几乎完美 |
+| **segmentation** (切分自然度) | 8.42 / 7 | 8.06 / 6 | LLM 认可不同切法 |
+| **punctuation** (标点) | **9.62 / 9** | 9.24 / 7 | proofread 加标点优势明显 |
+| **readability** (整体节奏) | 8.54 / 7 | 7.93 / 5 | 小宁子略好 |
+| **overall** | 8.34 / 5.0 | 8.02 / 5.0 | 跨场景 1.04× |
+
+**关键观察**：
+1. **terminology p10**：小宁子 9 / Kurzgesagt 10——动画 ASR 优于 vlog 麦克风
+2. **punctuation 小宁子高于 Kurzgesagt**：proofread 阶段对中文标点贡献明显（Kurzgesagt 没跑 proofread，stage=cues）
+3. **p10=5.0 跨 fixture 相同**：底部 10% 总有问题 group，差异不大
+
+### 10.3 L3 抓到 boundary 完全看不到的问题（high_risk 实例）
+
+**小宁子 zh（32 / 214 高风险）**：
+
+| group | voxkit | 金标 | LLM 抓 |
+|---|---|---|---|
+| 6 | 「这**一波**瞄准的目标用户」 | 「**G 胖**瞄准的目标用户」 | ASR 错识 + proofread 漏改 |
+| 12 | 「Steam」 | 「它到底值不值得买」 | reseg 把 "Steam" 单独成 cue 信息丢失 |
+| 16 | 「Steam **主体**的按键」 | 「Steam **主题**的按键」 | 错字 |
+| 24 | 「也被**接到**了」 | 「也被**挤到**了」 | ASR 错字 |
+| 29 | 「但是这个**抛开**...」 | 「但是这个**不好够**」 | ASR 严重错识 |
+| 54 | 「不支持 PS5、」 | 「PS5 Switch 和 Xbox」 | 切断丢内容 |
+
+**Kurzgesagt en（48 / 241 高风险）**：
+
+| group | voxkit | 金标 | LLM 抓 |
+|---|---|---|---|
+| 6 | 「What happened?」 | 「What happened?」+「Population Collapse」 | 漏掉 "Population Collapse" 标题 |
+| 7 | 「collapse.」 | 「Population Collapse」 | ASR 没识别 "Population"，只剩 "collapse" |
+| 11 | 「Compared to South Korea, this sounds almost amazing,」 | 完整复合句 | 切断丢核心 "but it still means population collapse" |
+| 22 | 「In 2026, Germany is already one of the oldest...」 | 完整 + "with a median age of over 45" | 漏后半部分 |
+
+**所有这些问题 boundary metrics 都给 hit**（时间对齐 OK），但 LLM 准确抓到了实质质量问题。
+
+### 10.4 工程化产物
+
+入仓 baselines（精简版，~21-35 KB）：
+- `tests/fixtures/youtuber_samples/xnzxnz_first_look_10min/baseline-llm.eval.json`
+- `tests/fixtures/youtuber_samples/kurzgesagt_germany_14min/baseline-llm.eval.json`
+
+每份含：aggregate（5 维 + overall mean/p50/p10）+ high_risk_groups 完整列表（含原文 + LLM 解释）+ prompt hash + token 消耗。
+
+完整 eval-llm.report.json（含全部 groups 详情，146-300 KB）落在 `/tmp/voxkit-samples/`，不入仓。
+
+### 10.5 单次评估成本
+
+| Fixture | input cue | LLM call | tokens (prompt+completion) | 估计成本 |
+|---|---|---|---|---|
+| 小宁子 zh (10min) | 213 | 22 | 49k + 81k = 130k | ~¥0.05 (deepseek-v4-flash) |
+| Kurzgesagt en (14min) | 241 | 25 | 58k + 98k = 156k | ~¥0.06 |
+
+**单次 release/PR review 跑一对 fixture 总成本 < ¥0.2**，可接受。
+
+### 10.6 关于 L3 的剩余风险
+
+- **LLM 评分有 variance**：temperature=0 但 DeepSeek 仍有少量浮动。两次跑同 fixture overall 可能差 0.1-0.3。**不要 over-fit 单次 LLM 分数**。
+- **prompt 校准未跟人工评分对照**：当前 LLM 给 8.34/8.02 是否反映真实人感受？建议下一轮做人工 spot-check 校准：手抽 20 个 cue 自己 1-10 打分，跟 LLM 比相关性。
+- **prompt v1 未优化**：当前 prompt 直接基于 §5.4 草案，没迭代。如果发现 LLM 系统性偏松/偏严，调 prompt 重跑（promptHash 变化作为 baseline 失效信号）。
+
+## 11. 下一轮决策点
+
+L3 数据让中文场景 ROI 更清晰：
+
+| 候选 | 现状 | L3 加持的判断 |
+|---|---|---|
+| **3a proofread 加 split 能力** | 未做 | LLM 已 catch ~6 个 ASR 错字（'这一波'/'主体'/'接到'/'抛开'/'拗开'），proofread prompt 加「拆分能力」可能不是关键，更应该改 proofread prompt **加强错字检测** |
+| **EN 路径候选 A**（pysbd 权重调整）| 未做 | LLM 显示 EN 实际质量 OK（8.02），boundary F1 0.194 是**指标 artifact** 不是真问题。EN 不优先 |
+| **proofread 错字检测加强** | 未做 | 新方向：LLM 抓到的 6 个错字都是同音字（一波/G 胖、主体/主题、接到/挤到、抛开/不好够）—— proofread v2 加「相邻同音字校验」启发 |
+| **3B1B 跑 LLM eval** | 未做 | 794 cue × ~¥0.2 = ~¥1。第三 fixture 数据点，可选 |
+
+**新洞察**：L3 揭示 voxkit 的真问题在 **ASR 错字 + 同音字**，不在 reseg 切分粒度。
+proofread v2 prompt 加强错字检测可能比 reseg 候选 A 更高 ROI。

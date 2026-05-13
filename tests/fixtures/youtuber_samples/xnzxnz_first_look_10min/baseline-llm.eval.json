@@ -1,0 +1,843 @@
+{
+  "schemaVersion": 1,
+  "voxkitBaseline": {
+    "version": "0.7.1",
+    "pipeline": "transcribe → eval --llm",
+    "recordedAt": "2026-05-13",
+    "note": "L3 LLM 多维评分 baseline（5 维 + 整体）。boundary metrics 在 baseline.eval.json",
+    "promptVersion": "v1",
+    "promptHash": "aa4e81194ab85bc7f91081a527716f1cc5a74e747b6fdf6a809b66e4064706d3"
+  },
+  "reference": "tests/fixtures/youtuber_samples/xnzxnz_first_look_10min/sub.zh-Hans.srt",
+  "language": "zh",
+  "sourceArtifact": "reseg2",
+  "provider": "deepseek",
+  "model": "deepseek-v4-flash",
+  "alignment": {
+    "vk_cues": 213,
+    "gold_cues": 302,
+    "groups": 214,
+    "groups_with_both": 213,
+    "groups_vk_only": 0,
+    "groups_gold_only": 1
+  },
+  "scores_aggregate": {
+    "semantic": {
+      "mean": 8.411214953271028,
+      "p50": 9.0,
+      "p10": 5.0
+    },
+    "terminology": {
+      "mean": 9.457943925233645,
+      "p50": 10.0,
+      "p10": 9.0
+    },
+    "segmentation": {
+      "mean": 8.42056074766355,
+      "p50": 9.0,
+      "p10": 7.0
+    },
+    "punctuation": {
+      "mean": 9.621495327102803,
+      "p50": 10.0,
+      "p10": 9.0
+    },
+    "readability": {
+      "mean": 8.537383177570094,
+      "p50": 9.0,
+      "p10": 7.0
+    },
+    "overall": {
+      "mean": 8.343457943925234,
+      "p50": 9.0,
+      "p10": 5.0
+    }
+  },
+  "high_risk_count": 32,
+  "high_risk_groups": [
+    {
+      "group_id": 0,
+      "time_start": 0.13,
+      "time_end": 2.748181818181818,
+      "voxkit_texts": [
+        "Steam出新硬件了。是个手柄，"
+      ],
+      "gold_texts": [
+        "Steam 出新硬件了",
+        "是个手柄",
+        "卖 700 块"
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 7,
+        "punctuation": 10,
+        "readability": 8
+      },
+      "overall": 5.0,
+      "issues": [
+        "缺少金标第三条信息"
+      ],
+      "explanation": "语义不完整，缺少'卖700块'，其他维度较好"
+    },
+    {
+      "group_id": 6,
+      "time_start": 16.49,
+      "time_end": 19.37,
+      "voxkit_texts": [
+        "如果你是这一波瞄准的目标用户"
+      ],
+      "gold_texts": [
+        "它还真的挺特别的",
+        "如果你是 G 胖瞄准的目标用户",
+        "它甚至会是一个"
+      ],
+      "scores": {
+        "semantic": 3,
+        "terminology": 2,
+        "segmentation": 7,
+        "punctuation": 7,
+        "readability": 6
+      },
+      "overall": 3.0,
+      "issues": [
+        "术语错误：'这一波'应为'G胖'"
+      ],
+      "explanation": "严重术语错误导致语义偏差，整体差"
+    },
+    {
+      "group_id": 12,
+      "time_start": 32.23,
+      "time_end": 34.846666666666664,
+      "voxkit_texts": [
+        "Steam"
+      ],
+      "gold_texts": [
+        "它到底值不值得买"
+      ],
+      "scores": {
+        "semantic": 2,
+        "terminology": 8,
+        "segmentation": 6,
+        "punctuation": 10,
+        "readability": 4
+      },
+      "overall": 3.0,
+      "issues": [
+        "voxkit 只输出'Steam'，严重缺失金标内容"
+      ],
+      "explanation": "信息几乎完全丢失，仅出现一个单词"
+    },
+    {
+      "group_id": 13,
+      "time_start": 34.846666666666664,
+      "time_end": 40.08,
+      "voxkit_texts": [
+        "手柄是一个对称布局的，"
+      ],
+      "gold_texts": [
+        "看外观 Steam 手柄",
+        "是一个对称布局的全功能 PC 手柄"
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 9,
+        "segmentation": 6,
+        "punctuation": 10,
+        "readability": 5
+      },
+      "overall": 5.0,
+      "issues": [
+        "voxkit 缺失金标的'看外观 Steam 手柄'部分"
+      ],
+      "explanation": "仅覆盖部分金标内容，语义不完整"
+    },
+    {
+      "group_id": 16,
+      "time_start": 44.61333333333333,
+      "time_end": 46.76,
+      "voxkit_texts": [
+        "额外有几个Steam主体的按键。"
+      ],
+      "gold_texts": [
+        "按键是 A B X Y",
+        "额外有几个 Steam 主题的按键"
+      ],
+      "scores": {
+        "semantic": 8,
+        "terminology": 4,
+        "segmentation": 9,
+        "punctuation": 10,
+        "readability": 8
+      },
+      "overall": 6.0,
+      "issues": [
+        "'Steam主体'应为'Steam主题'"
+      ],
+      "explanation": "语义基本完整，但有术语错误"
+    },
+    {
+      "group_id": 24,
+      "time_start": 64.87,
+      "time_end": 66.75,
+      "voxkit_texts": [
+        "摇杆的位置也被接到了"
+      ],
+      "gold_texts": [
+        "Steam 手柄外形整个很方很宽大",
+        "摇杆的位置",
+        "也被挤到了有点不那么好够的地方"
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 2,
+        "segmentation": 7,
+        "punctuation": 10,
+        "readability": 5
+      },
+      "overall": 4.0,
+      "issues": [
+        "错别字：'接到'应为'挤到'",
+        "信息不完整，缺少'有点不那么好够的地方'"
+      ],
+      "explanation": "voxkit存在错别字且信息缺失，严重影响了语义准确性。"
+    },
+    {
+      "group_id": 29,
+      "time_start": 76.64692307692307,
+      "time_end": 79.55,
+      "voxkit_texts": [
+        "但是这个抛开对于本来手就小到"
+      ],
+      "gold_texts": [
+        "但是这个不好够",
+        "对于本来手就小到"
+      ],
+      "scores": {
+        "semantic": 2,
+        "terminology": 2,
+        "segmentation": 5,
+        "punctuation": 10,
+        "readability": 3
+      },
+      "overall": 2.5,
+      "issues": [
+        "严重错词：'抛开'应为'不好够'",
+        "语义不完整，缺少'不好够'"
+      ],
+      "explanation": "voxkit识别严重错误，'抛开'取代了'不好够'，语义失真。"
+    },
+    {
+      "group_id": 54,
+      "time_start": 145.92,
+      "time_end": 147.61,
+      "voxkit_texts": [
+        "也就是说它不支持PS5、"
+      ],
+      "gold_texts": [
+        "只支持所有能安装 Steam 的操作系统",
+        "也就是说它不支持 PS5 Switch 和 Xbox"
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 6,
+        "punctuation": 7,
+        "readability": 4
+      },
+      "overall": 4.5,
+      "issues": [
+        "信息不完整，只列出PS5，漏掉Switch和Xbox"
+      ],
+      "explanation": "关键信息缺失，切分截断导致语义不完整"
+    },
+    {
+      "group_id": 57,
+      "time_start": 150.96,
+      "time_end": 152.48,
+      "voxkit_texts": [
+        "但是支持Windows。"
+      ],
+      "gold_texts": [
+        "也不支持 iOS 和安卓",
+        "但是支持 Windows macOS 和 Linux"
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 10,
+        "segmentation": 8,
+        "punctuation": 10,
+        "readability": 5
+      },
+      "overall": 4.5,
+      "issues": [
+        "漏掉了macOS和Linux，只说了Windows"
+      ],
+      "explanation": "关键信息丢失，只提及部分系统"
+    },
+    {
+      "group_id": 65,
+      "time_start": 170.9,
+      "time_end": 174.01,
+      "voxkit_texts": [
+        "触控板和连接其一切的，"
+      ],
+      "gold_texts": [
+        "所以它还得有普通手柄没有的东西",
+        "触控板",
+        "Puck",
+        "和连接起一切的 Steam Input 软件"
+      ],
+      "scores": {
+        "semantic": 2,
+        "terminology": 3,
+        "segmentation": 3,
+        "punctuation": 10,
+        "readability": 2
+      },
+      "overall": 2.5,
+      "issues": [
+        "漏掉了金标中的'Puck'和'Steam Input 软件'"
+      ],
+      "explanation": "核心信息丢失，语义不完整"
+    },
+    {
+      "group_id": 93,
+      "time_start": 253.21,
+      "time_end": 259.57,
+      "voxkit_texts": [
+        "电脑刚启动的时候"
+      ],
+      "gold_texts": [
+        "是不是很爽",
+        "电脑刚启动的时候"
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 10,
+        "segmentation": 5,
+        "punctuation": 10,
+        "readability": 4
+      },
+      "overall": 4.5,
+      "issues": [
+        "voxkit遗漏了金标中的'是不是很爽'"
+      ],
+      "explanation": "漏信息，语义不完整"
+    },
+    {
+      "group_id": 99,
+      "time_start": 274.77,
+      "time_end": 277.57000000000005,
+      "voxkit_texts": [
+        "就会唤醒Steam。Steam运行的时候，"
+      ],
+      "gold_texts": [
+        "再按一下 Steam 键",
+        "就会唤醒 Steam",
+        "Steam 运行的时候",
+        "手柄就会有更多的功能"
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 10,
+        "segmentation": 6,
+        "punctuation": 8,
+        "readability": 5
+      },
+      "overall": 4.5,
+      "issues": [
+        "voxkit遗漏了'手柄就会有更多的功能'"
+      ],
+      "explanation": "漏信息，不完整"
+    },
+    {
+      "group_id": 102,
+      "time_start": 281.93,
+      "time_end": 288.78,
+      "voxkit_texts": [
+        "会进入Steam大平板"
+      ],
+      "gold_texts": [
+        "再按一次 Steam 键",
+        "就会进入 Steam 大屏版"
+      ],
+      "scores": {
+        "semantic": 6,
+        "terminology": 3,
+        "segmentation": 8,
+        "punctuation": 9,
+        "readability": 7
+      },
+      "overall": 5.0,
+      "issues": [
+        "将'大屏版'误写为'大平板'，术语错误"
+      ],
+      "explanation": "术语错误导致信息偏差"
+    },
+    {
+      "group_id": 124,
+      "time_start": 346.918,
+      "time_end": 349.7821052631579,
+      "voxkit_texts": [
+        "键盘上的按键。比如数字12356，"
+      ],
+      "gold_texts": [
+        "它还可以配置成其他的按键",
+        "键盘上的按键",
+        "比如数字 123456"
+      ],
+      "scores": {
+        "semantic": 7,
+        "terminology": 5,
+        "segmentation": 9,
+        "punctuation": 10,
+        "readability": 8
+      },
+      "overall": 6.0,
+      "issues": [
+        "voxkit 将数字123456误写为12356，漏掉4"
+      ],
+      "explanation": "数字错误影响术语和语义，但整体可读"
+    },
+    {
+      "group_id": 127,
+      "time_start": 353.62,
+      "time_end": 355.49,
+      "voxkit_texts": [
+        "比如Doom Eternal，"
+      ],
+      "gold_texts": [
+        "甚至可以触发游戏里的特定功能",
+        "比如《DOOM Eternal》",
+        "正常切换武器是组合按键加摇杆"
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 9,
+        "segmentation": 8,
+        "punctuation": 10,
+        "readability": 7
+      },
+      "overall": 5.5,
+      "issues": [
+        "voxkit 仅转录了部分金标内容，遗漏了'正常切换武器'"
+      ],
+      "explanation": "窗口内信息缺失严重，总体分低"
+    },
+    {
+      "group_id": 130,
+      "time_start": 361.04,
+      "time_end": 363.915,
+      "voxkit_texts": [
+        "松开确定，正好，"
+      ],
+      "gold_texts": [
+        "触发武器轮",
+        "松开确定"
+      ],
+      "scores": {
+        "semantic": 3,
+        "terminology": 6,
+        "segmentation": 6,
+        "punctuation": 8,
+        "readability": 5
+      },
+      "overall": 4.0,
+      "issues": [
+        "丢失金标中的'触发武器轮'"
+      ],
+      "explanation": "voxkit未包含'触发武器轮'，核心信息丢失"
+    },
+    {
+      "group_id": 142,
+      "time_start": 390.79,
+      "time_end": 392.55357142857144,
+      "voxkit_texts": [
+        "我强行"
+      ],
+      "gold_texts": [
+        "你可以在 Steam 里呼叫你的手柄"
+      ],
+      "scores": {
+        "semantic": 0,
+        "terminology": 0,
+        "segmentation": 5,
+        "punctuation": 5,
+        "readability": 2
+      },
+      "overall": 1.0,
+      "issues": [
+        "voxkit编造了'我强行'，金标该窗口无内容"
+      ],
+      "explanation": "voxkit输出金标窗口内不存在的内容"
+    },
+    {
+      "group_id": 143,
+      "time_start": 392.55357142857144,
+      "time_end": 399.02,
+      "voxkit_texts": [
+        "给大家的Steam客户端"
+      ],
+      "gold_texts": [
+        "有种 Valve 强行给大家的 Steam 客户端"
+      ],
+      "scores": {
+        "semantic": 2,
+        "terminology": 6,
+        "segmentation": 3,
+        "punctuation": 10,
+        "readability": 2
+      },
+      "overall": 2.5,
+      "issues": [
+        "voxkit只输出后半句，丢失'有种 Valve 强行'，时间提前4.5秒"
+      ],
+      "explanation": "严重信息缺失和时间错位"
+    },
+    {
+      "group_id": 151,
+      "time_start": 417.18,
+      "time_end": 418.98,
+      "voxkit_texts": [
+        "所以Steam里很多热门游戏，"
+      ],
+      "gold_texts": [
+        "因为 Steam Deck 已经卖了快 800 万台",
+        "所以 Steam 里很多热门游戏"
+      ],
+      "scores": {
+        "semantic": 3,
+        "terminology": 10,
+        "segmentation": 8,
+        "punctuation": 10,
+        "readability": 8
+      },
+      "overall": 4.0,
+      "issues": [
+        "丢失了前一句'因为 Steam Deck 已经卖了快 800 万台'"
+      ],
+      "explanation": "严重信息丢失，因果关系不完整"
+    },
+    {
+      "group_id": 152,
+      "time_start": 418.98,
+      "time_end": 420.52,
+      "voxkit_texts": [
+        "都已经有很多人上传了"
+      ],
+      "gold_texts": [
+        "所以 Steam 里很多热门游戏",
+        "都已经有很多人上传了",
+        "自己做的自定义配置文件"
+      ],
+      "scores": {
+        "semantic": 3,
+        "terminology": 10,
+        "segmentation": 8,
+        "punctuation": 10,
+        "readability": 8
+      },
+      "overall": 4.0,
+      "issues": [
+        "丢失了前后句'所以 Steam 里...'和'自己做的...'"
+      ],
+      "explanation": "仅剩中间句，语义孤立不完整"
+    },
+    {
+      "group_id": 154,
+      "time_start": 422.38,
+      "time_end": 424.58,
+      "voxkit_texts": [
+        "就在手柄设置的社区配置里。"
+      ],
+      "gold_texts": [
+        "自己做的自定义配置文件",
+        "就在手柄设置的社区配置里"
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 8,
+        "punctuation": 10,
+        "readability": 8
+      },
+      "overall": 6.0,
+      "issues": [
+        "丢失了前一句'自己做的自定义配置文件'"
+      ],
+      "explanation": "缺少主语，语义不完整"
+    },
+    {
+      "group_id": 155,
+      "time_start": 424.58,
+      "time_end": 426.18,
+      "voxkit_texts": [
+        "而Steam Controller一出生"
+      ],
+      "gold_texts": [
+        "就在手柄设置的社区配置里",
+        "而 Steam Controller 一出生"
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 8,
+        "punctuation": 10,
+        "readability": 8
+      },
+      "overall": 6.0,
+      "issues": [
+        "丢失了前一句'就在手柄设置的社区配置里'"
+      ],
+      "explanation": "缺少承接，语义跳跃"
+    },
+    {
+      "group_id": 156,
+      "time_start": 426.18,
+      "time_end": 428.4911111111111,
+      "voxkit_texts": [
+        "就可以直接捡这些现成的用。"
+      ],
+      "gold_texts": [
+        "而 Steam Controller 一出生",
+        "就可以直接捡这些现成的用"
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 8,
+        "punctuation": 10,
+        "readability": 8
+      },
+      "overall": 6.0,
+      "issues": [
+        "丢失了前一句'而 Steam Controller 一出生'"
+      ],
+      "explanation": "缺少条件，结果句显得突兀"
+    },
+    {
+      "group_id": 158,
+      "time_start": 431.0407407407408,
+      "time_end": 433.00857142857143,
+      "voxkit_texts": [
+        "Switch一样都有陀螺仪的功能，"
+      ],
+      "gold_texts": [
+        "Steam 手柄和 Steam Deck",
+        "Switch 一样",
+        "都有陀螺仪的功能"
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 8,
+        "punctuation": 9,
+        "readability": 8
+      },
+      "overall": 6.0,
+      "issues": [
+        "丢失了前句'Steam 手柄和 Steam Deck'"
+      ],
+      "explanation": "缺少比较对象，语义不完整"
+    },
+    {
+      "group_id": 161,
+      "time_start": 438.1,
+      "time_end": 439.86,
+      "voxkit_texts": [
+        "Solato系列就是这样的。"
+      ],
+      "gold_texts": [
+        "弥补了摇杆不够精确的问题",
+        "Splatoon 系列就是这样的",
+        "陀螺仪瞄准其实很棒"
+      ],
+      "scores": {
+        "semantic": 3,
+        "terminology": 2,
+        "segmentation": 7,
+        "punctuation": 10,
+        "readability": 5
+      },
+      "overall": 3.0,
+      "issues": [
+        "Solato应为Splatoon，术语严重错误",
+        "丢失'弥补了摇杆'和'陀螺仪'信息"
+      ],
+      "explanation": "术语错且信息丢失严重，整体质量差"
+    },
+    {
+      "group_id": 168,
+      "time_start": 456.72,
+      "time_end": 458.72,
+      "voxkit_texts": [
+        "幸福工厂模拟建筑的配置。"
+      ],
+      "gold_texts": [
+        "更好瞄准了",
+        "《幸福工厂》模拟键鼠的配置"
+      ],
+      "scores": {
+        "semantic": 1,
+        "terminology": 1,
+        "segmentation": 8,
+        "punctuation": 10,
+        "readability": 4
+      },
+      "overall": 2.0,
+      "issues": [
+        "'建筑的'应为'键鼠的'，关键术语严重错误"
+      ],
+      "explanation": "术语错误导致语义完全偏离"
+    },
+    {
+      "group_id": 170,
+      "time_start": 461.7,
+      "time_end": 464.72,
+      "voxkit_texts": [
+        "Steam手柄背后的握把额外增加了触摸感应条。"
+      ],
+      "gold_texts": [
+        "已经有十几万小时的游戏时长了",
+        "Steam 手柄背后的握把",
+        "额外增加了触摸感应条"
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 10,
+        "segmentation": 7,
+        "punctuation": 10,
+        "readability": 6
+      },
+      "overall": 4.5,
+      "issues": [
+        "voxkit 丢失了金标第一条 '已经有十几万小时的游戏时长了'"
+      ],
+      "explanation": "voxkit 仅包含后两条，信息不完整"
+    },
+    {
+      "group_id": 171,
+      "time_start": 464.833,
+      "time_end": 466.041,
+      "voxkit_texts": [],
+      "gold_texts": [
+        "叫 Grip Sense"
+      ],
+      "scores": {
+        "semantic": 0,
+        "terminology": 0,
+        "segmentation": 0,
+        "punctuation": 0,
+        "readability": 0
+      },
+      "overall": 0.0,
+      "issues": [
+        "voxkit 在该窗口内无输出，缺失金标内容"
+      ],
+      "explanation": "完全缺失，严重错误"
+    },
+    {
+      "group_id": 184,
+      "time_start": 503.064,
+      "time_end": 505.85,
+      "voxkit_texts": [
+        "要么就下载这个叫做Ceaser的开源插件，"
+      ],
+      "gold_texts": [
+        "要么就下载这个叫做 SISR 的开源插件",
+        "同时在后台打开着 Steam"
+      ],
+      "scores": {
+        "semantic": 6,
+        "terminology": 2,
+        "segmentation": 7,
+        "punctuation": 10,
+        "readability": 7
+      },
+      "overall": 5.0,
+      "issues": [
+        "将“SISR”误写为“Ceaser”，术语错误严重"
+      ],
+      "explanation": "核心术语错误，导致信息失真"
+    },
+    {
+      "group_id": 190,
+      "time_start": 518.24,
+      "time_end": 520.8,
+      "voxkit_texts": [
+        "700块能买一个PS5手柄，"
+      ],
+      "gold_texts": [
+        "让它真的很不容易推荐给所有人",
+        "700 块能买一个 PS5 手柄"
+      ],
+      "scores": {
+        "semantic": 3,
+        "terminology": 9,
+        "segmentation": 8,
+        "punctuation": 8,
+        "readability": 7
+      },
+      "overall": 4.5,
+      "issues": [
+        "遗漏了金标前半句\"让它真的很不容易推荐给所有人\""
+      ],
+      "explanation": "voxkit只包含了后半句，信息不完整"
+    },
+    {
+      "group_id": 195,
+      "time_start": 530.16,
+      "time_end": 531.78,
+      "voxkit_texts": [
+        "如果你只是需要一个"
+      ],
+      "gold_texts": [
+        "还不是全面碾压哦",
+        "如果你只是需要一个和键鼠配合的"
+      ],
+      "scores": {
+        "semantic": 6,
+        "terminology": 10,
+        "segmentation": 3,
+        "punctuation": 8,
+        "readability": 4
+      },
+      "overall": 4.5,
+      "issues": [
+        "voxkit切断了句子，未完成\"和键鼠配合的\""
+      ],
+      "explanation": "voxkit只取了前半句，造成语义中断"
+    },
+    {
+      "group_id": 202,
+      "time_start": 548.21,
+      "time_end": 549.89,
+      "voxkit_texts": [
+        "我觉得700块的定价，"
+      ],
+      "gold_texts": [
+        "你还真的没有任何其他的选择",
+        "我觉得 700 块的定价",
+        "对于这个 Steam Controller 来说"
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 10,
+        "segmentation": 8,
+        "punctuation": 9,
+        "readability": 6
+      },
+      "overall": 5.0,
+      "issues": [
+        "voxkit 遗漏了金标第一条和第三条的关键信息"
+      ],
+      "explanation": "voxkit 只表达了半句话，缺少前后关键信息。"
+    }
+  ],
+  "tokens": {
+    "prompt": 49465,
+    "completion": 81174,
+    "total": 130639
+  }
+}

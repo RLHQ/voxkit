@@ -1,0 +1,1220 @@
+{
+  "schemaVersion": 1,
+  "voxkitBaseline": {
+    "version": "0.7.1",
+    "pipeline": "transcribe → eval --llm",
+    "recordedAt": "2026-05-13",
+    "note": "L3 LLM 多维评分 baseline（5 维 + 整体）。boundary metrics 在 baseline.eval.json",
+    "promptVersion": "v1",
+    "promptHash": "aa4e81194ab85bc7f91081a527716f1cc5a74e747b6fdf6a809b66e4064706d3"
+  },
+  "reference": "tests/fixtures/youtuber_samples/kurzgesagt_germany_14min/sub.en.srt",
+  "language": "en",
+  "sourceArtifact": "cues",
+  "provider": "deepseek",
+  "model": "deepseek-v4-flash",
+  "alignment": {
+    "vk_cues": 241,
+    "gold_cues": 201,
+    "groups": 241,
+    "groups_with_both": 238,
+    "groups_vk_only": 3,
+    "groups_gold_only": 0
+  },
+  "scores_aggregate": {
+    "semantic": {
+      "mean": 8.157676348547717,
+      "p50": 9.0,
+      "p10": 5.0
+    },
+    "terminology": {
+      "mean": 9.663900414937759,
+      "p50": 10.0,
+      "p10": 10.0
+    },
+    "segmentation": {
+      "mean": 8.062240663900415,
+      "p50": 8.0,
+      "p10": 6.0
+    },
+    "punctuation": {
+      "mean": 9.236514522821576,
+      "p50": 10.0,
+      "p10": 7.0
+    },
+    "readability": {
+      "mean": 7.929460580912863,
+      "p50": 9.0,
+      "p10": 5.0
+    },
+    "overall": {
+      "mean": 8.018257261410788,
+      "p50": 9.0,
+      "p10": 5.0
+    }
+  },
+  "high_risk_count": 48,
+  "high_risk_groups": [
+    {
+      "group_id": 6,
+      "time_start": 25.46,
+      "time_end": 33.67,
+      "voxkit_texts": [
+        "What happened?"
+      ],
+      "gold_texts": [
+        "What happened?",
+        "Population Collapse"
+      ],
+      "scores": {
+        "semantic": 3,
+        "terminology": 3,
+        "segmentation": 5,
+        "punctuation": 10,
+        "readability": 4
+      },
+      "overall": 3.5,
+      "issues": [
+        "漏掉 'Population Collapse'，严重信息丢失"
+      ],
+      "explanation": "voxkit 未包含金标的重要标题，信息残缺"
+    },
+    {
+      "group_id": 7,
+      "time_start": 33.67,
+      "time_end": 35.24,
+      "voxkit_texts": [
+        "collapse."
+      ],
+      "gold_texts": [
+        "Population Collapse"
+      ],
+      "scores": {
+        "semantic": 2,
+        "terminology": 2,
+        "segmentation": 5,
+        "punctuation": 10,
+        "readability": 2
+      },
+      "overall": 2.5,
+      "issues": [
+        "严重遗漏 'Population'，只剩 'collapse'"
+      ],
+      "explanation": "voxkit 几乎完全丢失了金标的关键内容"
+    },
+    {
+      "group_id": 11,
+      "time_start": 48.19,
+      "time_end": 51.72,
+      "voxkit_texts": [
+        "Compared to South Korea, this sounds almost amazing,"
+      ],
+      "gold_texts": [
+        "But for 55 years, they have\\hbeen below\nreplacement, at 1.4 children per woman in 2025.",
+        "Compared to South Korea this sounds almost\\h\namazing but it still means population collapse."
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 10,
+        "segmentation": 6,
+        "punctuation": 6,
+        "readability": 5
+      },
+      "overall": 4.5,
+      "issues": [
+        "语义不完整，缺少关键信息'but it still means population collapse'",
+        "末尾逗号结束，不符合规范"
+      ],
+      "explanation": "voxkit仅截取前半句，丢失核心信息。"
+    },
+    {
+      "group_id": 19,
+      "time_start": 79.86,
+      "time_end": 83.07,
+      "voxkit_texts": [
+        "The real crisis German millennials, Gen Z"
+      ],
+      "gold_texts": [
+        "So we have a fatal mix of way more\\h\ngrannies and way fewer babies.",
+        "The real crisis German Millennials,\\h\nGen-Z and younger will have to live"
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 9,
+        "segmentation": 6,
+        "punctuation": 5,
+        "readability": 5
+      },
+      "overall": 5.0,
+      "issues": [
+        "语义不完整，缺少'and younger will have to live'",
+        "末尾无标点"
+      ],
+      "explanation": "voxkit仅提取前半句，信息丢失严重。"
+    },
+    {
+      "group_id": 20,
+      "time_start": 83.07,
+      "time_end": 87.5,
+      "voxkit_texts": [
+        "and younger will have to live through is the massive shift in population composition"
+      ],
+      "gold_texts": [
+        "The real crisis German Millennials,\\h\nGen-Z and younger will have to live",
+        "through is the massive shift in population\\h\ncomposition and the transition period."
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 8,
+        "segmentation": 6,
+        "punctuation": 7,
+        "readability": 4
+      },
+      "overall": 4.5,
+      "issues": [
+        "缺失金标开头 'The real crisis German Millennials, Gen-Z'"
+      ],
+      "explanation": "voxkit 遗漏了主语，信息不完整"
+    },
+    {
+      "group_id": 22,
+      "time_start": 88.96,
+      "time_end": 93.51,
+      "voxkit_texts": [
+        "In 2026, Germany is already one of the oldest countries in the world,"
+      ],
+      "gold_texts": [
+        "through is the massive shift in population\\h\ncomposition and the transition period.",
+        "In 2026 Germany is already\\h\none of the oldest countries",
+        "in the world with a median age of over 45."
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 9,
+        "segmentation": 7,
+        "punctuation": 8,
+        "readability": 6
+      },
+      "overall": 5.5,
+      "issues": [
+        "缺失金标后半部分 'with a median age of over 45'"
+      ],
+      "explanation": "仅包含前一半信息"
+    },
+    {
+      "group_id": 26,
+      "time_start": 104.6,
+      "time_end": 108.56,
+      "voxkit_texts": [
+        "Despite its industrial production declining, suffocating bureaucracy,"
+      ],
+      "gold_texts": [
+        "Only one in 8 is a child under 14.",
+        "Despite its industrial production declining,\\h\nsuffocating bureaucracy and little economic"
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 9,
+        "segmentation": 7,
+        "punctuation": 8,
+        "readability": 5
+      },
+      "overall": 5.0,
+      "issues": [
+        "句子不完整，缺少 'and little economic'"
+      ],
+      "explanation": "金标后半句缺失"
+    },
+    {
+      "group_id": 27,
+      "time_start": 108.56,
+      "time_end": 112.33,
+      "voxkit_texts": [
+        "and little economic growth, Germany's system is still chugging along,"
+      ],
+      "gold_texts": [
+        "Despite its industrial production declining,\\h\nsuffocating bureaucracy and little economic",
+        "growth, Germany's system is still chugging along\\h\nand it remains one of the richest countries."
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 9,
+        "segmentation": 7,
+        "punctuation": 8,
+        "readability": 6
+      },
+      "overall": 5.5,
+      "issues": [
+        "缺失金标后部 'and it remains one of the richest countries'"
+      ],
+      "explanation": "信息不完整"
+    },
+    {
+      "group_id": 39,
+      "time_start": 149.31,
+      "time_end": 151.85,
+      "voxkit_texts": [
+        "But because they didn't have nearly enough kids,"
+      ],
+      "gold_texts": [
+        "By 2036, 13 million German Baby boomers\\h\nwill retire – this big bulge here.",
+        "But because they didn’t have nearly enough kids\\h\nway fewer younger people will replace them"
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 7,
+        "punctuation": 8,
+        "readability": 6
+      },
+      "overall": 5.5,
+      "issues": [
+        "voxkit 句子不完整，缺少 'way fewer younger people will replace them'"
+      ],
+      "explanation": "信息丢失严重，overall 偏低。"
+    },
+    {
+      "group_id": 43,
+      "time_start": 163.16,
+      "time_end": 167.08,
+      "voxkit_texts": [
+        "Also, services will decline. Waiting times will increase for everything"
+      ],
+      "gold_texts": [
+        "Fewer people working means fewer\\h\ntaxes and resources for the state.",
+        "Also services will decline,\\h\nwaiting times will increase",
+        "for everything from your bags at the\\h\nairport to doctor's appointments."
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 7,
+        "punctuation": 8,
+        "readability": 7
+      },
+      "overall": 6.5,
+      "issues": [
+        "漏掉“from your bags at the airport to doctor's appointments”"
+      ],
+      "explanation": "语义缺失后半关键信息，可读性受影响。"
+    },
+    {
+      "group_id": 44,
+      "time_start": 167.08,
+      "time_end": 167.65,
+      "voxkit_texts": [
+        "from your bags"
+      ],
+      "gold_texts": [
+        "for everything from your bags at the\\h\nairport to doctor's appointments."
+      ],
+      "scores": {
+        "semantic": 6,
+        "terminology": 10,
+        "segmentation": 6,
+        "punctuation": 10,
+        "readability": 4
+      },
+      "overall": 5.5,
+      "issues": [
+        "独立cue“from your bags”信息不完整"
+      ],
+      "explanation": "片段化严重，阅读体验差但术语正确。"
+    },
+    {
+      "group_id": 49,
+      "time_start": 180.46,
+      "time_end": 183.43,
+      "voxkit_texts": [
+        "This sort of worked in the 1960s,"
+      ],
+      "gold_texts": [
+        "which means that about 20% of today’s\\h\nsalaries is directly paid out to pensioners.",
+        "This sort of worked in the 1960s when there\\h\nwere five working Germans for every retiree."
+      ],
+      "scores": {
+        "semantic": 3,
+        "terminology": 10,
+        "segmentation": 6,
+        "punctuation": 9,
+        "readability": 5
+      },
+      "overall": 4.0,
+      "issues": [
+        "漏掉“when there were five working Germans for every retiree”"
+      ],
+      "explanation": "严重缺失关键信息，语义不完整。"
+    },
+    {
+      "group_id": 61,
+      "time_start": 218.2,
+      "time_end": 222.28,
+      "voxkit_texts": [
+        "In 2025, the German federal government spent roughly"
+      ],
+      "gold_texts": [
+        "The Future is Today",
+        "In 2025, the German federal government spent\\h\nroughly a quarter of its annual tax revenues"
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 10,
+        "segmentation": 5,
+        "punctuation": 8,
+        "readability": 4
+      },
+      "overall": 4.5,
+      "issues": [
+        "voxkit 句子不完整，漏掉核心数字信息"
+      ],
+      "explanation": "仅输出前半句，丢失'a quarter of'关键内容"
+    },
+    {
+      "group_id": 64,
+      "time_start": 229.22,
+      "time_end": 230.96,
+      "voxkit_texts": [
+        "Let's say that again."
+      ],
+      "gold_texts": [
+        "to fix holes in the pension system — on\\h\ntop of the working population’s payments.",
+        "Let’s say that again: One in four German\\h\ntax euros is used to pay out pensions today."
+      ],
+      "scores": {
+        "semantic": 3,
+        "terminology": 10,
+        "segmentation": 9,
+        "punctuation": 10,
+        "readability": 5
+      },
+      "overall": 4.5,
+      "issues": [
+        "voxkit 只输出开头短句，遗漏核心数字"
+      ],
+      "explanation": "仅输出'Let's say that again'，信息严重缺失"
+    },
+    {
+      "group_id": 67,
+      "time_start": 241.05,
+      "time_end": 244.17,
+      "voxkit_texts": [
+        "The wealth of the nation is redistributed from the young"
+      ],
+      "gold_texts": [
+        "More than on education, research,\\h\ninfrastructure and defense combined!",
+        "The wealth of the nation is redistributed from\\h\nthe young and the working to the old and retired."
+      ],
+      "scores": {
+        "semantic": 3,
+        "terminology": 10,
+        "segmentation": 4,
+        "punctuation": 3,
+        "readability": 3
+      },
+      "overall": 3.5,
+      "issues": [
+        "voxkit 句子中断在'young'，遗漏关键内容"
+      ],
+      "explanation": "信息严重不完整，切分不合理"
+    },
+    {
+      "group_id": 70,
+      "time_start": 250.14,
+      "time_end": 253.29,
+      "voxkit_texts": [
+        "It's money that could be spent on things that help the young"
+      ],
+      "gold_texts": [
+        "And as the boomers retire\\h\nthis will only get worse.",
+        "It’s money that could be spent on things that help\\h\nthe young and the working part of the population."
+      ],
+      "scores": {
+        "semantic": 3,
+        "terminology": 10,
+        "segmentation": 6,
+        "punctuation": 10,
+        "readability": 4
+      },
+      "overall": 4.0,
+      "issues": [
+        "voxkit 丢失金标第一行内容",
+        "voxkit 只截取了后半句，信息不完整"
+      ],
+      "explanation": "voxkit 遗漏了重要上下文，导致语义不完整"
+    },
+    {
+      "group_id": 84,
+      "time_start": 293.36,
+      "time_end": 297.73,
+      "voxkit_texts": [
+        "but taxes and contributions are about 40% of salaries for the average worker"
+      ],
+      "gold_texts": [
+        "Well many sure would like to but\\h\ntaxes and contributions are about",
+        "40% of salaries for the average worker and\\h\nalmost 50% in the highest tax brackets."
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 10,
+        "segmentation": 7,
+        "punctuation": 10,
+        "readability": 5
+      },
+      "overall": 5.0,
+      "issues": [
+        "漏掉'and almost 50% in the highest tax brackets'"
+      ],
+      "explanation": "voxkit严重丢失关键数字信息，导致语义不完整。"
+    },
+    {
+      "group_id": 91,
+      "time_start": 317.7,
+      "time_end": 321.03,
+      "voxkit_texts": [
+        "But due to a mix of Nimbus preventing new development,"
+      ],
+      "gold_texts": [
+        "wealth generators and places of comfort\\h\nand security is owning your own place.",
+        "But due to a mix of NIMBYS\\h\npreventing new development,"
+      ],
+      "scores": {
+        "semantic": 6,
+        "terminology": 2,
+        "segmentation": 7,
+        "punctuation": 10,
+        "readability": 8
+      },
+      "overall": 3.5,
+      "issues": [
+        "术语严重错误：'Nimbus' 应为 'NIMBYS'"
+      ],
+      "explanation": "核心术语识别错误，意思完全改变。"
+    },
+    {
+      "group_id": 104,
+      "time_start": 362.03,
+      "time_end": 365.76,
+      "voxkit_texts": [
+        "and app built to help you think critically about the information you consume,"
+      ],
+      "gold_texts": [
+        "Our partner Ground News is a\\h\nwebsite and app built to help",
+        "you think critically about the information\\h\nyou consume – a mission we fully support."
+      ],
+      "scores": {
+        "semantic": 8,
+        "terminology": 10,
+        "segmentation": 5,
+        "punctuation": 7,
+        "readability": 5
+      },
+      "overall": 6.5,
+      "issues": [
+        "句子以逗号结尾，不完整；CPS 过高(16)"
+      ],
+      "explanation": "voxkit 句子不完整，字符密度过高影响阅读。"
+    },
+    {
+      "group_id": 117,
+      "time_start": 409.31,
+      "time_end": 415.25,
+      "voxkit_texts": [
+        "Try it at ground.news.nutshell or scan the QR code on the screen."
+      ],
+      "gold_texts": [
+        "And Ground News makes it easier to do just that.",
+        "Try it at ground.news/nutshell,\nor scan the QR code on the screen."
+      ],
+      "scores": {
+        "semantic": 6,
+        "terminology": 3,
+        "segmentation": 8,
+        "punctuation": 6,
+        "readability": 5
+      },
+      "overall": 4.0,
+      "issues": [
+        "URL中使用了错误的分隔符点号，应为斜杠"
+      ],
+      "explanation": "URL错误，严重影响术语准确性"
+    },
+    {
+      "group_id": 121,
+      "time_start": 425.52,
+      "time_end": 428.88,
+      "voxkit_texts": [
+        "Young Germans are condemned to pay off a huge loan"
+      ],
+      "gold_texts": [
+        "And now back to the video.",
+        "Young Germans are condemned to\\h\npay off a huge loan on the future"
+      ],
+      "scores": {
+        "semantic": 6,
+        "terminology": 10,
+        "segmentation": 5,
+        "punctuation": 10,
+        "readability": 5
+      },
+      "overall": 5.5,
+      "issues": [
+        "voxkit 缺少 'on the future'，信息不完整"
+      ],
+      "explanation": "voxkit 截断句子，丢失重要状语。"
+    },
+    {
+      "group_id": 127,
+      "time_start": 448.31,
+      "time_end": 451.79,
+      "voxkit_texts": [
+        "This leaves young Germans facing a hard time building wealth"
+      ],
+      "gold_texts": [
+        "when seniors are the largest group of\\h\nvoters, politicians make politics for them.",
+        "This leaves young Germans facing a hard time\\h\nbuilding wealth or getting their own homes,"
+      ],
+      "scores": {
+        "semantic": 6,
+        "terminology": 10,
+        "segmentation": 4,
+        "punctuation": 10,
+        "readability": 5
+      },
+      "overall": 5.0,
+      "issues": [
+        "voxkit缺少 ' or getting their own homes'"
+      ],
+      "explanation": "句子截断，信息不完整。"
+    },
+    {
+      "group_id": 128,
+      "time_start": 451.79,
+      "time_end": 454.83,
+      "voxkit_texts": [
+        "or getting their own homes, which makes them even less willing"
+      ],
+      "gold_texts": [
+        "This leaves young Germans facing a hard time\\h\nbuilding wealth or getting their own homes,",
+        "which makes them even less willing to start\\h\nfamilies and have children, even if they want to."
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 4,
+        "punctuation": 9,
+        "readability": 5
+      },
+      "overall": 5.0,
+      "issues": [
+        "voxkit缺少 'to start families and have children, even if they want to'"
+      ],
+      "explanation": "句子截断，未完成。"
+    },
+    {
+      "group_id": 135,
+      "time_start": 473.44,
+      "time_end": 474.96,
+      "voxkit_texts": [
+        "inevitably millions of older"
+      ],
+      "gold_texts": [
+        "With unsustainable pension funds, inevitably,",
+        "millions of older Germans will have\\h\nto work much longer than they thought."
+      ],
+      "scores": {
+        "semantic": 7,
+        "terminology": 10,
+        "segmentation": 4,
+        "punctuation": 10,
+        "readability": 4
+      },
+      "overall": 5.0,
+      "issues": [
+        "Cue 在 older 处截断，不完整",
+        "金标本句完整，voxkit 切分断裂"
+      ],
+      "explanation": "Voxkit 切分不自然，句子中途截断，影响可读性。"
+    },
+    {
+      "group_id": 148,
+      "time_start": 513.52,
+      "time_end": 514.38,
+      "voxkit_texts": [
+        "But the scale of the"
+      ],
+      "gold_texts": [
+        "But the scale of the gap between what\\h\nworkers pay and what is needed to cover"
+      ],
+      "scores": {
+        "semantic": 7,
+        "terminology": 10,
+        "segmentation": 5,
+        "punctuation": 7,
+        "readability": 6
+      },
+      "overall": 6.0,
+      "issues": [
+        "切分停在'the'，阅读体验差"
+      ],
+      "explanation": "语义不完整，切分点不自然。"
+    },
+    {
+      "group_id": 149,
+      "time_start": 514.38,
+      "time_end": 518.22,
+      "voxkit_texts": [
+        "gap between what workers pay and what's needed to cover boomers' pensions is"
+      ],
+      "gold_texts": [
+        "But the scale of the gap between what\\h\nworkers pay and what is needed to cover",
+        "boomers’ pensions is so enormous that even\\h\nraising taxes would only buy a bit of time."
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 5,
+        "punctuation": 6,
+        "readability": 5
+      },
+      "overall": 5.0,
+      "issues": [
+        "句子截断在'is'，丢失关键信息"
+      ],
+      "explanation": "语义严重不完整，切分导致信息丢失。"
+    },
+    {
+      "group_id": 150,
+      "time_start": 518.22,
+      "time_end": 522.44,
+      "voxkit_texts": [
+        "so enormous that even raising taxes would only buy a bit of time."
+      ],
+      "gold_texts": [
+        "boomers’ pensions is so enormous that even\\h\nraising taxes would only buy a bit of time."
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 7,
+        "segmentation": 7,
+        "punctuation": 8,
+        "readability": 6
+      },
+      "overall": 4.5,
+      "issues": [
+        "丢失前半句 'boomers’ pensions is so'"
+      ],
+      "explanation": "voxkit仅截取后半句，语义不完整"
+    },
+    {
+      "group_id": 151,
+      "time_start": 522.44,
+      "time_end": 524.76,
+      "voxkit_texts": [
+        "And beyond pensions, the welfare"
+      ],
+      "gold_texts": [
+        "boomers’ pensions is so enormous that even\\h\nraising taxes would only buy a bit of time.",
+        "And beyond pensions, the welfare\\h\nand healthcare systems Germans"
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 6,
+        "punctuation": 10,
+        "readability": 6
+      },
+      "overall": 5.5,
+      "issues": [
+        "句子不完整，缺失 'and healthcare systems Germans'"
+      ],
+      "explanation": "voxkit只取前半，信息不完整"
+    },
+    {
+      "group_id": 156,
+      "time_start": 540.69,
+      "time_end": 543.02,
+      "voxkit_texts": [
+        "The waiting time for a specialist"
+      ],
+      "gold_texts": [
+        "the numbers of patients will explode.",
+        "The waiting time for a specialist doctor is\\h\nalready months in the state health care system."
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 10,
+        "segmentation": 3,
+        "punctuation": 10,
+        "readability": 4
+      },
+      "overall": 4.0,
+      "issues": [
+        "句子被切断，缺少 'doctor is already months'"
+      ],
+      "explanation": "voxkit仅取前半，信息不完整"
+    },
+    {
+      "group_id": 159,
+      "time_start": 548.39,
+      "time_end": 551.04,
+      "voxkit_texts": [
+        "Whatever your opinion on immigration is,"
+      ],
+      "gold_texts": [
+        "Ok, but what about immigration?",
+        "Whatever your opinion on immigration\\h\nis, pro or against, please put it in"
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 10,
+        "segmentation": 5,
+        "punctuation": 8,
+        "readability": 5
+      },
+      "overall": 4.5,
+      "issues": [
+        "信息不完整，缺少 'pro or against, please put it in'"
+      ],
+      "explanation": "voxkit仅取前半，语义不完整"
+    },
+    {
+      "group_id": 160,
+      "time_start": 551.04,
+      "time_end": 554.79,
+      "voxkit_texts": [
+        "pro or against, please put it in a box and ignore it for a moment."
+      ],
+      "gold_texts": [
+        "Whatever your opinion on immigration\\h\nis, pro or against, please put it in",
+        "a box and ignore it for a moment, we only\\h\nwant to look at it from one perspective:"
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 8,
+        "punctuation": 10,
+        "readability": 7
+      },
+      "overall": 5.5,
+      "issues": [
+        "voxkit 缺失了开头 'Whatever your opinion on immigration is' 核心信息"
+      ],
+      "explanation": "voxkit 合并了金标后续内容但丢失了前半句重要前提"
+    },
+    {
+      "group_id": 170,
+      "time_start": 583.05,
+      "time_end": 587.04,
+      "voxkit_texts": [
+        "Sure, immigration over the last few decades has delayed the coming crash,"
+      ],
+      "gold_texts": [
+        "they tend to adjust to the rest of\\h\nthe population within two generations.",
+        "Sure, immigration over the last few decades\\h\nhas delayed the coming crash and in the"
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 7,
+        "punctuation": 10,
+        "readability": 4
+      },
+      "overall": 5.0,
+      "issues": [
+        "缺少金标第一句整个信息和第二句的 'and in the'"
+      ],
+      "explanation": "voxkit 只捕获了部分金标内容，核心信息缺失严重"
+    },
+    {
+      "group_id": 174,
+      "time_start": 596.75,
+      "time_end": 598.4,
+      "voxkit_texts": [
+        "But there's a problem."
+      ],
+      "gold_texts": [
+        "So zero immigration doesn’t seem wise or feasible.",
+        "But there’s a problem: If birthrates stay\\h\nas low as they are or go down even more,"
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 9,
+        "punctuation": 7,
+        "readability": 6
+      },
+      "overall": 5.5,
+      "issues": [
+        "只取了金标句子开头，缺少冒号后的关键条件"
+      ],
+      "explanation": "voxkit 信息不完整，且句号代替冒号改变了语义连接"
+    },
+    {
+      "group_id": 187,
+      "time_start": 645.21,
+      "time_end": 649.67,
+      "voxkit_texts": [
+        "The demographic crisis is the greatest danger to German living standards"
+      ],
+      "gold_texts": [
+        "Conclusion and Opinion Part\\h\n– So How Over is Germany?",
+        "The demographic crisis is the greatest danger\\h\nto German living standards, and social cohesion."
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 10,
+        "segmentation": 4,
+        "punctuation": 10,
+        "readability": 3
+      },
+      "overall": 4.5,
+      "issues": [
+        "漏掉'and social cohesion'",
+        "cps过高（14.1）"
+      ],
+      "explanation": "voxkit截断句子，丢失后半关键信息且cps过高。"
+    },
+    {
+      "group_id": 189,
+      "time_start": 654.85,
+      "time_end": 659.19,
+      "voxkit_texts": [
+        "Things are about to escalate in Germany, Italy, France and Poland,"
+      ],
+      "gold_texts": [
+        "And the same crisis is unfolding\\h\nin all western countries.",
+        "Things are about to escalate in Germany, Italy,",
+        "France and Poland – but the same issues are also\\h\non the horizon in the US, Argentina or Canada."
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 5,
+        "punctuation": 7,
+        "readability": 5
+      },
+      "overall": 5.5,
+      "issues": [
+        "遗漏后续转折内容",
+        "以逗号结尾不完整",
+        "cps过高（15.2）"
+      ],
+      "explanation": "voxkit截断句子，遗漏关键转折且cps过高。"
+    },
+    {
+      "group_id": 190,
+      "time_start": 659.19,
+      "time_end": 664.29,
+      "voxkit_texts": [
+        "but the same issues are also on the horizon in the US, Argentina or Canada."
+      ],
+      "gold_texts": [
+        "France and Poland – but the same issues are also\\h\non the horizon in the US, Argentina or Canada."
+      ],
+      "scores": {
+        "semantic": 2,
+        "terminology": 10,
+        "segmentation": 7,
+        "punctuation": 10,
+        "readability": 4
+      },
+      "overall": 3.0,
+      "issues": [
+        "缺少'France and Poland'信息"
+      ],
+      "explanation": "voxkit遗漏了金标前半部分的关键信息"
+    },
+    {
+      "group_id": 191,
+      "time_start": 664.29,
+      "time_end": 666.96,
+      "voxkit_texts": [
+        "The reality nobody wants to talk about"
+      ],
+      "gold_texts": [
+        "France and Poland – but the same issues are also\\h\non the horizon in the US, Argentina or Canada.",
+        "The reality nobody wants to talk about is"
+      ],
+      "scores": {
+        "semantic": 3,
+        "terminology": 10,
+        "segmentation": 6,
+        "punctuation": 10,
+        "readability": 4
+      },
+      "overall": 3.5,
+      "issues": [
+        "遗漏了上一句，直接开始新句"
+      ],
+      "explanation": "voxkit跳过前一句，语义不连贯"
+    },
+    {
+      "group_id": 200,
+      "time_start": 694.32,
+      "time_end": 696.69,
+      "voxkit_texts": [
+        "families paying for housing and child care"
+      ],
+      "gold_texts": [
+        "especially the wealthiest among them, we\\h\ncould invest more of it in families — paying",
+        "for housing and childcare and making it\\h\nan amazing deal to have a big family."
+      ],
+      "scores": {
+        "semantic": 2,
+        "terminology": 8,
+        "segmentation": 6,
+        "punctuation": 10,
+        "readability": 5
+      },
+      "overall": 3.0,
+      "issues": [
+        "voxkit语义反转：金标表示'为家庭支付'，voxkit变为'家庭支付'"
+      ],
+      "explanation": "voxkit丢失了原文主语，导致信息错误"
+    },
+    {
+      "group_id": 206,
+      "time_start": 717.69,
+      "time_end": 724.47,
+      "voxkit_texts": [
+        "making this video was"
+      ],
+      "gold_texts": [
+        "decide just how rough – and what kind of\\h\nsocieties will emerge on the other side.",
+        "Making this video was hell."
+      ],
+      "scores": {
+        "semantic": 1,
+        "terminology": 6,
+        "segmentation": 2,
+        "punctuation": 10,
+        "readability": 2
+      },
+      "overall": 2.0,
+      "issues": [
+        "voxkit严重遗漏窗口内金标内容",
+        "内容不完整且时间过长"
+      ],
+      "explanation": "voxkit只捕获了下一句开头，当前窗口信息完全缺失"
+    },
+    {
+      "group_id": 207,
+      "time_start": 724.47,
+      "time_end": 730.0,
+      "voxkit_texts": [
+        "hell we wrote the first draft in the winter of 2023 we killed this script again"
+      ],
+      "gold_texts": [
+        "Making this video was hell.",
+        "We wrote the first draft in the winter of 2023!",
+        "We killed this script again and again\\h\nonly to be annoyed and start fresh."
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 8,
+        "segmentation": 4,
+        "punctuation": 10,
+        "readability": 4
+      },
+      "overall": 4.0,
+      "issues": [
+        "开头'hell'孤立，丢失前文",
+        "缺少'again and again'等关键部分"
+      ],
+      "explanation": "voxkit合并三句但开头突兀，语义不完整"
+    },
+    {
+      "group_id": 218,
+      "time_start": 764.45,
+      "time_end": 766.62,
+      "voxkit_texts": [
+        "and you need to judge if we did a good job."
+      ],
+      "gold_texts": [
+        "the iceberg and you need to\\h\njudge if we did a good job."
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 8,
+        "punctuation": 10,
+        "readability": 6
+      },
+      "overall": 6.0,
+      "issues": [
+        "voxkit遗漏了开头的'the iceberg'，语义不完整"
+      ],
+      "explanation": "句子成分缺失，影响阅读流畅"
+    },
+    {
+      "group_id": 222,
+      "time_start": 773.25,
+      "time_end": 777.5,
+      "voxkit_texts": [
+        "And we literally can only afford to do this because of your direct support."
+      ],
+      "gold_texts": [
+        "we think it is important that\\h\nwe do them from time to time.",
+        "And we literally can only afford to do\\h\nthis because of your direct support!"
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 6,
+        "punctuation": 9,
+        "readability": 6
+      },
+      "overall": 5.5,
+      "issues": [
+        "漏掉了窗口内金标前半句 'we do them from time to time'"
+      ],
+      "explanation": "voxkit 仅输出后半句，导致信息缺失，语义不完整。"
+    },
+    {
+      "group_id": 223,
+      "time_start": 777.51,
+      "time_end": 780.15,
+      "voxkit_texts": [
+        "So, if you think what we're doing is of value"
+      ],
+      "gold_texts": [
+        "And we literally can only afford to do\\h\nthis because of your direct support!",
+        "So if you think what we are doing is of value and\\h\nyou want to enable more in the future, the best"
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 9,
+        "segmentation": 6,
+        "punctuation": 9,
+        "readability": 6
+      },
+      "overall": 5.0,
+      "issues": [
+        "遗漏了窗口内金标 'your direct support!' 部分"
+      ],
+      "explanation": "voxkit 只截取后半句，漏掉前一部分，语义不连贯。"
+    },
+    {
+      "group_id": 225,
+      "time_start": 783.2,
+      "time_end": 787.07,
+      "voxkit_texts": [
+        "so is to get one of our passion projects or limited editions from our shop."
+      ],
+      "gold_texts": [
+        "way of doing so is to get one of our passion\\h\nprojects or limited editions from our Shop."
+      ],
+      "scores": {
+        "semantic": 4,
+        "terminology": 9,
+        "segmentation": 7,
+        "punctuation": 10,
+        "readability": 5
+      },
+      "overall": 5.0,
+      "issues": [
+        "漏掉 'way of doing'，导致句子语法残缺"
+      ],
+      "explanation": "voxkit 句子不完整，'so is to get' 缺少前提，可读性差。"
+    },
+    {
+      "group_id": 226,
+      "time_start": 787.07,
+      "time_end": 790.24,
+      "voxkit_texts": [
+        "One of our personal favorites are our science posters."
+      ],
+      "gold_texts": [
+        "way of doing so is to get one of our passion\\h\nprojects or limited editions from our Shop.",
+        "One of our personal favorites are our\\h\nscience posters, we made over 100 and"
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 10,
+        "segmentation": 7,
+        "punctuation": 10,
+        "readability": 8
+      },
+      "overall": 6.0,
+      "issues": [
+        "漏掉了窗口内金标 'from our Shop'"
+      ],
+      "explanation": "voxkit 跳过金标前一句末尾，信息丢失。"
+    },
+    {
+      "group_id": 230,
+      "time_start": 799.93,
+      "time_end": 804.15,
+      "voxkit_texts": [
+        "From a new type of map of evolution to the incredible inner life of yourselves,"
+      ],
+      "gold_texts": [
+        "collaboration with leading experts and\\h\nmade with lots of attention to detail.",
+        "From a new type of map of evolution, to the\\h\nincredible inner life of your cells we have"
+      ],
+      "scores": {
+        "semantic": 6,
+        "terminology": 4,
+        "segmentation": 7,
+        "punctuation": 8,
+        "readability": 6
+      },
+      "overall": 5.0,
+      "issues": [
+        "voxkit误将'your cells'写为'yourselves'",
+        "漏掉了金标中collaboration相关信息"
+      ],
+      "explanation": "语义有缺失，术语错误，但切分合理"
+    },
+    {
+      "group_id": 237,
+      "time_start": 825.88,
+      "time_end": 831.8,
+      "voxkit_texts": [
+        "want to listen to the beautiful soundtrack without"
+      ],
+      "gold_texts": [
+        "dumb ideas – like this video or all of human\\h\nhistory in an hour – the kurzgesagt shop is open!"
+      ],
+      "scores": {
+        "semantic": 5,
+        "terminology": 5,
+        "segmentation": 5,
+        "punctuation": 5,
+        "readability": 4
+      },
+      "overall": 4.5,
+      "issues": [
+        "金标缺失无法验证内容",
+        "voxkit文本不完整"
+      ],
+      "explanation": "金标数据缺失，且voxkit内容不完整"
+    },
+    {
+      "group_id": 240,
+      "time_start": 836.73,
+      "time_end": 839.42,
+      "voxkit_texts": [
+        "and and watch the video again as a music video."
+      ],
+      "gold_texts": [],
+      "scores": {
+        "semantic": 0,
+        "terminology": 0,
+        "segmentation": 5,
+        "punctuation": 5,
+        "readability": 0
+      },
+      "overall": 1.0,
+      "issues": [
+        "金标空白，voxkit不应输出字幕"
+      ],
+      "explanation": "金标无内容，voxkit误输出字幕"
+    }
+  ],
+  "tokens": {
+    "prompt": 57728,
+    "completion": 97902,
+    "total": 155630
+  }
+}
