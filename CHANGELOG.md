@@ -7,6 +7,51 @@ changes (with migration notes).
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-05-13
+
+中文 reseg 切分粒度修复 + 拉丁词原子化。基于
+`tests/fixtures/youtuber_samples/xnzxnz_first_look_10min/`（小宁子 10min）
+对照人工金标实测：
+
+- cue 密度 145 → 200（金标 302）：density_ratio 0.480 → **0.662**（+38%）
+- 边界 recall 0.391 → **0.559**（+43%），precision 0.884 → 0.901（不退反升）
+- 边界 F1 0.542 → **0.690**（+27%）
+- 字符 / 时长漂移 +10.25 chars → +4.37、+2.21s → +1.10s（-50% 以上）
+- 跨 cue 拉丁词切断 1 → **0**（'Steam' 不再被切成 'S t' + 'eam'）
+
+### Added
+
+- **`voxkit eval` 子命令** — 对照人类金标 SRT 评估 voxkit 输出 reseg 质量。
+  输出 `eval.report.json`，含 cue 密度比、边界 precision/recall/F1、
+  字符/时长 drift、跨 cue 拉丁词切断数。纯计算零 LLM，CI 可频繁跑。
+- **`tests/fixtures/youtuber_samples/`** — 4 个「认真做字幕的 YouTuber」
+  实拉样本（小宁子 zh+en 同帧对齐、Kurzgesagt en、Lex Fridman en、
+  3Blue1Brown 11 语对照）作为人类金标 fixture。
+- **`tests/fixtures/youtuber_samples/xnzxnz_first_look_10min/baseline.eval.json`**
+  — voxkit 0.6.0 在该 fixture 上的 eval 基线，后续改动可 diff 看进退。
+- `docs/eval.md` 设计稿、`docs/eval-baseline-observations.md` 基线观察、
+  `docs/认真做字幕的YouTuber.md` 频道筛选标准。
+- 2 个 CJK reseg 回归测试（拉丁词原子化 + vlog 风格无标点中文密度）。
+
+### Changed
+
+- **`semantic_resegment._CJK_DEFAULT_SOFT_MAX_CHARS`** 28 → **18**。
+  whisper.cpp 中文 ASR 不带标点，原 28 字符目标会把多个气口合并成一个
+  长 cue（小宁子样本 avg 23 char/cue vs 人工金标 11）。**这是 breaking
+  change**：所有现有中文 fixture 的 reseg 输出会变得更细切，cue 数典型
+  +30~40%；字幕渲染观感更贴近人工。
+- **`semantic_resegment._split_cjk_long`** — 候选切点循环跳过拉丁词内部，
+  fallback 物理切点也会往后调整到最近非拉丁边界。修复 7s+ 长 CJK segment
+  做字符级切分时把 'Steam' 切成 'S t' + 'eam' 的 P1 bug。
+
+### Migration notes
+
+- 用户如希望保留 0.5.1 的旧粒度，可在 `transcribe` 调用时构造
+  `ResegmentParams(soft_max_chars=28)` 显式覆盖——但建议先用 `voxkit eval`
+  对照金标看新默认是否更接近你的字幕风格。
+- 现有 `subtitles.cues.json` artifact schema **未变**；重跑 transcribe 即可
+  获得新粒度产物。
+
 ## [0.5.1] — 2026-05-12
 
 字幕切分质量修复。基于 `tmp/e2e_test/` 90 秒样本实测：

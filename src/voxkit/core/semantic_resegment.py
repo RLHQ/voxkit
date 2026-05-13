@@ -269,7 +269,11 @@ _CJK_STRONG_BREAK = frozenset("；;")
 _CJK_MEDIUM_BREAK = frozenset("，、：:")
 
 _CJK_DEFAULT_MAX_CHARS = 42
-_CJK_DEFAULT_SOFT_MAX_CHARS = 28
+# 软上限：触发 cue flush 的字符阈值。调到 18 是为了 vlog/短视频风格的中文
+# 无标点输入——whisper.cpp 中文 ASR 不带标点，原 28 字符的目标会把多个气口
+# 合并成一个 cue（小宁子样本 avg 23 char/cue vs 人工金标 11）。
+# 详见 docs/eval-baseline-observations.md。
+_CJK_DEFAULT_SOFT_MAX_CHARS = 18
 _CJK_DEFAULT_MAX_CPS = 18.0
 
 
@@ -561,6 +565,19 @@ def _cjk_need_split(chars: list[_CjkChar], p: ResegmentParams) -> bool:
     return dur > p.max_dur_s or count > p.max_chars or count / dur > p.max_cps
 
 
+def _is_latin_word_interior(chars: list[_CjkChar], i: int) -> bool:
+    """切在 char[i] 之后是否落在一个连续拉丁词的内部。
+
+    用于阻止 `_split_cjk_long` 把 'Steam' 这类词切成 'S t' + 'eam'。
+    判定：char[i] 是 ASCII 字母 **且** char[i+1] 是 ASCII 字母。
+    """
+    if i < 0 or i + 1 >= len(chars):
+        return False
+    a = chars[i].char
+    b = chars[i + 1].char
+    return a.isascii() and a.isalpha() and b.isascii() and b.isalpha()
+
+
 def _cjk_break_weight(chars: list[_CjkChar], i: int, p: ResegmentParams) -> float:
     """Weight for a potential boundary after char ``i``."""
     if i < 0 or i >= len(chars) - 1:
@@ -615,6 +632,9 @@ def _split_cjk_long(chars: list[_CjkChar], p: ResegmentParams) -> list[list[_Cjk
         best_score = -1e9
         search_end = total_chars - min_remaining - 1
         for i in range(start, search_end + 1):
+            # 永不在拉丁词内部切（防 'Steam' → 'S t' + 'eam'）
+            if _is_latin_word_interior(chars, i):
+                continue
             chunk = chars[start : i + 1]
             dur, count = _cjk_chunk_metrics(chunk)
             if dur <= 0:
@@ -636,6 +656,11 @@ def _split_cjk_long(chars: list[_CjkChar], p: ResegmentParams) -> list[list[_Cjk
             max_by_cps = max(1, int(p.max_cps * max(0.05, p.max_dur_s)))
             width = max(1, min(p.max_chars, max_by_cps, int(target_size)))
             best_idx = min(start + width - 1, search_end)
+            # Fallback 也不能切到拉丁词内部：往后移到最近的非拉丁边界
+            while (
+                best_idx < search_end and _is_latin_word_interior(chars, best_idx)
+            ):
+                best_idx += 1
 
         chunks.append(chars[start : best_idx + 1])
         start = best_idx + 1

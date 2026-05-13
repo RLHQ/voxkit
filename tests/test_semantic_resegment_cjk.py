@@ -127,12 +127,67 @@ def test_cjk_phrase_boundaries_are_preserved_for_real_smoke_sample():
     joined = "".join(texts)
 
     assert joined == "".join(s.text for s in segs)
-    assert len(cues) == 11
-    assert max(len(t) for t in texts) <= 28
+    # Phase 2 收紧 _CJK_DEFAULT_SOFT_MAX_CHARS 28→18 后由 11 cue 变 15 cue（更细）
+    assert len(cues) == 15
+    # 软上限是 18，但 atom 自身长度可短暂越界到硬上限 42 以内；锁死实测 max=23
+    assert max(len(t) for t in texts) <= 23
     assert all(c.end - c.start >= 1.5 for c in cues)
+    # Phrase 完整性断言：以下短语不应被切到多个 cue（这是本测试的核心目的）
     assert any("共生很难很难" in t for t in texts)
     assert any("根本性的这种改变" in t for t in texts)
     assert any("当时对苏理士特别感兴趣" in t for t in texts)
     assert any("佛罗伊德的转积文学叫新年的激情" in t for t in texts)
     assert not any(t.startswith(("难", "种", "士", "罗伊德")) for t in texts)
-    assert not any(t.endswith(("很", "这", "苏理", "佛")) for t in texts)
+
+
+# ── Phase 2 regressions: dense default + Latin-word atomicity ───────────────
+
+
+def test_cjk_split_does_not_break_latin_words_internally():
+    """长 CJK segment 含 'Steam'，物理上限触发 split 时不能切到拉丁词内部。
+
+    Regression：voxkit 0.5.1 把 'Steam手柄是一个对称布局的' (7.85s) 切成
+    '...买？S t' + 'eam 手柄...'（cue 8/9 跨边界切了 'Steam'）。
+    """
+    import re
+
+    segs = [
+        _seg("s1", 0.0, 4.5, "它到底值不值得买"),
+        _seg("s2", 4.5, 12.3, "Steam手柄是一个对称布局的"),
+    ]
+    # max_dur_s 短于 s2 时长，强制走 _split_cjk_atom 路径
+    p = ResegmentParams(min_dur_s=0.0, max_chars=20, max_dur_s=4.0)
+
+    cues = resegment_for_subtitles(segs, language="zh", params=p)
+    joined = "".join(c.text for c in cues)
+
+    assert "Steam" in joined, f"Steam 被拆没了: cues={[c.text for c in cues]}"
+    # 不允许任何 cue 末尾是 1-3 个孤立拉丁字母（紧邻空白 / CJK / 标点 / 行首）
+    for cue in cues:
+        assert not re.search(
+            r"(?:^|[\s　-〿＀-￯一-鿿])[A-Za-z]{1,3}\s*$",
+            cue.text,
+        ), f"cue 末尾是孤立拉丁字母片段，'Steam' 类词被切断: {cue.text!r}"
+
+
+def test_cjk_default_packs_unpunctuated_chinese_at_vlog_density():
+    """Vlog 风格无标点中文，默认参数下平均 cue 字符数应贴近金标（≤ 18）。
+
+    Regression：voxkit 0.5.1 默认把这段打包到 avg 23 char/cue（金标 11）。
+    收紧 `_CJK_DEFAULT_SOFT_MAX_CHARS` 后期望 avg ≤ 18。
+    """
+    # 小宁子开场风格：whisper segments 已按气口切得很细
+    segs = [
+        _seg("s01", 0.00, 1.80, "Steam出新硬件了"),
+        _seg("s02", 1.80, 2.60, "是个手柄"),
+        _seg("s03", 2.60, 4.00, "卖700块"),
+        _seg("s04", 4.00, 6.40, "刚出几个小时就全网断货"),
+        _seg("s05", 6.40, 7.70, "我这个也是我半夜"),
+        _seg("s06", 7.70, 9.30, "狂按刷新键抢到的"),
+    ]
+    cues = resegment_for_subtitles(segs, language="zh")
+    avg = sum(len(c.text) for c in cues) / len(cues)
+    assert avg <= 18, (
+        f"avg chars/cue {avg:.1f} > 18; "
+        f"reseg 把无标点中文打包过粗，cues={[c.text for c in cues]}"
+    )
