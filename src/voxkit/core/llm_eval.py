@@ -90,58 +90,69 @@ def align_cue_groups(
     vk: List[Dict[str, Any]],
     gold: List[Dict[str, Any]],
 ) -> List[_AlignedGroup]:
-    """双指针扫描：把所有时间相交的 vk + gold cue 聚成同一组。
+    """每个 voxkit cue 作 anchor，关联所有时间相交的 gold cue。
 
-    保证 O(n+m)。若某侧空，另一侧每条 cue 独立成组。
+    策略原因：早期版本用「时间相交贪婪 cluster」会在 cue 几乎连续的真实字幕
+    （vlog/podcast 中 cue 间 gap 接近 0）上链式膨胀，把整个视频合成 ~10 个
+    超大 group——LLM 无法精确指认问题。
+    新策略：voxkit cue 是评估 anchor，每个 cue 单独评分，附带跟它时间相交的
+    所有 gold cue 作参考。未被任何 voxkit cue 覆盖的 gold cue 作独立
+    gold_only group，让 LLM 评估「voxkit 是否漏切了关键内容」。
+
+    返回按 ``time_start`` 排序的 ``_AlignedGroup`` 列表，``group_id`` 顺序赋值。
     """
-    groups: List[_AlignedGroup] = []
-    vi = gi = 0
-    gid = 0
-    vn, gn = len(vk), len(gold)
+    raw_groups: List[_AlignedGroup] = []
+    used_gold_idx: set[int] = set()
+    gn = len(gold)
 
-    while vi < vn or gi < gn:
-        cluster_vk: List[Dict[str, Any]] = []
-        cluster_gold: List[Dict[str, Any]] = []
-
-        # 选更早起点作 cluster 种子
-        if vi < vn and (gi >= gn or vk[vi]["start"] <= gold[gi]["start"]):
-            cluster_vk.append(vk[vi])
-            cluster_end = vk[vi]["end"]
-            vi += 1
-        else:
-            cluster_gold.append(gold[gi])
-            cluster_end = gold[gi]["end"]
-            gi += 1
-
-        # 贪婪吃所有跟 cluster_end 时间相交的 cue
-        while True:
-            ate = False
-            if vi < vn and vk[vi]["start"] < cluster_end:
-                cluster_vk.append(vk[vi])
-                cluster_end = max(cluster_end, vk[vi]["end"])
-                vi += 1
-                ate = True
-            if gi < gn and gold[gi]["start"] < cluster_end:
-                cluster_gold.append(gold[gi])
-                cluster_end = max(cluster_end, gold[gi]["end"])
-                gi += 1
-                ate = True
-            if not ate:
-                break
-
-        starts = [c["start"] for c in cluster_vk + cluster_gold]
-        groups.append(
+    # 1. 每个 voxkit cue 一个 group + 时间相交 gold
+    gi_start = 0
+    for v in vk:
+        # 推进 gi_start 跳过完全在 v.start 之前的 gold
+        while gi_start < gn and gold[gi_start]["end"] <= v["start"]:
+            gi_start += 1
+        related: List[Dict[str, Any]] = []
+        gj = gi_start
+        while gj < gn and gold[gj]["start"] < v["end"]:
+            related.append(gold[gj])
+            used_gold_idx.add(gj)
+            gj += 1
+        raw_groups.append(
             _AlignedGroup(
-                group_id=gid,
-                time_start=min(starts) if starts else 0.0,
-                time_end=cluster_end,
-                voxkit=cluster_vk,
-                gold=cluster_gold,
+                group_id=-1,  # 占位，最后排序后赋值
+                time_start=float(v["start"]),
+                time_end=float(v["end"]),
+                voxkit=[v],
+                gold=related,
             )
         )
-        gid += 1
 
-    return groups
+    # 2. 未被覆盖的 gold cue 作独立 group（vk 漏切的关键内容）
+    for j, g in enumerate(gold):
+        if j in used_gold_idx:
+            continue
+        raw_groups.append(
+            _AlignedGroup(
+                group_id=-1,
+                time_start=float(g["start"]),
+                time_end=float(g["end"]),
+                voxkit=[],
+                gold=[g],
+            )
+        )
+
+    # 3. 按时间排序 + 重新赋 group_id
+    raw_groups.sort(key=lambda gp: gp.time_start)
+    return [
+        _AlignedGroup(
+            group_id=i,
+            time_start=g.time_start,
+            time_end=g.time_end,
+            voxkit=g.voxkit,
+            gold=g.gold,
+        )
+        for i, g in enumerate(raw_groups)
+    ]
 
 
 # ── LLM 调用（批处理）─────────────────────────────────────────────────────

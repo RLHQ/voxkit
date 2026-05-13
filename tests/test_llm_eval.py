@@ -83,7 +83,7 @@ def _score_resp(group_id: int, **scores: int) -> Dict[str, Any]:
 
 
 def test_align_cue_groups_pairs_overlapping_cues() -> None:
-    """voxkit 1 条 cue 覆盖金标 2 条时间相交 cue → 1 个组 (1+2)。"""
+    """voxkit 1 条 cue 覆盖金标 2 条时间相交 cue → 1 个组 (1 vk + 2 gold)。"""
     vk = [{"start": 0.0, "end": 4.0, "text": "你好世界"}]
     gold = [
         {"start": 0.0, "end": 2.0, "text": "你好"},
@@ -98,7 +98,7 @@ def test_align_cue_groups_pairs_overlapping_cues() -> None:
 
 
 def test_align_cue_groups_separates_non_overlapping() -> None:
-    """两段时间不相交的 cue → 2 个独立组。"""
+    """两段时间不相交的 cue → 每个 voxkit cue 独立 + 它对应的 gold。"""
     vk = [
         {"start": 0.0, "end": 1.0, "text": "a"},
         {"start": 5.0, "end": 6.0, "text": "b"},
@@ -109,6 +109,9 @@ def test_align_cue_groups_separates_non_overlapping() -> None:
     ]
     groups = align_cue_groups(vk, gold)
     assert len(groups) == 2
+    # 每个 voxkit cue 配上对应时间的 gold
+    assert groups[0].voxkit[0]["text"] == "a" and groups[0].gold[0]["text"] == "x"
+    assert groups[1].voxkit[0]["text"] == "b" and groups[1].gold[0]["text"] == "y"
 
 
 def test_align_cue_groups_vk_only_or_gold_only() -> None:
@@ -128,6 +131,44 @@ def test_align_cue_groups_assigns_sequential_ids() -> None:
     gold = []
     groups = align_cue_groups(vk, gold)
     assert [g.group_id for g in groups] == [0, 1]
+
+
+def test_align_cue_groups_does_not_merge_continuous_cues() -> None:
+    """Regression：早期版本用 cluster 贪婪扩张，遇到几乎连续的 cue（真实
+    vlog/podcast 字幕 gap 接近 0）会链式吃光整个视频。新算法每 voxkit cue
+    独立成 anchor，5 条紧邻 voxkit cue 应该产出 5 个独立 group 而非 1 个。
+    """
+    vk = [
+        {"start": 0.00, "end": 1.73, "text": "v1"},
+        {"start": 1.73, "end": 4.00, "text": "v2"},
+        {"start": 4.00, "end": 6.38, "text": "v3"},
+        {"start": 6.38, "end": 9.38, "text": "v4"},
+        {"start": 9.38, "end": 11.50, "text": "v5"},
+    ]
+    gold = [
+        {"start": 0.00, "end": 1.79, "text": "g1"},
+        {"start": 1.79, "end": 2.62, "text": "g2"},
+        {"start": 2.62, "end": 4.00, "text": "g3"},
+    ]
+    groups = align_cue_groups(vk, gold)
+    # 每个 voxkit cue 一个 group → 5 个；gold 已全部被覆盖 → 不加 gold_only
+    assert len(groups) == 5
+    # 每组 voxkit 都恰好 1 条
+    assert all(len(g.voxkit) == 1 for g in groups)
+
+
+def test_align_cue_groups_adds_gold_only_for_uncovered() -> None:
+    """voxkit 没覆盖到的 gold 时间段应作为独立 gold_only group。"""
+    vk = [{"start": 0.0, "end": 2.0, "text": "v"}]
+    gold = [
+        {"start": 0.0, "end": 1.5, "text": "covered"},
+        {"start": 5.0, "end": 6.0, "text": "uncovered"},  # vk 漏切
+    ]
+    groups = align_cue_groups(vk, gold)
+    assert len(groups) == 2
+    g_only = [g for g in groups if g.voxkit == []]
+    assert len(g_only) == 1
+    assert g_only[0].gold[0]["text"] == "uncovered"
 
 
 # ── _parse_llm_response ─────────────────────────────────────────────────────
