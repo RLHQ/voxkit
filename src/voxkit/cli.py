@@ -121,6 +121,10 @@ def _build_parser() -> argparse.ArgumentParser:
     from voxkit.commands import quality
     quality.add_subparser(sub)
 
+    # ── eval（对照金标的回归评估）───────────────────────────
+    from voxkit.commands import eval as eval_cmd
+    eval_cmd.add_subparser(sub)
+
     return parser
 
 
@@ -162,6 +166,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.cmd == "quality":
         from voxkit.commands.quality import run as run_quality
         return run_quality(args)
+    if args.cmd == "eval":
+        from voxkit.commands.eval import run as run_eval
+        return run_eval(args)
 
     parser.error(f"未知子命令: {args.cmd}")
     return 1  # unreachable
