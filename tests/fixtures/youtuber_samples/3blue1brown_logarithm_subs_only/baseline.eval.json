@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "voxkitBaseline": {
+    "version": "0.7.1",
+    "reseg": "single-pass EN (pysbd word-level; no proofread)",
+    "pipeline": "transcribe --resegment=semantic --language=en",
+    "recordedAt": "2026-05-13",
+    "note": "EN path baseline. Gold sub.en.srt is author hand-written (Grant Sanderson). Compare with kurzgesagt EN baseline to see fixture sensitivity of boundary metrics."
+  },
+  "workdir": "<workdir>",
+  "reference": "tests/fixtures/youtuber_samples/3blue1brown_logarithm_subs_only/sub.en.srt",
+  "language": "en",
+  "sourceArtifact": "cues",
+  "tolerance_s": 0.3,
+  "alignment": {
+    "vk_cues": 794,
+    "gold_cues": 722,
+    "density_ratio": 1.0997229916897506,
+    "vk_avg_chars": 57.8992443324937,
+    "gold_avg_chars": 64.22160664819944,
+    "vk_avg_dur_s": 3.3455793450881597,
+    "gold_avg_dur_s": 3.4266191135734108
+  },
+  "metrics": {
+    "boundary_precision": 0.44106925880923453,
+    "boundary_recall": 0.3786127167630058,
+    "boundary_f1": 0.40746151638097605,
+    "boundary_vk_bounds": 823,
+    "boundary_gold_bounds": 1038,
+    "boundary_vk_hits": 363,
+    "boundary_gold_covered": 393,
+    "chars_drift": -6.322362315705739,
+    "dur_drift_s": -0.08103976848525107,
+    "broken_latin_words": 0
+  }
+}
