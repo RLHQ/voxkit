@@ -137,3 +137,93 @@ voxkit eval <workdir> --reference <gold.srt> --lang zh
 - **C. 先并行做：A 由我推进，你同时定 2a 的方案选 1-3 哪个先试**。
 
 我的建议是 **A**——没有自动化打分，改 reseg 没法快速迭代验证（每次都得手工统计），心智负担太重。
+
+---
+
+## 7. Phase 3 增补：EN 路径根因分析
+
+Kurzgesagt 14min EN 实测 precision 0.180 / recall 0.209 / F1 0.194。**这不是 Phase 2 引入的 regression**——Phase 2 改动只动 `_CJK_*` 分支，EN 路径未受影响。这是 EN 路径的固有 baseline。
+
+### 7.1 根因（按重要性）
+
+1. **目标函数本质冲突**（最深层根因）：voxkit `_resegment_word_level` 按 pysbd 的「句子语义完整性」切分，金标按「字幕渲染单元 + 镜头转换 + 演员停顿」切分。前者优化句法，后者优化字幕渲染节奏。两者**fundamentally 不同**——纯参数调优只能边际改善，不能跨过这个 gap。
+
+2. **VAD 静默吃进 cue**：whisper-cli 输出的 segment timestamp 只覆盖有声部分，相邻 segment 之间的静默不被显式建模。voxkit `_split_long` 的 `prosody_gap_s=0.25` 检测依赖 word-level 时间戳的相邻 gap——但 whisper 在静默处的 word timestamp 可能丢失，导致 7s+ 静默被吞进前一个 cue（实例：voxkit `[25.46-33.67s] What happened?` 把 8 秒静默归入）。
+
+3. **pysbd char span → word index 反查不稳**：`_char_range_to_word_range`（line 246-261）用贪婪策略映射，pysbd 切点落在空格中间时可能多/少选 1 个词，导致 cue 末尾偏移 1-2 词（实例：voxkit `consequences of` vs 金标 `consequences of a`）。
+
+### 7.2 候选调优（按成本排序）
+
+| # | 改动 | 成本 | 预期收益 |
+|---|---|---|---|
+| **A** | 调 `soft_break_weights` 表（加 clause 启发，降 comma 权重） | small | recall +10-15% |
+| **B** | `prosody_gap_s` 动态化（按全局 speech rate 计算，0.25 → 0.3-0.5 自适应） | medium | precision +5-8% |
+| **C** | 引入「字幕行长感知」切点权重（max_chars 不仅是硬上限，还作为软推荐反馈到 break_weights） | large | F1 可破 0.5+，但参数空间爆炸需迭代调 |
+
+### 7.3 推荐路径
+
+先做 **A**（5 行代码，立即验证）。若 precision 不掉下来，再叠 **B**。两者合起来预估 F1 从 0.19 推到 0.28-0.32。
+
+**关键认知**：voxkit EN 路径的高 precision 低 recall 不是 bug，是设计选择的副作用——它在按"句子语义"优化，金标在按"字幕渲染"优化。要破 F1 0.5 必须做 C 或重新定义目标函数。**短期不建议投入大量精力推 EN F1**，应聚焦中文场景（用户主战场）和共享改进（如 medium-break atom 切分，对 EN 也是基础设施）。
+
+## 8. Phase 3 实验记录：3b 双 pass reseg
+
+**假说**：proofread 加完标点后，把 cue 喂回 reseg，能驱动 `_build_cjk_atoms` 在 `，。？！` 处切，把 recall 从 0.559 推到 0.70+。
+
+**实验跑了两轮，结论被第 2 轮推翻**。
+
+### 8.1 第 1 轮（input = 0.5.1 reseg + proofread, 145 粗 cue）— 失败
+
+| 指标 | 单 pass (Phase 2) | 双 pass 实验 | 变化 |
+|---|---|---|---|
+| precision | 0.901 | **0.790** | **-0.11 ⚠️** |
+| recall | 0.559 | **0.488** | **-0.07 ⚠️** |
+| F1 | 0.690 | 0.603 | -0.09 |
+
+**根因**：0.5.1 reseg 把 whisper 1-2s 短 segment 合并到 4s+ 长 cue → proofread 在长 cue 内加标点 → 二次 reseg 切新 atom 用 `_estimate_char_time` 线性插值（line 290）→ 在 4s+ 长 cue 内线性插值精度差于 whisper 原始 segment 边界 → precision 暴跌。
+
+### 8.2 第 2 轮（input = 0.6.0 reseg + proofread, 200 细 cue）— 成功
+
+| 指标 | 单 pass (Phase 2) | 双 pass 实验 | 变化 |
+|---|---|---|---|
+| precision | 0.901 | **0.906** | **+0.005** ✅（不退反升）|
+| recall | 0.559 | **0.597** | **+0.038** ✅ |
+| F1 | 0.690 | **0.720** | **+0.030** ✅ |
+| broken_latin_words | 0 | 0 | ✅ |
+
+**为什么第 2 轮成功**：input cue 已经 avg ~3s 短跨度，`_estimate_char_time` 线性插值在小区间内精度足够。
+
+### 8.3 关键洞察：双 pass 对 input 粒度敏感
+
+| Input 形态 | Avg cue 时长 | 双 pass precision | 结论 |
+|---|---|---|---|
+| 0.5.1 reseg (粗 145 cue) | ~4.1s | 0.790 ⚠️ | 不可用 |
+| 0.6.0 reseg (细 200 cue) | ~3.0s | 0.906 ✅ | 可用 |
+
+**前提条件**：双 pass 要 work，input cue 必须已经被第一 pass reseg 切到 ~3s 以内。Phase 2 的密度修复（`_CJK_DEFAULT_SOFT_MAX_CHARS=18`）刚好满足这个前提——两个 phase 的改动**互相成全**，否则单做任何一个都不够。
+
+### 8.4 工程化产物：`voxkit reseg` 子命令
+
+第 2 轮数据说服了工程化决策。已新增 `voxkit reseg <workdir>` 子命令（commit pending v0.7.0），消费 `subtitles.proofread.json`，输出 `subtitles.cues.reseg2.json` + 可选 `subtitles.reseg2.srt`。零 LLM 零网络，CI 可频繁跑。`voxkit eval` 加 reseg2 fallback 优先于 proofread。
+
+完整推荐流水线：
+
+```bash
+voxkit transcribe <audio> --workdir <wd> --language zh --resegment semantic
+voxkit proofread <wd> --language zh
+voxkit reseg <wd>            # ← 新增：用 proofread 加的标点做二次切分
+voxkit eval <wd> --reference <gold.srt> --lang zh   # 自动读 reseg2
+```
+
+## 9. Phase 3 后续优先级建议
+
+| 方向 | 现状 | ROI |
+|---|---|---|
+| **3b 双 pass reseg** | ✅ 已工程化为 `voxkit reseg` | F1 0.69 → 0.72 实现 |
+| **3a proofread-with-split** | 未做 | 比 3b 复杂但理论上 F1 上限更高（~0.78）；3b 已达可用质量，3a 收益递减，**优先级降为低** |
+| **3e EN 路径改进** | 未做（见 §7） | F1 0.19 → 0.28-0.32（候选 A+B）；短期 ROI 低于中文场景 |
+
+下一轮可选：
+- **冲 F1 0.80+**：3a 工程化或改 reseg packing 阶段让 medium-break atom **强制 flush**（不让短 cue 合并）
+- **拓宽场景**：跑 Lex Fridman / 3B1B 长视频，验证 0.7.0 流水线鲁棒性
+- **改 EN 路径**：候选 A 调 `soft_break_weights`

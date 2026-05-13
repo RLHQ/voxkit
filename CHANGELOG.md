@@ -7,6 +7,62 @@ changes (with migration notes).
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-05-13
+
+**双 pass reseg：`voxkit reseg` 子命令** + CJK atom 切分覆盖 medium 标点
+（，、：:）。基于小宁子 10min 实拉对照人工金标：
+
+| 指标            | 0.6.0   | 0.7.0   | 变化           |
+|----------------|---------|---------|---------------|
+| vk_cues        | 200     | 210     | +5%           |
+| precision      | 0.901   | **0.906** | +0.005（升） |
+| recall         | 0.559   | **0.597** | **+0.038**   |
+| F1             | 0.690   | **0.720** | **+0.030**   |
+| chars_drift    | +4.37   | +4.73   | ≈            |
+| broken_latin   | 0       | 0       | ✅            |
+
+### Added
+
+- **`voxkit reseg` 子命令** — 读 `subtitles.proofread.json`，把 corrected
+  cue 当带标点 ASR segment 喂回 `semantic_resegment`，输出
+  `subtitles.cues.reseg2.json` + 可选 `subtitles.reseg2.srt`。零 LLM 零
+  网络，CI 可频繁跑。完整推荐流水线：
+  ```bash
+  voxkit transcribe ... --resegment semantic
+  voxkit proofread <wd>
+  voxkit reseg <wd>                  # ← 新增
+  voxkit eval <wd> --reference ...   # 自动读 reseg2
+  ```
+- **`voxkit eval` 加 reseg2 fallback**：load_voxkit_cues 优先级
+  `reseg2 > proofread > cues`，自动消费 `voxkit reseg` 产物。
+- **9 个 reseg 命令单测** 覆盖：含逗号长 cue 切分、SRT 渲染、speaker 保留、
+  错误路径（缺 proofread / 缺 workdir / 拒覆盖）、eval fallback 优先级。
+
+### Changed
+
+- **`_build_cjk_atoms` 加入 `_CJK_MEDIUM_BREAK = ，、：:` 切点**
+  （commit 8a9ce2a，v0.7.0 前置）。whisper 中文 ASR 输出无标点时无影响，
+  但带标点输入（proofread 后 / prompt 引导 ASR）下逗号承载 ~80% 气口
+  边界，是双 pass reseg 工作的前提。1 个新单测覆盖。
+
+### Design rationale（详见 docs/eval-baseline-observations.md §8）
+
+双 pass reseg 对 input cue 粒度敏感：
+
+| Input 形态 | Avg cue 时长 | 双 pass precision |
+|---|---|---|
+| 0.5.1 reseg (粗 145 cue) | ~4.1s | 0.790 ⚠️（不可用）|
+| 0.6.0 reseg (细 200 cue) | ~3.0s | 0.906 ✅（可用）|
+
+`_estimate_char_time` 线性插值在 4s+ 长 cue 内会丢精度，但在 ~3s 短 cue
+内足够。Phase 2（v0.6.0 收紧 `_CJK_DEFAULT_SOFT_MAX_CHARS=18`）和本期
+（v0.7.0 双 pass）**互相成全**——单做任何一个都不够。
+
+### Breaking change
+
+无。`voxkit reseg` 是可选新命令，不改现有 `transcribe / proofread / eval`
+行为。`subtitles.cues.json` / `subtitles.proofread.json` schema 未变。
+
 ## [0.6.0] — 2026-05-13
 
 中文 reseg 切分粒度修复 + 拉丁词原子化。基于

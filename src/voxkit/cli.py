@@ -125,6 +125,10 @@ def _build_parser() -> argparse.ArgumentParser:
     from voxkit.commands import eval as eval_cmd
     eval_cmd.add_subparser(sub)
 
+    # ── reseg（proofread 后的二次切分）──────────────────────
+    from voxkit.commands import reseg
+    reseg.add_subparser(sub)
+
     return parser
 
 
@@ -169,6 +173,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.cmd == "eval":
         from voxkit.commands.eval import run as run_eval
         return run_eval(args)
+    if args.cmd == "reseg":
+        from voxkit.commands.reseg import run as run_reseg
+        return run_reseg(args)
 
     parser.error(f"未知子命令: {args.cmd}")
     return 1  # unreachable

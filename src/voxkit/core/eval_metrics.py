@@ -54,12 +54,31 @@ def parse_srt(path: Path) -> List[Dict[str, Any]]:
 
 
 def load_voxkit_cues(workdir: Path) -> Tuple[List[Dict[str, Any]], str]:
-    """优先读 ``subtitles.proofread.json``，缺则回退 ``subtitles.cues.json``。
+    """加载 workdir 内最 "成熟" 的字幕产物。
 
-    返回 ``(cues, source_artifact_name)``，``cues`` 字段统一为 ``start / end /
-    text``，方便上层与金标对齐。
+    优先级（高到低）：
+      1. ``subtitles.cues.reseg2.json`` — 双 pass reseg 产物（proofread 后再切）
+      2. ``subtitles.proofread.json`` — LLM 校对后产物
+      3. ``subtitles.cues.json`` — 第一 pass reseg 产物
+
+    返回 ``(cues, source_artifact_name)``，``cues`` 字段统一为
+    ``start / end / text``，方便上层与金标对齐。
     """
     workdir = Path(workdir)
+
+    reseg2 = workdir / "subtitles.cues.reseg2.json"
+    if reseg2.is_file():
+        doc = json.loads(reseg2.read_text(encoding="utf-8"))
+        cues = [
+            {
+                "start": float(c.get("start", 0.0)),
+                "end": float(c.get("end", 0.0)),
+                "text": c.get("text", "") or "",
+            }
+            for c in (doc.get("cues") or [])
+        ]
+        return cues, "reseg2"
+
     proof = workdir / "subtitles.proofread.json"
     if proof.is_file():
         doc = json.loads(proof.read_text(encoding="utf-8"))

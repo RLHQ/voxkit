@@ -1,35 +1,36 @@
 {
   "schemaVersion": 1,
   "voxkitBaseline": {
-    "version": "0.6.0",
-    "reseg": "CJK soft_max_chars=18 + latin-word-atomic split",
-    "pipeline": "transcribe --resegment=semantic --language=zh (no proofread)",
-    "recordedAt": "2026-05-13"
+    "version": "0.7.0",
+    "reseg": "double-pass: transcribe→proofread→reseg (CJK medium-break atom splits)",
+    "pipeline": "transcribe --resegment=semantic → proofread --language=zh → reseg",
+    "recordedAt": "2026-05-13",
+    "note": "precision/recall/F1 measured against gold sub.zh-Hans.srt; voxkit reseg consumes proofread.json"
   },
   "workdir": "<workdir>",
   "reference": "tests/fixtures/youtuber_samples/xnzxnz_first_look_10min/sub.zh-Hans.srt",
   "language": "zh",
-  "sourceArtifact": "cues",
+  "sourceArtifact": "reseg2",
   "tolerance_s": 0.3,
   "alignment": {
-    "vk_cues": 200,
+    "vk_cues": 210,
     "gold_cues": 302,
-    "density_ratio": 0.6622516556291391,
-    "vk_avg_chars": 15.47,
+    "density_ratio": 0.695364238410596,
+    "vk_avg_chars": 15.82857142857143,
     "gold_avg_chars": 11.096026490066226,
-    "vk_avg_dur_s": 2.9022500000000004,
+    "vk_avg_dur_s": 2.764047619047619,
     "gold_avg_dur_s": 1.805605960264901
   },
   "metrics": {
-    "boundary_precision": 0.900990099009901,
-    "boundary_recall": 0.5588235294117647,
-    "boundary_f1": 0.6898065030919609,
-    "boundary_vk_bounds": 202,
+    "boundary_precision": 0.9056603773584906,
+    "boundary_recall": 0.5970588235294118,
+    "boundary_f1": 0.7196720706082205,
+    "boundary_vk_bounds": 212,
     "boundary_gold_bounds": 340,
-    "boundary_vk_hits": 182,
-    "boundary_gold_covered": 190,
-    "chars_drift": 4.373973509933775,
-    "dur_drift_s": 1.0966440397350994,
+    "boundary_vk_hits": 192,
+    "boundary_gold_covered": 203,
+    "chars_drift": 4.732544938505203,
+    "dur_drift_s": 0.958441658782718,
     "broken_latin_words": 0
   }
 }
