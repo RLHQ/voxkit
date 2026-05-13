@@ -31,3 +31,6 @@ tests/fixtures/audio/generated/
 .vscode/
 .DS_Store
 !.python-version
+
+*.wav
+.claude/

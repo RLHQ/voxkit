@@ -94,12 +94,12 @@ B 类频道列在 §3，但 voxkit fixture 优先用 A 类。
 
 - 链接：<https://www.youtube.com/@lexfridman>
 - 视频形态：1–4 小时双人长访谈。
-- 字幕实拉结果（最新一期 `nepKKz-MzFM`，2h28m）：
+- 字幕实拉结果（最新一期 `nepKKz-MzFM`，4h18m22s）：
   - **仅 `en` 一轨**，但**带说话人切换标注**：每次说话人变化，新条目以 `- ` 开头（例：`- The important is, is your code good?`）。
 - voxkit 价值：
   - **`diarize + align` 长对话压力测试**：字幕里的 `- ` 切换点可作为 diarize 输出说话人边界的对照；
   - **`proofread` 跨小时术语一致性测试**。
-- 已下载 fixture：`tests/fixtures/youtuber_samples/lexfridman_ffmpeg_5min/`（音频截前 5min + en 全程字幕）
+- 已下载 fixture：`tests/fixtures/youtuber_samples/lexfridman_ffmpeg_4h18m/`（en 全程字幕入仓 + 完整音频按需 `./fetch.sh`）
 
 ### 5. Veritasium
 
@@ -151,9 +151,9 @@ B 类频道列在 §3，但 voxkit fixture 优先用 A 类。
 | `xnzxnz_first_look_10min/` | 小宁子 | 10min WAV | zh-Hans / zh-Hant / en-US | 中文 reseg + zh↔en translate |
 | `kurzgesagt_germany_14min/` | Kurzgesagt | 14min WAV | en | 英文 proofread / reseg |
 | `3blue1brown_logarithm_subs_only/` | 3Blue1Brown | 按需 `fetch.sh` | en + 10 种 AI 翻译（各自独立切分） | translate 多语**风格**对照（非逐条对齐）|
-| `lexfridman_ffmpeg_5min/` | Lex Fridman | 5min WAV（截） + 全程字幕 | en（带说话人 `- ` 切换） | diarize/align |
+| `lexfridman_ffmpeg_4h18m/` | Lex Fridman | 按需 `fetch.sh`（4h18m WAV） + 全程字幕 | en（带说话人 `- ` 切换） | diarize/align |
 
-总体积约 55 MB。
+入仓总体积约 45 MB（3B1B 与 Lex 音频按需 `./fetch.sh` 拉取，不入仓）。
 
 ---
 

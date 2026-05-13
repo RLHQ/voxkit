@@ -102,7 +102,7 @@ voxkit eval out/xnzxnz --reference fixtures/.../sub.en-US.srt    --lang en --sta
 | `xnzxnz_first_look_10min/` | transcribe (zh) | `sub.zh-Hans.srt` | 建立中文 ASR CER 基线 |
 | `xnzxnz_first_look_10min/` | translate (zh→en) | `sub.en-US.srt`（同帧对齐） | 建立 zh→en chrF 基线 |
 | `kurzgesagt_germany_14min/` | transcribe (en) | `sub.en.srt` | 建立英文 ASR WER 基线 |
-| `lexfridman_ffmpeg_5min/` | transcribe (en) | `sub.en.srt`（截 5min 段） | 长对话场景压力 |
+| `lexfridman_ffmpeg_4h18m/` | transcribe (en) | `sub.en.srt`（全程 4h18m） | 长对话场景压力；按需 `fetch.sh` 拉音频后用 ffmpeg 自切片回归 |
 | `3blue1brown_logarithm_subs_only/` | — | — | **暂缓**——10 种非英文是 AI+校对天花板，不当金标；en 需要先跑 `fetch.sh` 拉音频 |
 
 3B1B 非英文字幕**永远不**作为 `eval --reference`，但可作为「voxkit 译文 vs 现有 AI+校对译文」的**风格比较**素材，归到另一个工具或 ad-hoc 脚本里。

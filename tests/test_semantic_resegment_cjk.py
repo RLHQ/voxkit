@@ -199,6 +199,28 @@ def test_cjk_build_atoms_splits_on_medium_punctuation():
     assert "".join(c.text for c in cues) == "你好，我叫张三，今天天气真好。"
 
 
+def test_cjk_medium_break_triggers_soft_flush_in_long_cue():
+    """带逗号的长 segment 在 packing 阶段应在逗号后 flush，不被合并回 single cue。
+
+    Regression：voxkit 0.7.0 仍把含逗号的长 cue 合并成一条
+    （例如 "它这么贵却这么火，一半是因为 Steam 一直以来的口碑都很好。" 32 字符）。
+    本测试用 voxkit 默认参数验证 medium-break atom 后 dur≥min_dur 应 flush。
+    """
+    # 默认 min_dur_s=1.5，所以左半段至少 1.5s 才能 flush
+    segs = [
+        _seg("s1", 0.0, 5.0, "它这么贵却这么火，一半是因为Steam一直以来的口碑都很好。"),
+    ]
+    cues = resegment_for_subtitles(segs, language="zh")
+    # 期望：在逗号处切，至少 2 条 cue
+    assert len(cues) >= 2, f"逗号未触发 soft_flush，cues={[c.text for c in cues]}"
+    # 第一条以逗号结尾
+    assert cues[0].text.endswith("，"), (
+        f"第一条不以逗号结尾: {cues[0].text!r}"
+    )
+    # 文本完整保留
+    assert "".join(c.text for c in cues) == "它这么贵却这么火，一半是因为Steam一直以来的口碑都很好。"
+
+
 def test_cjk_default_packs_unpunctuated_chinese_at_vlog_density():
     """Vlog 风格无标点中文，默认参数下平均 cue 字符数应贴近金标（≤ 18）。
 

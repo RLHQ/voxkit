@@ -12,9 +12,9 @@
 | `xnzxnz_first_look_10min/` | 小宁子 XNZ | 10:06 | ✅ | zh-Hans, zh-Hant, en-US（**zh↔en 同帧对齐**） | 中文 reseg + zh↔en translate 金标 |
 | `kurzgesagt_germany_14min/` | Kurzgesagt | 14:05 | ✅ | en（**作者人工**） | 英文短篇科普 proofread / reseg |
 | `3blue1brown_logarithm_subs_only/` | 3Blue1Brown | 44:52 | 按需 `fetch.sh` | 11 语（en 人工 + 10 语 AI+校对，各自独立切分） | 多语**风格**对照 + 客户场景对照（非逐条平行） |
-| `lexfridman_ffmpeg_5min/` | Lex Fridman | 5:00（截）/ 字幕 2h28m 全程 | ✅ | en（带说话人切换 `- `） | 长 podcast diarize/align |
+| `lexfridman_ffmpeg_4h18m/` | Lex Fridman | 4:18:22（完整） | 按需 `fetch.sh` | en（带说话人切换 `- `） | 长 podcast diarize/align |
 
-总体积约 55 MB。
+入仓总体积约 45 MB（仅含 `xnzxnz` / `kurzgesagt` 两个音频；3B1B ≈ 82MB 与 Lex ≈ 496MB 按需 `./fetch.sh` 拉取，不入仓）。
 
 ## 目录结构约定
 

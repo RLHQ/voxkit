@@ -276,6 +276,12 @@ _CJK_DEFAULT_MAX_CHARS = 42
 _CJK_DEFAULT_SOFT_MAX_CHARS = 18
 _CJK_DEFAULT_MAX_CPS = 18.0
 
+# medium-break (，、：:) atom 触发 flush 的最小 cue 时长。比全局 min_dur_s
+# 更宽松——人工金标（小宁子）37% 的 cue < 1.5s, p10=0.96s, 即逗号气口允许
+# < 1.5s 的短 cue。voxkit 用 0.8s 作为下限既能切到这些短气口，又避开
+# < 0.5s 的闪屏。详见 docs/eval-baseline-observations.md §9 候选 A。
+_CJK_MEDIUM_FLUSH_MIN_DUR = 0.8
+
 
 def _cjk_limits(p: ResegmentParams) -> tuple[int, int, float]:
     """Use tighter default reading limits for CJK than for Latin subtitles."""
@@ -430,6 +436,10 @@ def _should_soft_flush(atoms: list[_CjkAtom], p: ResegmentParams) -> bool:
     dur = atoms[-1].end - atoms[0].start
     text = _cjk_atom_text(atoms)
     if text and text[-1] in _CJK_SENTENCE_END and dur >= p.min_dur_s:
+        return True
+    # medium-break (，、：:) flush 用更宽松的 min_dur（vlog 场景金标 37%
+    # cue < 1.5s）；防止长 cue 内逗号气口被 packing 阶段重新合并
+    if text and text[-1] in _CJK_MEDIUM_BREAK and dur >= _CJK_MEDIUM_FLUSH_MIN_DUR:
         return True
     return dur >= p.min_dur_s and len(text) >= soft_max_chars
 
