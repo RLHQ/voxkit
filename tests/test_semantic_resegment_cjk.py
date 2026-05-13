@@ -170,6 +170,35 @@ def test_cjk_split_does_not_break_latin_words_internally():
         ), f"cue 末尾是孤立拉丁字母片段，'Steam' 类词被切断: {cue.text!r}"
 
 
+def test_cjk_build_atoms_splits_on_medium_punctuation():
+    """带逗号 / 顿号 / 冒号的中文 segment 在 atom 构建阶段就被切分。
+
+    Regression：voxkit ≤0.6.0 的 `_build_cjk_atoms` 只在「。！？；」切，
+    完全忽略 `_CJK_MEDIUM_BREAK = ，、：:`。当输入已带标点时（proofread
+    后双 pass 场景），逗号承载 ~80% 气口边界，全部不切就会让 cue 仍被
+    packing 阶段合并过粗。
+
+    本测试用大字符上限避免 packing 阶段合并，专注验证 atom 切分。
+    """
+    # 单个长 segment 内含 2 个逗号 + 1 个句号
+    segs = [
+        _seg("s1", 0.0, 6.0, "你好，我叫张三，今天天气真好。"),
+    ]
+    # max_chars=5 强制 packing 阶段不合并相邻 atom（每段 ≥ 4 字符就独立 cue）
+    p = ResegmentParams(min_dur_s=0.0, max_chars=5, max_dur_s=7.0)
+
+    cues = resegment_for_subtitles(segs, language="zh", params=p)
+
+    # 期望切成 3 条独立 cue：以逗号、逗号、句号收尾
+    assert len(cues) >= 3, f"逗号未生效，cues={[c.text for c in cues]}"
+    assert cues[0].text.endswith("，"), f"cue 0 末尾不是逗号: {cues[0].text!r}"
+    assert cues[1].text.endswith("，"), f"cue 1 末尾不是逗号: {cues[1].text!r}"
+    # 最后一条以句号结尾（原 _CJK_SENTENCE_END 路径）
+    assert cues[-1].text.endswith("。"), f"末 cue 末尾不是句号: {cues[-1].text!r}"
+    # 文本必须完整保留
+    assert "".join(c.text for c in cues) == "你好，我叫张三，今天天气真好。"
+
+
 def test_cjk_default_packs_unpunctuated_chinese_at_vlog_density():
     """Vlog 风格无标点中文，默认参数下平均 cue 字符数应贴近金标（≤ 18）。
 

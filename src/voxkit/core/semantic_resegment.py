@@ -295,7 +295,14 @@ def _estimate_char_time(
 
 
 def _build_cjk_atoms(segments: Sequence[RemixrSegment]) -> list[_CjkAtom] | None:
-    """Build phrase atoms, splitting only at strong in-segment punctuation."""
+    """Build phrase atoms, splitting at sentence-end / strong / medium punctuation.
+
+    把 ``_CJK_MEDIUM_BREAK = ，、：:`` 也作为切点的根因：whisper.cpp 中文 ASR
+    本身不输出标点，第一 pass reseg 时 segment 内没有 medium 标点可切，行为
+    与「只切句末」一致；但当输入已带标点时（proofread 后的双 pass 场景、或
+    带 prompt 引导的 ASR），逗号承载了 ~80% 气口边界，全部忽略会让 cue 仍
+    被打包过粗。详见 docs/eval-baseline-observations.md §2.2 与 Phase 3 实验。
+    """
     atoms: list[_CjkAtom] = []
     for seg_idx, seg in enumerate(segments):
         text = seg.text.strip()
@@ -309,7 +316,11 @@ def _build_cjk_atoms(segments: Sequence[RemixrSegment]) -> list[_CjkAtom] | None
         span_start = 0
         text_len = len(text)
         for i, ch in enumerate(text):
-            if ch not in _CJK_SENTENCE_END and ch not in _CJK_STRONG_BREAK:
+            if (
+                ch not in _CJK_SENTENCE_END
+                and ch not in _CJK_STRONG_BREAK
+                and ch not in _CJK_MEDIUM_BREAK
+            ):
                 continue
             part = text[span_start : i + 1].strip()
             if part:
