@@ -4,6 +4,8 @@
 **视频**：【First Look】Steam Has Released a Controller! Why Is It So Hot?
 **URL**：<https://www.youtube.com/watch?v=2_FpQj_f69g>
 **时长**：606 秒（10:06）
+**音频**：按需 `./fetch.sh` 拉取（约 19MB，不入仓）
+**字幕**：zh-Hans / zh-Hant / en-US（入仓）
 **下载日期**：2026-05-13
 
 ## 字幕轨道（YouTube 原始声明）
@@ -31,4 +33,4 @@
 
 ## 音频规格
 
-WAV / 16000 Hz / mono / 605.6 秒
+WAV / 16000 Hz / mono / 605.6 秒。按需用同目录 `./fetch.sh` 拉取。

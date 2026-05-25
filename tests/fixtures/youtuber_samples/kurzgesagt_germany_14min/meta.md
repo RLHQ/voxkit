@@ -4,6 +4,8 @@
 **视频**：GERMANY IS OVER
 **URL**：<https://www.youtube.com/watch?v=n-gYFcVx-8Y>
 **时长**：845 秒（14:05）
+**音频**：按需 `./fetch.sh` 拉取（约 27MB，不入仓）
+**字幕**：en（入仓）
 **下载日期**：2026-05-13
 
 ## 字幕轨道
@@ -29,4 +31,4 @@
 
 ## 音频规格
 
-WAV / 16000 Hz / mono / 844.0 秒
+WAV / 16000 Hz / mono / 844.0 秒。按需用同目录 `./fetch.sh` 拉取。
