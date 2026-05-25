@@ -7,6 +7,20 @@ changes (with migration notes).
 
 ## [Unreleased]
 
+## [0.7.1] — 2026-05-25
+
+### Fixed
+
+- **`semantic_resegment` 死循环修复**：`_split_long` 与 `_split_cjk_long`
+  在递归保护处增加 shrinkage 守卫（`len(chunk) < n`）。原算法在子 chunk
+  没真正变短时仍会递归，导致两类病态输入触发 `RecursionError`：
+  - **EN 路径**：whisper-cli 偶发把长尾静音锁进单词的 `end`，使单 word
+    `dur > max_dur_s × _HARD_DUR_RATIO`（默认 8.4s）→ 主循环所有候选切点
+    被 hard-ratio 全数拒绝 → `chunks=[整段]` → 无限递归。
+  - **CJK 路径**：极短文本 + 极长 dur（如 `n_by_dur > total_chars`）→
+    主循环 `start >= total_chars - min_remaining` 立即 break → 同上。
+  - 新增两条回归测试覆盖两条路径。
+
 ## [0.7.0] — 2026-05-13
 
 **双 pass reseg：`voxkit reseg` 子命令** + CJK atom 切分覆盖 medium 标点

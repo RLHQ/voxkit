@@ -221,6 +221,28 @@ def test_cjk_medium_break_triggers_soft_flush_in_long_cue():
     assert "".join(c.text for c in cues) == "它这么贵却这么火，一半是因为Steam一直以来的口碑都很好。"
 
 
+def test_cjk_split_long_does_not_recurse_forever_on_short_text_long_dur():
+    """CJK 路径的同源 bug：当 atom 字符数 < ceil(dur/max_dur_s) 时
+    `_split_cjk_long` 主循环 `start >= total_chars - min_remaining` 立即 break，
+    chunks 仍为 [整段]（未收缩），递归保护 `_cjk_need_split and len>=2` 仍为真
+    → 递归同输入 → RecursionError。
+
+    触发示例：单 segment 「啊啊」(2 chars) 但 dur=30s（whisper-cli 偶发把
+    长静音段标到极短文本上）。n_chunks=5 > N=2 → 立刻 break → 不收缩 → 死循环。
+
+    新版应：检测到子 chunk 没收缩时停止递归。
+    """
+    # 2 个中文字符 + 30s 时长 → 必触发 n_chunks > len(chars)
+    segs = [_seg("s1", 0.0, 30.0, "啊啊")]
+    p = ResegmentParams()  # 默认 max_dur_s=7.0 → n_by_dur=5 > 2 chars
+
+    # 关键：不应抛 RecursionError
+    cues = resegment_for_subtitles(segs, language="zh", params=p)
+    # 不要求切分完美——只要求收敛且文本不丢
+    assert cues, "should converge and produce at least one cue"
+    assert "".join(c.text for c in cues) == "啊啊"
+
+
 def test_cjk_default_packs_unpunctuated_chinese_at_vlog_density():
     """Vlog 风格无标点中文，默认参数下平均 cue 字符数应贴近金标（≤ 18）。
 

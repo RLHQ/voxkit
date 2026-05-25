@@ -361,6 +361,34 @@ def test_split_long_prefers_clause_punctuation_over_prosody_gap():
     )
 
 
+def test_pathological_long_word_does_not_recurse_forever():
+    """whisper-cli 偶发把长静音锁进单词的 end → 单词 dur 超 _HARD_DUR_RATIO。
+
+    原 _split_long 在该输入下：start=0 时所有候选切点 chunk_dur 都 > max_dur_s*1.2
+    被 hard-ratio 全数拒绝 → best_idx=-1 → 主循环立即 break → chunks=[words]
+    （没收缩）→ 递归保护条件 `_need_split(chunk) and len(chunk)>=4` 仍为真
+    → 同一输入再次递归 → RecursionError。
+
+    新版应：检测到子 chunk 没收缩时停止递归，把该 chunk 原样输出。
+    """
+    # 第一个 word "Steam" 端到端 15s（病态尾随静音），其余正常
+    words = [
+        _w("Steam", 0.0, 15.0),
+        _w("rolled", 15.0, 15.4),
+        _w("over", 15.4, 15.6),
+        _w("us", 15.6, 16.0),
+    ]
+    segs = [_seg("s1", 0.0, 16.0, "Steam rolled over us", words=words, speaker="A")]
+    p = ResegmentParams(min_dur_s=0.0)
+
+    # 关键：不应抛 RecursionError；至少产出一个 cue，文本含全部 token
+    cues = resegment_for_subtitles(segs, language="en", params=p)
+    assert cues, "should converge and produce at least one cue"
+    joined = " ".join(c.text for c in cues)
+    for token in ("Steam", "rolled", "over", "us"):
+        assert token in joined, f"token {token!r} lost; cues={[c.text for c in cues]}"
+
+
 def test_pysbd_missing_raises_import_error(monkeypatch):
     """pysbd 不可用时模块直接抛 ImportError，由 caller 决定 fallback。"""
     import sys

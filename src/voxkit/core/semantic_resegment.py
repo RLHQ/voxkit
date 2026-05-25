@@ -689,9 +689,13 @@ def _split_cjk_long(chars: list[_CjkChar], p: ResegmentParams) -> list[list[_Cjk
     if start < total_chars:
         chunks.append(chars[start:])
 
+    # `len(chunk) < len(chars)` 守卫：当 n_chunks > total_chars（极短文本 +
+    # 极长 dur 触发 n_by_dur 远大于字符数）时，主循环 `start >= total_chars -
+    # min_remaining` 立即 break，chunks 回退成 [整个输入]（未收缩）。再递归
+    # 是死循环。子 chunk 没真正变短就不递归，原样输出。
     final: list[list[_CjkChar]] = []
     for chunk in chunks:
-        if _cjk_need_split(chunk, p) and len(chunk) >= 2:
+        if _cjk_need_split(chunk, p) and len(chunk) >= 2 and len(chunk) < len(chars):
             final.extend(_split_cjk_long(chunk, p))
         else:
             final.append(chunk)
@@ -870,9 +874,13 @@ def _split_long(words: list[_Word], p: ResegmentParams) -> list[list[_Word]]:
         chunks.append(words[start:])
 
     # 万一某段仍超 hard（极少情况）→ 递归
+    # `len(chunk) < n` 守卫：若主循环 best_idx 始终被 _HARD_*_RATIO 拒绝，
+    # chunks 会回退成 [整个输入]（未收缩）。此时再递归是死循环（whisper-cli
+    # 偶发把长尾静音锁进单词的 end → 单词 dur > max_dur_s × _HARD_DUR_RATIO
+    # → start=0 时所有 i 都被拒）。子 chunk 没真正变短就不递归，原样输出。
     final: list[list[_Word]] = []
     for chunk in chunks:
-        if _need_split(chunk, p) and len(chunk) >= 4:
+        if _need_split(chunk, p) and len(chunk) >= 4 and len(chunk) < n:
             final.extend(_split_long(chunk, p))
         else:
             final.append(chunk)
