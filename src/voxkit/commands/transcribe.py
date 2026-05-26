@@ -222,6 +222,18 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
             "不动 transcript JSON）；CJK 走 phrase-aware 打包并在必要时做字符插值。需安装 pysbd。"
         ),
     )
+    # ── v0.7.2 review #2：transcribe / reseg 同 translate 暴露 --speaker-prefix
+    p.add_argument(
+        "--speaker-prefix",
+        choices=["auto", "always", "never"],
+        default="auto",
+        dest="speaker_prefix",
+        help=(
+            "SRT/VTT 每条 cue 是否加 'Speaker X: ' 前缀。"
+            "auto = 仅在 ≥2 个不同 informative speaker 时加（默认；'Speaker A' / "
+            "'Speaker ?' 占位符不计入）；always = v0.7.1 之前的旧行为；never = 永不加。"
+        ),
+    )
 
 
 def run(args: argparse.Namespace) -> int:
@@ -314,6 +326,7 @@ def run(args: argparse.Namespace) -> int:
         max_speakers=args.max_speakers,
         diarize_model=args.diarize_model,
         resegment=args.resegment,
+        speaker_prefix=args.speaker_prefix,
     )
 
     try:

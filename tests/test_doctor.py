@@ -140,8 +140,9 @@ def test_check_whisper_cli_all_flags(monkeypatch, tmp_path):
         stdout = help_text
         stderr = ""
 
-    def _fake_run(argv, capture_output=True, text=True, timeout=5):
+    def _fake_run(argv, capture_output=True, text=True, timeout=15):
         assert argv[0] == str(fake_bin) and argv[1] == "--help"
+        assert timeout >= 15, "doctor 应给 whisper-cli Metal 初始化预留 ≥15s"
         return _Completed()
 
     monkeypatch.setattr(D.subprocess, "run", _fake_run)

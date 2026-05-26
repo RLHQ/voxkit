@@ -322,12 +322,14 @@ def check_whisper_cli() -> CheckResult:
             severity="warn",
         )
 
+    # 15s 而非 5s：whisper-cli 首次跑 --help 会初始化 Metal/CUDA backend，
+    # macOS Metal 实测 ~8s，5s 超时会导致 doctor 假阴性（transcribe 实际能跑）。
     try:
         out = subprocess.run(
             [str(bin_path), "--help"],
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=15,
         )
     except Exception as e:
         return CheckResult(

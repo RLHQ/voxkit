@@ -170,6 +170,12 @@ class TranscribeRequest:
     # (pysbd sentence boundaries + clause-aware splitting; CJK passthrough).
     # Only affects SRT/VTT — JSON outputs are byte-identical regardless.
     resegment: ResegmentMode = "none"
+    # ── Phase 4 — SRT/VTT speaker prefix policy (v0.7.2 review #2) ───
+    # "auto" (default): drop "Speaker A:" / "Speaker ?:" placeholder noise,
+    # only render prefix when ≥2 informative speakers (real diarization).
+    # "always": legacy ≤0.7.1 behaviour — every cue carries a prefix.
+    # "never": never render prefix even when diarization found multiple speakers.
+    speaker_prefix: str = "auto"
 
 
 @dataclass(frozen=True)
@@ -248,6 +254,47 @@ def _discover_binaries(
         # vad=True + missing model is non-fatal — caller adds a warning.
 
     return whisper_bin, model_path, vad_model
+
+
+#: 首条 segment.start 超过该阈值时认为 VAD 可能误吃了开场，发 warning。
+#: 15s 取自 Code with Claude 演讲场景：典型"PA 报幕 + 嘉宾上台"约 30s，
+#: 留半档余量做 false-positive 控制。
+VAD_WARMUP_WARN_SECS = 15.0
+
+
+def _vad_warmup_warning(
+    *,
+    vad_effectively_on: bool,
+    first_segment_start: float | None,
+    duration_secs: float,
+    threshold_secs: float = VAD_WARMUP_WARN_SECS,
+) -> str | None:
+    """如果 VAD 实际生效且首条 segment 起点过晚 → 返回可读 warning。
+
+    背景（v0.7.1 反馈 B2）：silero VAD 默认开启，对"开场入场音乐 + PA 报幕 +
+    嘉宾上台"格式会把开头 30–45 秒判为非语音裁掉，且 voxkit 过去对此完全静默。
+
+    **文案故意不做"VAD 一定吃了"的因果断言**：我们只能观察到"首条 segment 起点
+    晚 + VAD 开着"，无法分辨是 VAD 真吃了还是音频本就空白（intro music / 演讲
+    者真的迟开口）。所以文案只描述观察 + 给排查路径，不下结论。
+
+    返回 None 表示无需 warning；返回 str 是写入 ``warnings`` 列表 + stderr 的
+    成品文案。"""
+    if not vad_effectively_on:
+        return None
+    if first_segment_start is None:
+        return None
+    if first_segment_start <= threshold_secs:
+        return None
+    # sanity: 若整段音频比首条 segment 起点还短，多半是错误数据，不报警。
+    if duration_secs <= first_segment_start:
+        return None
+    return (
+        f"first transcribed segment starts at {first_segment_start:.1f}s with VAD on. "
+        f"this is expected if your input begins with intro music / PA announcement / "
+        f"applause / silence; but if real speech starts earlier, silero VAD may have "
+        f"trimmed it — rerun with `--no-vad` to verify"
+    )
 
 
 def _normalize_detected_language(value: Any) -> str | None:
@@ -854,6 +901,31 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                     f"merge note: {note.kind} at {note.seg_id} ({note.detail})"
                 )
 
+            # 5a. VAD warm-up warning（修复 v0.7.1 反馈 B2）。
+            # 启发式与文案见 :func:`_vad_warmup_warning` 注释。
+            first_start = merged_segments[0].start if merged_segments else None
+            vad_warn = _vad_warmup_warning(
+                vad_effectively_on=bool(req.vad and vad_model is not None),
+                first_segment_start=first_start,
+                duration_secs=duration_secs,
+            )
+            if vad_warn is not None:
+                warnings.append(vad_warn)
+                # json_events 模式下 NDJSON 事件自带 stderr 镜像；普通模式给人
+                # 一个可读 warning，否则用户跑完才在 manifest 里看到就太晚。
+                # sys 已在模块顶层 import，这里直接用。
+                if not forward_stderr:
+                    sys.stderr.write(f"warning: {vad_warn}\n")
+                _emit_event(
+                    em,
+                    {
+                        "event": "vad.warmup_skip",
+                        "firstSegmentStart": first_start,
+                        "thresholdSecs": VAD_WARMUP_WARN_SECS,
+                    },
+                    forward_to_stderr=forward_stderr,
+                )
+
             # 6. Compose TranscriptionOutput
             elapsed_secs = time.monotonic() - started_wall
             rtf_total = (
@@ -1160,9 +1232,13 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
             if req.emit_srt:
                 if cues is not None:
                     from voxkit.io.srt import to_subtitles_srt_from_cues
-                    srt_text = to_subtitles_srt_from_cues(cues)
+                    srt_text = to_subtitles_srt_from_cues(
+                        cues, speaker_prefix=req.speaker_prefix
+                    )
                 else:
-                    srt_text = to_subtitles_srt(voxkit_out)
+                    srt_text = to_subtitles_srt(
+                        voxkit_out, speaker_prefix=req.speaker_prefix
+                    )
                 ws.srt_path.write_text(srt_text, encoding="utf-8")
                 artifacts["srt"] = ws.srt_path
                 _emit_event(
@@ -1173,9 +1249,13 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
             if req.emit_vtt:
                 if cues is not None:
                     from voxkit.io.srt import to_subtitles_vtt_from_cues
-                    vtt_text = to_subtitles_vtt_from_cues(cues)
+                    vtt_text = to_subtitles_vtt_from_cues(
+                        cues, speaker_prefix=req.speaker_prefix
+                    )
                 else:
-                    vtt_text = to_subtitles_vtt(voxkit_out)
+                    vtt_text = to_subtitles_vtt(
+                        voxkit_out, speaker_prefix=req.speaker_prefix
+                    )
                 ws.vtt_path.write_text(vtt_text, encoding="utf-8")
                 artifacts["vtt"] = ws.vtt_path
                 _emit_event(

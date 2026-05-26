@@ -59,6 +59,17 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
         help="同步渲染 subtitles.reseg2.srt（不覆盖原 subtitles.srt）",
     )
     p.add_argument(
+        "--speaker-prefix",
+        choices=["auto", "always", "never"],
+        default="auto",
+        dest="speaker_prefix",
+        help=(
+            "reseg2.srt 每条 cue 是否加 'Speaker X: ' 前缀。"
+            "auto = 仅在 ≥2 个 informative speaker 时加（默认；占位符不计入）；"
+            "always = v0.7.1 之前的旧行为；never = 永不加。"
+        ),
+    )
+    p.add_argument(
         "--force",
         action="store_true",
         help="覆盖已存在的 subtitles.cues.reseg2.json",
@@ -134,7 +145,12 @@ def run(args: argparse.Namespace) -> int:
 
     if args.emit_srt:
         srt_path = workdir / "subtitles.reseg2.srt"
-        srt_path.write_text(to_subtitles_srt_from_cues(new_cues), encoding="utf-8")
+        srt_path.write_text(
+            to_subtitles_srt_from_cues(
+                new_cues, speaker_prefix=getattr(args, "speaker_prefix", "auto")
+            ),
+            encoding="utf-8",
+        )
 
     sys.stdout.write(
         f"reseg done: {len(segments)} proofread cues → {len(new_cues)} reseg2 cues\n"

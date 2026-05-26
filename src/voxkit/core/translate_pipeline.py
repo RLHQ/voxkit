@@ -49,7 +49,13 @@ from voxkit.io.schema import (
     TranslationOutput,
     TranslationParams,
 )
-from voxkit.io.srt import format_srt_time, format_vtt_time
+from voxkit.io.srt import (
+    SpeakerPrefixPolicy,
+    format_srt_time,
+    format_vtt_time,
+    is_informative_speaker,
+    should_show_speaker_prefix,
+)
 from voxkit.llm import ChatResult, LLMClient
 from voxkit.llm.errors import LLMError, LLMRateLimit, LLMRefusal, LLMSchemaError, LLMTimeout
 from voxkit.llm.prompts import load_prompt
@@ -81,6 +87,15 @@ class TranslateRequest:
     context_next: int = 2
     emit_srt: bool = True
     emit_vtt: bool = True
+    # speaker_prefix:
+    #   "auto"  → 仅在出现 ≥2 个非空 speaker 时给 SRT/VTT 每条 cue 加 "Speaker X: "
+    #   "always"→ 旧行为（>=v0.7.1 之前）：始终加前缀；单人也会被强加 "Speaker A:"
+    #   "never" → 永不加前缀
+    speaker_prefix: SpeakerPrefixPolicy = "auto"
+    # render_only（v0.7.2 review #3）：跳过 LLM / checkpoint，直接读现有
+    # subtitles.<lang>.json 重渲染 SRT/VTT。专为"只想换 --speaker-prefix"这类
+    # 纯格式化重渲染场景，避免被迫 --force 重 LLM 浪费 token。
+    render_only: bool = False
     force_level: ForceLevel = None
     json_events: bool = False
     timeout_s: float = 60.0
@@ -181,7 +196,9 @@ def _load_source(
 
     raise FileNotFoundError(
         f"no translation input in {ws.root}: need subtitles.proofread.json "
-        "or subtitles.cues.json"
+        "or subtitles.cues.json. "
+        "Run `voxkit transcribe <input> --workdir <dir> --resegment=semantic` "
+        "to produce subtitles.cues.json (optionally followed by `voxkit proofread <dir>`)."
     )
 
 
@@ -617,13 +634,29 @@ def _atomic_write_text(path: Path, body: str) -> None:
     tmp.replace(path)
 
 
-def _render_translated(cues: Sequence[TranslationCueOut], *, time_fmt) -> str:
+def _render_translated(
+    cues: Sequence[TranslationCueOut],
+    *,
+    time_fmt,
+    speaker_prefix: SpeakerPrefixPolicy = "auto",
+) -> str:
+    show_prefix = should_show_speaker_prefix(
+        [c.speaker for c in cues], speaker_prefix
+    )
     parts: List[str] = []
     for i, c in enumerate(cues, 1):
         parts.append(str(i))
         parts.append(f"{time_fmt(c.start)} --> {time_fmt(c.end)}")
         body = c.text.strip()
-        parts.append(f"{c.speaker}: {body}" if c.speaker else body)
+        # 与 voxkit.io.srt._render_cues 同形的 per-cue 占位符过滤（review #5）：
+        # auto 模式下 'Speaker A' / 'Speaker ?' 不写前缀；always 保留旧行为。
+        write_prefix = bool(show_prefix and c.speaker) and (
+            speaker_prefix != "auto" or is_informative_speaker(c.speaker)
+        )
+        if write_prefix:
+            parts.append(f"{c.speaker}: {body}")
+        else:
+            parts.append(body)
         parts.append("")
     return "\n".join(parts) + "\n" if parts else ""
 
@@ -638,6 +671,52 @@ def _emit(em: EventMirror, payload: Dict[str, Any], *, to_stderr: bool) -> None:
         sys.stderr.flush()
 
 
+def _run_render_only(
+    req: TranslateRequest,
+    *,
+    json_path: Path,
+    srt_path: Path,
+    vtt_path: Path,
+) -> Dict[str, Any]:
+    """``--render-only`` short-circuit：读现有 subtitles.<lang>.json，按当前
+    ``speaker_prefix`` 重渲染 SRT/VTT。不动 LLM、不动 work checkpoints、不动
+    artifact 的 ``state`` / ``reviewedBy`` / ``provider`` / cost metrics。
+
+    返回最小 dict（仅含本次重渲染信息），manifest **不更新**——既然 LLM 没跑、
+    cost 没变，没必要污染 audit 字段。
+    """
+    if not json_path.is_file():
+        raise FileNotFoundError(
+            f"--render-only requires existing {json_path.name}; run "
+            f"`voxkit translate <workdir> --target-language {req.target_language}` "
+            f"first to produce it"
+        )
+    doc = TranslationOutput.model_validate_json(json_path.read_text(encoding="utf-8"))
+    cues = doc.cues
+    if req.emit_srt:
+        _atomic_write_text(
+            srt_path,
+            _render_translated(
+                cues, time_fmt=format_srt_time, speaker_prefix=req.speaker_prefix
+            ),
+        )
+    if req.emit_vtt:
+        _atomic_write_text(
+            vtt_path,
+            "WEBVTT\n\n"
+            + _render_translated(
+                cues, time_fmt=format_vtt_time, speaker_prefix=req.speaker_prefix
+            ),
+        )
+    return {
+        "renderOnly": True,
+        "targetLanguage": req.target_language,
+        "cueCount": len(cues),
+        "speakerPrefix": req.speaker_prefix,
+        "state": doc.state,
+    }
+
+
 def run_translate(
     req: TranslateRequest,
     *,
@@ -650,6 +729,18 @@ def run_translate(
     work_dir = _translate_work_dir(ws, req.target_language)
     json_path, srt_path, vtt_path = _translation_paths(ws, req.target_language)
     try:
+        # 0. --render-only short-circuit：纯重渲染，不动 LLM / checkpoint。
+        # 在 gate_force_overwrite 之前处理——重渲染不算"覆盖 artifact"。
+        if req.render_only:
+            if req.force_level is not None:
+                raise ValueError(
+                    "--render-only is incompatible with --force / --force-reviewed / "
+                    "--force-final (render-only never touches the existing JSON artifact)"
+                )
+            return _run_render_only(
+                req, json_path=json_path, srt_path=srt_path, vtt_path=vtt_path
+            )
+
         # 1. 拒覆盖（reviewed/final 必须显式 --force-reviewed/--force-final）
         gate_force_overwrite(
             json_path,
@@ -929,12 +1020,22 @@ def run_translate(
             # 10. 渲染 SRT/VTT（同样 atomic，避免半截字幕被播放器读到）
             if req.emit_srt:
                 _atomic_write_text(
-                    srt_path, _render_translated(all_out, time_fmt=format_srt_time)
+                    srt_path,
+                    _render_translated(
+                        all_out,
+                        time_fmt=format_srt_time,
+                        speaker_prefix=req.speaker_prefix,
+                    ),
                 )
             if req.emit_vtt:
                 _atomic_write_text(
                     vtt_path,
-                    "WEBVTT\n\n" + _render_translated(all_out, time_fmt=format_vtt_time),
+                    "WEBVTT\n\n"
+                    + _render_translated(
+                        all_out,
+                        time_fmt=format_vtt_time,
+                        speaker_prefix=req.speaker_prefix,
+                    ),
                 )
 
             elapsed = time.monotonic() - started

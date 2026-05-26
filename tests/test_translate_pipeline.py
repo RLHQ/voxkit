@@ -443,3 +443,187 @@ def test_run_translate_transport_failure_writes_pending_marker(tmp_path: Path) -
     assert not pending.exists()
     artifact = json.loads((ws.root / "subtitles.en.json").read_text(encoding="utf-8"))
     assert [c["text"] for c in artifact["cues"]] == ["hello", "world"]
+
+
+# ── B1 regression: SRT speaker prefix should be context-aware ───────────────
+
+
+def test_translate_srt_single_speaker_placeholder_no_prefix(tmp_path: Path) -> None:
+    """B1 修复：单 speaker（"Speaker A" 占位符）→ SRT 不再强加 "Speaker A:" 前缀。"""
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues(ws.cues_json_path, cues=[
+        {"id": "cue_000001", "start": 0.0, "end": 2.0, "speaker": "Speaker A", "text": "你好"},
+        {"id": "cue_000002", "start": 2.0, "end": 4.0, "speaker": "Speaker A", "text": "世界"},
+    ])
+    fake = FakeLLMClient([_mock_translate_for(["cue_000001", "cue_000002"], ["hello", "world"])])
+    run_translate(TranslateRequest(workdir=ws.root, target_language="en"), llm_client=fake)
+
+    srt = (ws.root / "subtitles.en.srt").read_text(encoding="utf-8")
+    assert "Speaker A:" not in srt, "auto 模式不该把占位符渲染成前缀"
+    assert "hello" in srt and "world" in srt
+
+    # JSON 里 speaker 字段仍然保留（供下游消费）
+    artifact = json.loads((ws.root / "subtitles.en.json").read_text(encoding="utf-8"))
+    assert artifact["cues"][0]["speaker"] == "Speaker A"
+
+
+def test_translate_srt_multi_speaker_keeps_prefix(tmp_path: Path) -> None:
+    """多 speaker 时 auto 仍保留前缀，保护 diarization 信号不被一刀切掉。"""
+    ws = open_workspace(tmp_path / "ws")
+    # 默认 fixture 是 Speaker 1 / Speaker 2 双人
+    _write_cues(ws.cues_json_path)
+    fake = FakeLLMClient([
+        _mock_translate_for(["cue_000001", "cue_000002"], ["hello", "world"]),
+        _mock_translate_for(["cue_000003"], ["bye"]),
+    ])
+    run_translate(TranslateRequest(workdir=ws.root, target_language="en"), llm_client=fake)
+
+    srt = (ws.root / "subtitles.en.srt").read_text(encoding="utf-8")
+    assert "Speaker 1: hello" in srt
+    assert "Speaker 2: bye" in srt
+
+
+def test_translate_speaker_prefix_always_forces_placeholder(tmp_path: Path) -> None:
+    """speaker_prefix='always' 等同 v0.7.1 之前的旧行为，单人也强加前缀。"""
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues(ws.cues_json_path, cues=[
+        {"id": "cue_000001", "start": 0.0, "end": 2.0, "speaker": "Speaker A", "text": "你好"},
+    ])
+    fake = FakeLLMClient([_mock_translate_for(["cue_000001"], ["hello"])])
+    run_translate(
+        TranslateRequest(workdir=ws.root, target_language="en", speaker_prefix="always"),
+        llm_client=fake,
+    )
+    srt = (ws.root / "subtitles.en.srt").read_text(encoding="utf-8")
+    assert "Speaker A: hello" in srt
+
+
+def test_translate_speaker_prefix_never_strips_even_multi(tmp_path: Path) -> None:
+    """speaker_prefix='never' 强制移除前缀，即使是多 speaker。"""
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues(ws.cues_json_path)
+    fake = FakeLLMClient([
+        _mock_translate_for(["cue_000001", "cue_000002"], ["hello", "world"]),
+        _mock_translate_for(["cue_000003"], ["bye"]),
+    ])
+    run_translate(
+        TranslateRequest(workdir=ws.root, target_language="en", speaker_prefix="never"),
+        llm_client=fake,
+    )
+    srt = (ws.root / "subtitles.en.srt").read_text(encoding="utf-8")
+    assert "Speaker 1:" not in srt
+    assert "Speaker 2:" not in srt
+    assert "hello" in srt and "bye" in srt
+
+
+def test_translate_no_input_error_mentions_resegment(tmp_path: Path) -> None:
+    """B3 修复：缺 cues.json 时报错应明确指向 transcribe --resegment=semantic。"""
+    ws = open_workspace(tmp_path / "ws")
+    with pytest.raises(FileNotFoundError) as exc:
+        run_translate(
+            TranslateRequest(workdir=ws.root, target_language="en"),
+            llm_client=FakeLLMClient([]),
+        )
+    msg = str(exc.value)
+    assert "--resegment=semantic" in msg
+    assert "voxkit transcribe" in msg
+
+
+# ── v0.7.2 review #3: --render-only short-circuit ──────────────────────────
+
+
+def test_render_only_reuses_existing_artifact_no_llm(tmp_path: Path) -> None:
+    """切换 --speaker-prefix 时 --render-only 应跳过 LLM，复用现有 JSON。"""
+    ws = open_workspace(tmp_path / "ws")
+    # 先用 auto 产出多 speaker fixture（auto → 渲染前缀）
+    _write_cues(ws.cues_json_path)
+    fake = FakeLLMClient([
+        _mock_translate_for(["cue_000001", "cue_000002"], ["hello", "world"]),
+        _mock_translate_for(["cue_000003"], ["bye"]),
+    ])
+    run_translate(TranslateRequest(workdir=ws.root, target_language="en"), llm_client=fake)
+    srt_path = ws.root / "subtitles.en.srt"
+    # 多 speaker auto → 默认有前缀
+    assert "Speaker 1: hello" in srt_path.read_text(encoding="utf-8")
+
+    # render-only 改成 never：不该再调 LLM，但 SRT 内容应变化
+    no_llm = FakeLLMClient([])  # 空 canned response — 任何 chat() 调用都会 AssertionError
+    summary = run_translate(
+        TranslateRequest(
+            workdir=ws.root,
+            target_language="en",
+            speaker_prefix="never",
+            render_only=True,
+        ),
+        llm_client=no_llm,
+    )
+    assert no_llm.calls == [], "render-only 不应触发任何 LLM call"
+    assert summary["renderOnly"] is True
+    assert summary["speakerPrefix"] == "never"
+
+    srt2 = srt_path.read_text(encoding="utf-8")
+    assert "Speaker 1:" not in srt2
+    assert "hello" in srt2 and "bye" in srt2
+
+
+def test_render_only_fails_when_no_existing_artifact(tmp_path: Path) -> None:
+    """缺 subtitles.<lang>.json 时 --render-only 应明确报错。"""
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues(ws.cues_json_path)
+    with pytest.raises(FileNotFoundError) as exc:
+        run_translate(
+            TranslateRequest(
+                workdir=ws.root, target_language="en", render_only=True
+            ),
+            llm_client=FakeLLMClient([]),
+        )
+    msg = str(exc.value)
+    assert "render-only" in msg
+    assert "subtitles.en.json" in msg
+
+
+def test_render_only_rejects_force_combo(tmp_path: Path) -> None:
+    """--render-only + --force 应是 ValueError（语义冲突）。"""
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues(ws.cues_json_path, cues=[
+        {"id": "cue_000001", "start": 0.0, "end": 2.0, "speaker": "A", "text": "x"},
+    ])
+    # 先产出
+    run_translate(
+        TranslateRequest(workdir=ws.root, target_language="en"),
+        llm_client=FakeLLMClient([_mock_translate_for(["cue_000001"], ["y"])]),
+    )
+    with pytest.raises(ValueError, match="render-only"):
+        run_translate(
+            TranslateRequest(
+                workdir=ws.root,
+                target_language="en",
+                render_only=True,
+                force_level="draft",
+            ),
+            llm_client=FakeLLMClient([]),
+        )
+
+
+def test_render_only_preserves_artifact_state(tmp_path: Path) -> None:
+    """--render-only 不应修改 subtitles.<lang>.json 的 state / metrics。"""
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues(ws.cues_json_path, cues=[
+        {"id": "cue_000001", "start": 0.0, "end": 2.0, "speaker": "A", "text": "x"},
+    ])
+    run_translate(
+        TranslateRequest(workdir=ws.root, target_language="en"),
+        llm_client=FakeLLMClient([_mock_translate_for(["cue_000001"], ["y"])]),
+    )
+    json_path = ws.root / "subtitles.en.json"
+    original_bytes = json_path.read_bytes()
+    run_translate(
+        TranslateRequest(
+            workdir=ws.root,
+            target_language="en",
+            speaker_prefix="never",
+            render_only=True,
+        ),
+        llm_client=FakeLLMClient([]),
+    )
+    assert json_path.read_bytes() == original_bytes, "render-only 不应改 JSON artifact"

@@ -57,6 +57,25 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
         default=True,
         help="输出目标语言 VTT（默认 on）",
     )
+    p.add_argument(
+        "--speaker-prefix",
+        choices=["auto", "always", "never"],
+        default="auto",
+        help=(
+            "SRT/VTT 每条 cue 是否加 'Speaker X: ' 前缀。"
+            "auto = 仅在 ≥2 个非空 speaker 时加（默认，单人讲座不再被强加 'Speaker A:'）；"
+            "always = 旧行为；never = 永不加。"
+        ),
+    )
+    p.add_argument(
+        "--render-only",
+        action="store_true",
+        dest="render_only",
+        help=(
+            "跳过 LLM / cache，仅根据现有 subtitles.<lang>.json 重渲染 SRT/VTT。"
+            "用于在不重新调 LLM 的情况下切换 --speaker-prefix。与 --force* 互斥。"
+        ),
+    )
     # --force 三档（语义见 TranslateRequest.force_level）
     p.add_argument(
         "--force",
@@ -103,6 +122,8 @@ def run(args: argparse.Namespace) -> int:
         context_next=args.context_next,
         emit_srt=args.emit_srt,
         emit_vtt=args.emit_vtt,
+        speaker_prefix=args.speaker_prefix,
+        render_only=args.render_only,
         force_level=_resolve_force_level(args),
         json_events=args.json_events,
         timeout_s=args.timeout,

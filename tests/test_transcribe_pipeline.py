@@ -594,17 +594,91 @@ def test_no_keep_work_removes_work_dir_on_success(
 # ─────────────────────────────────────────────────────────────────────────
 
 
-def test_srt_contains_speaker_prefix(
+def test_srt_default_auto_skips_placeholder_prefix(
     tmp_path: Path, patched_pipeline: dict[str, Any]
 ) -> None:
-    """SRT renders the Remixr-aligned ``Speaker A:`` prefix."""
+    """v0.7.2 review #1：segment path（无 diarization、无 resegment）默认 auto，
+    SRT 不应再含 'Speaker A:' 占位符前缀。"""
     ws = open_workspace(tmp_path / "ws")
     req = _make_request(ws)
     run_pipeline(req)
 
     srt = ws.srt_path.read_text(encoding="utf-8")
-    assert "Speaker A:" in srt
+    assert "Speaker A:" not in srt
     assert "-->" in srt
+    assert "Hello world." in srt
+
+
+def test_srt_speaker_prefix_always_keeps_legacy_format(
+    tmp_path: Path, patched_pipeline: dict[str, Any]
+) -> None:
+    """显式 ``--speaker-prefix always`` 恢复 v0.7.1 之前的 ``Speaker A:`` 前缀。"""
+    from dataclasses import replace
+
+    ws = open_workspace(tmp_path / "ws")
+    req = replace(_make_request(ws), speaker_prefix="always")
+    run_pipeline(req)
+
+    srt = ws.srt_path.read_text(encoding="utf-8")
+    assert "Speaker A:" in srt
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# VAD warm-up warning (B2 fix)
+# ─────────────────────────────────────────────────────────────────────────
+
+
+def test_vad_warmup_warning_helper_thresholds():
+    """``_vad_warmup_warning`` 纯函数：覆盖触发与抑制条件。"""
+    from voxkit.core.transcribe_pipeline import _vad_warmup_warning
+
+    # 未开 VAD → 永不 warn
+    assert _vad_warmup_warning(
+        vad_effectively_on=False, first_segment_start=30.0, duration_secs=120.0
+    ) is None
+
+    # 无 segment → 不 warn
+    assert _vad_warmup_warning(
+        vad_effectively_on=True, first_segment_start=None, duration_secs=120.0
+    ) is None
+
+    # 开场就开口（< 阈值）→ 不 warn
+    assert _vad_warmup_warning(
+        vad_effectively_on=True, first_segment_start=5.0, duration_secs=120.0
+    ) is None
+
+    # 首条 cue 推迟 > 阈值且音频足够长 → warn
+    warn = _vad_warmup_warning(
+        vad_effectively_on=True, first_segment_start=30.0, duration_secs=120.0
+    )
+    assert warn is not None
+    assert "--no-vad" in warn
+    assert "30.0s" in warn
+    # 文案不应做"VAD 一定吃了"的因果断言（我们无法证明）；只描述观察。
+    assert "trimmed first" not in warn, "应避免无依据的因果断言"
+
+    # 总时长 ≤ 首 segment 起点（坏数据兜底）→ 不 warn
+    assert _vad_warmup_warning(
+        vad_effectively_on=True, first_segment_start=30.0, duration_secs=10.0
+    ) is None
+
+
+def test_vad_warmup_warning_threshold_param():
+    """自定义 threshold 应被尊重，便于上游按场景下调。"""
+    from voxkit.core.transcribe_pipeline import _vad_warmup_warning
+
+    assert _vad_warmup_warning(
+        vad_effectively_on=True,
+        first_segment_start=20.0,
+        duration_secs=120.0,
+        threshold_secs=30.0,
+    ) is None
+    assert _vad_warmup_warning(
+        vad_effectively_on=True,
+        first_segment_start=40.0,
+        duration_secs=120.0,
+        threshold_secs=30.0,
+    ) is not None
 
 
 # ─────────────────────────────────────────────────────────────────────────

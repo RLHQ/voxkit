@@ -7,6 +7,49 @@ changes (with migration notes).
 
 ## [Unreleased]
 
+## [0.7.2] — 2026-05-26
+
+针对 v0.7.1 下游反馈（`code-with-claude/voxkit-feedback.md`）的 P0 4 项 bug
+全部修复 + code-review 暴露的 6 个补强一并搞定，无 schema 变更，下游 reader
+不用改。详细回应见 `code-with-claude/voxkit-feedback-response.md`。
+
+### Added
+
+- **`voxkit transcribe` / `voxkit reseg` 新增 `--speaker-prefix {auto, always,
+  never}`** 与 `voxkit translate` 对齐（review #2）。三个命令共享同一套语义，
+  下游想全局回退到 v0.7.1 行为只需统一传 `always`。
+- **`voxkit translate --render-only`**（review #3）：跳过 LLM 与 cache，仅根
+  据现有 `subtitles.<lang>.json` 重渲染 SRT/VTT。专为"只想换 `--speaker-prefix`
+  / 格式参数"场景，避免被迫 `--force` 重 LLM 浪费 token。
+- 公共导出 `voxkit.io.srt.is_informative_speaker` + `PLACEHOLDER_SPEAKERS`：
+  下游想做自己的占位符过滤可以复用。
+
+### Fixed
+
+- **B1：SRT 不再无脑加 "Speaker A:" 前缀**（修复扩到所有命令）。
+  - `voxkit translate`：新增 `--speaker-prefix {auto, always, never}`，默认
+    `auto` 仅在 cue 实际含 ≥2 个不同**信息性** speaker 时渲染前缀。
+  - `voxkit transcribe`：**segment path** 默认 `auto`（segment schema 无 speaker
+    信息，等同"全占位符"，auto = 不渲染）；**cue path**
+    （`--resegment=semantic`）同样默认 `auto`。 → 修补了 0.7.2 review #1。
+  - `voxkit reseg`：reseg2.srt 同样默认 `auto`。
+  - **`Speaker A` / `Speaker ?` 公认为占位符**：不计入 distinct count，per-cue
+    渲染时单独跳过（修补 0.7.2 review #5；多 speaker 场景下未匹配 cue 不会再
+    漏出 `"Speaker ?: [cough]"`）。
+  - `always` 等同 0.7.1 之前的旧行为。
+- **B2：silero VAD 吃开场不再静默**。`voxkit transcribe` 在 VAD 实际生效
+  且首条 segment 起点 > 15s 时，把 warning 写入 manifest + stderr。**文案
+  弱化因果断言**（review #4）：从 "VAD trimmed first {N}s as non-speech"
+  改成 "first transcribed segment starts at {N}s with VAD on; if real speech
+  starts earlier, silero VAD may have trimmed it — rerun with --no-vad to
+  verify"，避免在 intro music / 真实静默场景下误导用户。
+- **B3：`voxkit translate` 在缺 cues.json 时报错带修复命令**。错误信息现在
+  明确指向 `voxkit transcribe <input> --workdir <dir> --resegment=semantic`。
+- **B5：`voxkit doctor` whisper-cli 探测超时 5s → 15s**。macOS Metal 初始化
+  典型 ~8s，旧的 5s 超时在 brew-installed whisper-cpp + Metal 后端上会假阴性。
+- 删除 `transcribe_pipeline.py` 里 VAD warning 分支的冗余 `import sys`（review
+  #6；模块顶层已 import）。
+
 ## [0.7.1] — 2026-05-25
 
 ### Fixed
