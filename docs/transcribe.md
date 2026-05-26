@@ -297,9 +297,27 @@ Pydantic 模型见 `src/voxkit/io/schema.py::TranscriptionOutput`。
     "srt":                "/abs/.../subtitles.srt",
     "vtt":                "/abs/.../subtitles.vtt",
     "subtitle_cues_json": "/abs/.../subtitles.cues.json"
-  }
+  },
+  "artifactRecords": [
+    {
+      "kind": "subtitle_cues_json",
+      "path": "subtitles.cues.json",
+      "hash": "sha256-hex...",
+      "hashAlgorithm": "sha256",
+      "sourceArtifacts": ["raw_json"],
+      "sourceArtifactHashes": { "raw_json": "sha256-hex..." },
+      "paramsHash": "sha256-hex...",
+      "status": "current",
+      "createdAt": "2026-05-11T00:00:00+00:00",
+      "schemaVersion": "1"
+    }
+  ]
 }
 ```
+
+`artifacts` 保持旧版简表，方便现有消费者按 key 找文件；`artifactRecords`
+是审计层索引，记录文件 hash、直接依赖、参数 hash、schemaVersion 和状态，
+后续 proofread / translation / review 阶段用它判断 stale。
 
 `mergeNotes` 是 warn-only —— `out_of_order` 是相邻 segment 时间轴的 ms 级回溯，
 不影响下游消费（whisper.cpp 偶尔吐出来的，4-character 重叠在播放器里完全不可见）。

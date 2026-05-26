@@ -46,6 +46,7 @@ The lock lives in its own file so :func:`write_manifest` can freely overwrite
 from __future__ import annotations
 
 import errno
+import hashlib
 import json
 import os
 import shutil
@@ -62,6 +63,10 @@ __all__ = [
     "EventMirror",
     "open_workspace",
     "chunk_paths",
+    "build_artifact_records",
+    "file_sha256",
+    "params_hash",
+    "is_artifact_stale",
     "write_manifest",
     "read_manifest",
     "acquire_lock",
@@ -161,6 +166,141 @@ def chunk_paths(ws: Workspace, idx: int) -> tuple[Path, Path, Path]:
 
 
 # ── Manifest I/O ────────────────────────────────────────────────────────────
+
+
+def file_sha256(path: Path) -> str:
+    """Return the SHA-256 hex digest for ``path`` contents."""
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _canonical_json_bytes(value: Any) -> bytes:
+    """Serialize JSON-like data deterministically for hashing.
+
+    ``default=str`` keeps paths and other simple runtime values hashable without
+    making the hash depend on object reprs or dict insertion order.
+    """
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        default=str,
+    ).encode("utf-8")
+
+
+def params_hash(params: Any) -> str | None:
+    """Return a deterministic SHA-256 hash for parameter snapshots.
+
+    ``None`` means the artifact has no meaningful parameter snapshot.
+    """
+    if params is None:
+        return None
+    return hashlib.sha256(_canonical_json_bytes(params)).hexdigest()
+
+
+def _infer_json_schema_version(path: Path) -> str | None:
+    if path.suffix.lower() != ".json":
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, UnicodeDecodeError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    value = payload.get("schemaVersion")
+    return str(value) if value is not None else None
+
+
+def _workspace_relative(path: Path, root: Path) -> str:
+    try:
+        return str(path.relative_to(root))
+    except ValueError:
+        return str(path)
+
+
+def build_artifact_records(
+    artifacts: dict[str, Path],
+    *,
+    root: Path,
+    created_at: str,
+    metadata: dict[str, dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    """Build manifest ``artifactRecords`` from written artifact files.
+
+    The existing manifest ``artifacts`` map is a compact compatibility index.
+    ``artifactRecords`` adds auditable metadata for freshness checks: content
+    hash, source artifact names/hashes, params hash, schema version and status.
+    Missing paths are skipped so callers can include future/conditional entries
+    without writing failed records.
+    """
+    metadata = metadata or {}
+    existing = {
+        kind: path
+        for kind, path in artifacts.items()
+        if path.exists() and path.is_file()
+    }
+    content_hashes = {kind: file_sha256(path) for kind, path in existing.items()}
+
+    records: list[dict[str, Any]] = []
+    for kind, path in existing.items():
+        item_meta = metadata.get(kind, {})
+        source_artifacts = list(item_meta.get("source_artifacts", []))
+        source_hashes = {
+            source: content_hashes[source]
+            for source in source_artifacts
+            if source in content_hashes
+        }
+        schema_version = item_meta.get("schema_version")
+        if schema_version is None:
+            schema_version = _infer_json_schema_version(path)
+
+        record = {
+            "kind": kind,
+            "path": _workspace_relative(path, root),
+            "hash": content_hashes[kind],
+            "hashAlgorithm": "sha256",
+            "sourceArtifacts": source_artifacts,
+            "sourceArtifactHashes": source_hashes,
+            "paramsHash": params_hash(item_meta.get("params")),
+            "status": item_meta.get("status", "current"),
+            "createdAt": created_at,
+        }
+        if schema_version is not None:
+            record["schemaVersion"] = str(schema_version)
+        records.append(record)
+
+    return records
+
+
+def is_artifact_stale(
+    record: dict[str, Any],
+    *,
+    source_hashes: dict[str, str] | None = None,
+    current_params_hash: str | None = None,
+) -> bool:
+    """Return whether an artifact record is stale against current inputs.
+
+    This intentionally checks only explicit evidence supplied by the caller:
+    changed source artifact hashes and/or changed params hash. A record without
+    comparison data is treated as fresh.
+    """
+    if (
+        current_params_hash is not None
+        and record.get("paramsHash") != current_params_hash
+    ):
+        return True
+
+    if source_hashes:
+        recorded = record.get("sourceArtifactHashes") or {}
+        for source, current_hash in source_hashes.items():
+            if recorded.get(source) != current_hash:
+                return True
+
+    return False
 
 
 def write_manifest(ws: Workspace, manifest: dict[str, Any]) -> None:

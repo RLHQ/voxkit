@@ -302,6 +302,19 @@ def test_run_pipeline_writes_all_artifacts(
     assert ws.manifest_path.exists()
     assert ws.events_path.exists()
 
+    manifest = json.loads(ws.manifest_path.read_text(encoding="utf-8"))
+    records = manifest["artifactRecords"]
+    by_kind = {record["kind"]: record for record in records}
+    assert {"raw_json", "voxkit_json", "events", "srt", "vtt"} <= set(by_kind)
+    assert all(len(record["hash"]) == 64 for record in records)
+    assert by_kind["raw_json"]["sourceArtifacts"] == ["voxkit_json"]
+    assert by_kind["raw_json"]["sourceArtifactHashes"] == {
+        "voxkit_json": by_kind["voxkit_json"]["hash"]
+    }
+    assert by_kind["srt"]["sourceArtifacts"] == ["raw_json"]
+    assert by_kind["vtt"]["sourceArtifacts"] == ["raw_json"]
+    assert by_kind["raw_json"]["path"] == "transcript.raw.json"
+
     # Pipeline ran whisper exactly once (single chunk for 30s audio).
     assert patched_pipeline["whisper_calls"] == 1
     assert patched_pipeline["normalize_calls"] == 1
@@ -652,6 +665,14 @@ def test_resegment_semantic_writes_cues_json(
     assert payload["metrics"]["cueCount"] == len(payload["cues"])
     assert "subtitle_cues_json" in manifest["artifacts"]
     assert manifest["artifacts"]["subtitle_cues_json"] == str(ws.cues_json_path)
+    records = {record["kind"]: record for record in manifest["artifactRecords"]}
+    assert records["subtitle_cues_json"]["path"] == "subtitles.cues.json"
+    assert records["subtitle_cues_json"]["sourceArtifacts"] == ["raw_json"]
+    assert records["srt"]["sourceArtifacts"] == ["subtitle_cues_json"]
+    assert records["vtt"]["sourceArtifacts"] == ["subtitle_cues_json"]
+    assert records["srt"]["sourceArtifactHashes"] == {
+        "subtitle_cues_json": records["subtitle_cues_json"]["hash"]
+    }
 
 
 def test_language_auto_resegment_uses_detected_language(

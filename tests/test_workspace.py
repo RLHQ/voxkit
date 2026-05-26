@@ -16,8 +16,12 @@ from voxkit.core.workspace import (
     Workspace,
     WorkspaceLockError,
     acquire_lock,
+    build_artifact_records,
     chunk_paths,
+    file_sha256,
+    is_artifact_stale,
     open_workspace,
+    params_hash,
     read_manifest,
     release_lock,
     write_manifest,
@@ -155,6 +159,70 @@ def test_read_manifest_round_trip(tmp_path: Path) -> None:
     payload = {"alpha": [1, 2, 3], "beta": {"nested": True}}
     write_manifest(ws, payload)
     assert read_manifest(ws) == payload
+
+
+def test_file_sha256_and_params_hash_are_stable(tmp_path: Path) -> None:
+    p = tmp_path / "a.txt"
+    p.write_text("hello\n", encoding="utf-8")
+
+    assert file_sha256(p) == file_sha256(p)
+    assert len(file_sha256(p)) == 64
+    assert params_hash({"b": 2, "a": 1}) == params_hash({"a": 1, "b": 2})
+    assert params_hash(None) is None
+
+
+def test_build_artifact_records_with_sources_and_params(tmp_path: Path) -> None:
+    ws = open_workspace(tmp_path / "ws")
+    raw = ws.raw_json_path
+    cues = ws.cues_json_path
+    raw.write_text('{"schemaVersion":"1","segments":[]}\n', encoding="utf-8")
+    cues.write_text(
+        '{"schemaVersion":"1","cues":[{"start":0,"end":1,"text":"hi"}]}\n',
+        encoding="utf-8",
+    )
+
+    records = build_artifact_records(
+        {"raw_json": raw, "subtitle_cues_json": cues, "missing": ws.srt_path},
+        root=ws.root,
+        created_at="2026-01-01T00:00:00+00:00",
+        metadata={
+            "subtitle_cues_json": {
+                "source_artifacts": ["raw_json"],
+                "params": {"resegment": "semantic", "max_chars": 84},
+            }
+        },
+    )
+
+    by_kind = {record["kind"]: record for record in records}
+    assert set(by_kind) == {"raw_json", "subtitle_cues_json"}
+    assert by_kind["raw_json"]["path"] == "transcript.raw.json"
+    assert by_kind["raw_json"]["schemaVersion"] == "1"
+    assert len(by_kind["raw_json"]["hash"]) == 64
+    cue_record = by_kind["subtitle_cues_json"]
+    assert cue_record["sourceArtifacts"] == ["raw_json"]
+    assert cue_record["sourceArtifactHashes"] == {
+        "raw_json": by_kind["raw_json"]["hash"]
+    }
+    assert cue_record["paramsHash"] == params_hash(
+        {"max_chars": 84, "resegment": "semantic"}
+    )
+    assert cue_record["status"] == "current"
+    assert cue_record["createdAt"] == "2026-01-01T00:00:00+00:00"
+
+
+def test_is_artifact_stale_detects_source_and_params_changes() -> None:
+    record = {
+        "paramsHash": params_hash({"model": "a"}),
+        "sourceArtifactHashes": {"raw_json": "old"},
+    }
+
+    assert not is_artifact_stale(
+        record,
+        source_hashes={"raw_json": "old"},
+        current_params_hash=params_hash({"model": "a"}),
+    )
+    assert is_artifact_stale(record, source_hashes={"raw_json": "new"})
+    assert is_artifact_stale(record, current_params_hash=params_hash({"model": "b"}))
 
 
 # ── lock ────────────────────────────────────────────────────────────────────

@@ -86,6 +86,7 @@ from voxkit.core.workspace import (
     EventMirror,
     Workspace,
     acquire_lock,
+    build_artifact_records,
     chunk_paths,
     release_lock,
     write_manifest,
@@ -1190,11 +1191,82 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
             )
 
             # 10. Manifest (single source of truth for run audit)
+            finished_iso = datetime.now(timezone.utc).isoformat()
+            subtitle_render_source = (
+                ["subtitle_cues_json"]
+                if "subtitle_cues_json" in artifacts
+                else ["raw_json"]
+            )
+            artifact_record_metadata: dict[str, dict[str, Any]] = {
+                "voxkit_json": {
+                    "params": {
+                        "asrBackend": "whisper-cpp",
+                        "asrModel": asr_model_name,
+                        "language": language_for_output,
+                        "wordTimestamps": word_ts_effective,
+                        "vad": bool(req.vad and vad_model is not None),
+                        "logprobThold": req.logprob_thold,
+                        "chunkThresholds": {
+                            "thresholdSecs": threshold_secs,
+                            "chunkSecs": chunk_secs,
+                            "overlapSecs": overlap_secs,
+                        },
+                    },
+                },
+                "raw_json": {
+                    "source_artifacts": ["voxkit_json"],
+                    "params": {"sourceId": req.source_id},
+                },
+                "events": {},
+            }
+            if diarization_output is not None:
+                artifact_record_metadata["diarization_json"] = {
+                    "params": {
+                        "diarizationModel": diarization_output.model,
+                        "speakerLabels": req.speaker_labels,
+                        "numSpeakers": req.num_speakers,
+                        "minSpeakers": req.min_speakers,
+                        "maxSpeakers": req.max_speakers,
+                    },
+                }
+            if "subtitle_cues_json" in artifacts:
+                artifact_record_metadata["subtitle_cues_json"] = {
+                    "source_artifacts": ["raw_json"],
+                    "params": {
+                        "resegment": req.resegment,
+                        "language": language_for_output,
+                        "resegmentParams": resegment_params_snapshot,
+                    },
+                }
+            if "srt" in artifacts:
+                artifact_record_metadata["srt"] = {
+                    "source_artifacts": subtitle_render_source,
+                    "params": {
+                        "format": "srt",
+                        "resegment": req.resegment,
+                        "language": language_for_output,
+                    },
+                }
+            if "vtt" in artifacts:
+                artifact_record_metadata["vtt"] = {
+                    "source_artifacts": subtitle_render_source,
+                    "params": {
+                        "format": "vtt",
+                        "resegment": req.resegment,
+                        "language": language_for_output,
+                    },
+                }
+            artifact_records = build_artifact_records(
+                artifacts,
+                root=ws.root,
+                created_at=finished_iso,
+                metadata=artifact_record_metadata,
+            )
             manifest = {
                 "voxkitVersion": __version__,
                 "schemaVersion": "1",
                 "startedAt": started_iso,
-                "finishedAt": datetime.now(timezone.utc).isoformat(),
+                "finishedAt": finished_iso,
                 "input": str(req.input_path),
                 "sourceId": req.source_id,
                 "workdir": str(ws.root),
@@ -1224,6 +1296,7 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                 ],
                 "warnings": warnings,
                 "artifacts": {k: str(v) for k, v in artifacts.items()},
+                "artifactRecords": artifact_records,
                 # ── Phase 2: diarization metadata ────────────────────
                 "withDiarization": req.with_diarization,
                 "speakerLabels": req.speaker_labels,
