@@ -234,6 +234,28 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
             "'Speaker ?' 占位符不计入）；always = v0.7.1 之前的旧行为；never = 永不加。"
         ),
     )
+    # ── F2: whisper-cli --prompt 透传 (initial prompt 专名先验) ────
+    # Mutex: 两个 flag 表达"同一段 prompt 内容"的两种供给方式，不应并存。
+    prompt_group = p.add_mutually_exclusive_group()
+    prompt_group.add_argument(
+        "--initial-prompt",
+        default=None,
+        dest="initial_prompt",
+        help=(
+            "传给 whisper-cli --prompt 的上下文先验文本，抑制专名同音词 typo "
+            "(如 'Claude' → 'Cloud')。每个 chunk 都重传。"
+            "whisper-cli 内部 token 上限约 224；voxkit 超过 1000 char 会截断 + warn。"
+        ),
+    )
+    prompt_group.add_argument(
+        "--initial-prompt-file",
+        default=None,
+        dest="initial_prompt_file",
+        help=(
+            "从文件读取 initial prompt（适合从 JSON glossary 衍生出来的长 prompt）；"
+            "与 --initial-prompt 互斥。文件必须 UTF-8 可读。"
+        ),
+    )
 
 
 def run(args: argparse.Namespace) -> int:
@@ -297,6 +319,24 @@ def run(args: argparse.Namespace) -> int:
         )
         return int(ExitCode.GENERIC_FAIL)
 
+    # 4b. F2: resolve --initial-prompt / --initial-prompt-file → 单一 str | None.
+    # argparse mutex 已保证最多一个被指定；这里只需读文件那条分支。
+    initial_prompt: str | None = args.initial_prompt
+    if getattr(args, "initial_prompt_file", None):
+        prompt_path = Path(args.initial_prompt_file).expanduser()
+        if not prompt_path.exists():
+            sys.stderr.write(
+                f"error: --initial-prompt-file not found: {prompt_path}\n"
+            )
+            return int(ExitCode.GENERIC_FAIL)
+        try:
+            initial_prompt = prompt_path.read_text(encoding="utf-8")
+        except OSError as exc:
+            sys.stderr.write(
+                f"error: failed to read --initial-prompt-file {prompt_path}: {exc}\n"
+            )
+            return int(ExitCode.GENERIC_FAIL)
+
     # 5. Build request + run pipeline
     req = TranscribeRequest(
         input_path=input_path,
@@ -327,6 +367,7 @@ def run(args: argparse.Namespace) -> int:
         diarize_model=args.diarize_model,
         resegment=args.resegment,
         speaker_prefix=args.speaker_prefix,
+        initial_prompt=initial_prompt,
     )
 
     try:

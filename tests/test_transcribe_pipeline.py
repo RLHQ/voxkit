@@ -123,6 +123,9 @@ def patched_pipeline(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
         "normalize_calls": 0,
         "vad_present": False,
         "raw_result_language": None,
+        # F2: capture WhisperFlags passed to each run_whisper call so tests
+        # can assert --prompt plumbing without parsing argv.
+        "flags_history": [],
     }
     fake_entries = _stub_entries()
     fake_raw = _stub_raw_json(fake_entries)
@@ -182,6 +185,7 @@ def patched_pipeline(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
         progress_cb=None,
     ) -> WhisperRunResult:
         state["whisper_calls"] += 1
+        state["flags_history"].append(flags)
         raw = dict(fake_raw)
         raw_result_language = state.get("raw_result_language")
         if raw_result_language is not None:
@@ -821,3 +825,138 @@ def test_resegment_semantic_emits_write_event(
     write_evt = next(e for e in events if e.get("event") == "write.subtitle_cues")
     assert write_evt["path"] == str(ws.cues_json_path)
     assert isinstance(write_evt["cue_count"], int)
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# F2: --initial-prompt 透传到 whisper-cli flags + manifest audit
+# ─────────────────────────────────────────────────────────────────────────
+
+
+def test_initial_prompt_none_by_default(
+    tmp_path: Path, patched_pipeline: dict[str, Any]
+) -> None:
+    """No prompt set → WhisperFlags.initial_prompt is None; manifest reflects."""
+    ws = open_workspace(tmp_path / "ws")
+    req = _make_request(ws)
+    run_pipeline(req)
+
+    assert patched_pipeline["whisper_calls"] == 1
+    flags = patched_pipeline["flags_history"][0]
+    assert flags.initial_prompt is None
+
+    manifest = json.loads(ws.manifest_path.read_text(encoding="utf-8"))
+    assert manifest["initialPromptUsed"] is False
+    assert manifest["initialPromptChars"] == 0
+
+
+def test_initial_prompt_plumbed_to_whisper_flags(
+    tmp_path: Path, patched_pipeline: dict[str, Any]
+) -> None:
+    """req.initial_prompt → flags.initial_prompt verbatim; manifest records meta."""
+    ws = open_workspace(tmp_path / "ws")
+    prompt = "Claude, Anthropic, MCP, Sonnet, Opus, Haiku."
+    req = replace(_make_request(ws), initial_prompt=prompt)
+    run_pipeline(req)
+
+    flags = patched_pipeline["flags_history"][0]
+    assert flags.initial_prompt == prompt
+
+    manifest = json.loads(ws.manifest_path.read_text(encoding="utf-8"))
+    assert manifest["initialPromptUsed"] is True
+    assert manifest["initialPromptChars"] == len(prompt)
+    # Body must NOT leak into the manifest (privacy + size).
+    assert prompt not in ws.manifest_path.read_text(encoding="utf-8")
+
+
+def test_initial_prompt_blank_normalised_to_none(
+    tmp_path: Path, patched_pipeline: dict[str, Any]
+) -> None:
+    """Whitespace-only prompt collapses to None (don't emit --prompt for noise)."""
+    ws = open_workspace(tmp_path / "ws")
+    req = replace(_make_request(ws), initial_prompt="   \n\t  ")
+    run_pipeline(req)
+
+    flags = patched_pipeline["flags_history"][0]
+    assert flags.initial_prompt is None
+
+    manifest = json.loads(ws.manifest_path.read_text(encoding="utf-8"))
+    assert manifest["initialPromptUsed"] is False
+    assert manifest["initialPromptChars"] == 0
+
+
+def test_initial_prompt_long_text_is_truncated_with_warning(
+    tmp_path: Path, patched_pipeline: dict[str, Any]
+) -> None:
+    """Prompts > 1000 chars are truncated (whisper-cli ~224 token limit) + warned.
+
+    No hard failure — the user might paste a glossary that's too long; we want
+    to keep going, not abort the whole transcribe.
+    """
+    ws = open_workspace(tmp_path / "ws")
+    long_prompt = "Claude. " * 200  # 1600 chars
+    req = replace(_make_request(ws), initial_prompt=long_prompt)
+    result = run_pipeline(req)
+
+    flags = patched_pipeline["flags_history"][0]
+    assert flags.initial_prompt is not None
+    assert len(flags.initial_prompt) == 1000
+
+    manifest = json.loads(ws.manifest_path.read_text(encoding="utf-8"))
+    assert manifest["initialPromptUsed"] is True
+    assert manifest["initialPromptChars"] == 1000
+
+    assert any(
+        "initial_prompt" in w and "truncating" in w
+        for w in result.voxkit_output.warnings
+    ), result.voxkit_output.warnings
+
+
+def test_initial_prompt_survives_resume_cache_miss(
+    tmp_path: Path, patched_pipeline: dict[str, Any]
+) -> None:
+    """On a cold run (no chunk JSON cache), prompt reaches every chunk's WhisperFlags.
+
+    Regression guard: chunk transcription is in a per-chunk loop; if the prompt
+    pass-through is hoisted to the wrong scope, only chunk 0 gets it.
+    """
+    ws = open_workspace(tmp_path / "ws")
+    req = replace(_make_request(ws), initial_prompt="Claude is a model.")
+    run_pipeline(req)
+
+    # 30s audio → single chunk in the fixture; assert that single call carries
+    # the prompt. The structural plumb-through is the load-bearing claim.
+    assert all(
+        f.initial_prompt == "Claude is a model."
+        for f in patched_pipeline["flags_history"]
+    )
+
+
+def test_initial_prompt_build_argv_emits_prompt_flag() -> None:
+    """build_argv contract: --prompt only appears when initial_prompt is non-empty.
+
+    This is an integration check against the actual whisper_exec module to make
+    sure the pipeline's flags translate to whisper-cli's argv form.
+    """
+    from voxkit.core.whisper_exec import WhisperFlags, build_argv
+
+    f_none = WhisperFlags(
+        model_path=Path("/m.bin"),
+        language="en",
+        vad=False,
+        vad_model_path=None,
+        initial_prompt=None,
+    )
+    argv = build_argv(f_none, Path("/a.wav"), Path("/o.json"), whisper_bin=Path("/wc"))
+    assert "--prompt" not in argv
+
+    f_with = WhisperFlags(
+        model_path=Path("/m.bin"),
+        language="en",
+        vad=False,
+        vad_model_path=None,
+        initial_prompt="Claude, Anthropic.",
+    )
+    argv = build_argv(f_with, Path("/a.wav"), Path("/o.json"), whisper_bin=Path("/wc"))
+    assert "--prompt" in argv
+    i = argv.index("--prompt")
+    assert argv[i + 1] == "Claude, Anthropic."

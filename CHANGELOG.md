@@ -36,6 +36,24 @@ changes (with migration notes).
 - 新增 `voxkit.core.pricing` 模块：中心化 `(provider, model) → USD/M-token`
   价目表（当前只 `deepseek/deepseek-v4-flash`），公开 `estimate_cost()` /
   `format_cost()` 纯函数。加新 provider 只需在 `PRICING` dict 里追加一行。
+- **`voxkit transcribe --initial-prompt <text>` / `--initial-prompt-file <path>`**
+  — 透传 whisper-cli `--prompt`，作为上下文先验抑制专名同音词 typo
+  （F2 反馈：whisper 把 "Claude" 反复听成 "Cloud"、"Anthropic" 听成
+  "anthropoid"）。两个 flag 互斥（argparse mutex group）；string 直接传，
+  file 读 UTF-8 文本（适合 JSON glossary 衍生出的长 prompt）。
+  - **chunk 透传**：whisper-cli 是 stateless 子进程，每个 chunk 都重传 prompt。
+  - **长度守护**：超过 1000 char 自动截断 + warn（不 hard fail），对齐
+    whisper-cli ~224 token 的内部上限。
+  - **manifest 审计**：只写 `initialPromptUsed: bool` + `initialPromptChars: int`，
+    不落明文（隐私 + manifest 体积）。
+  - 用法示例：
+    ```bash
+    voxkit transcribe talk.mp4 --workdir /tmp/wd \
+      --initial-prompt "Claude, Anthropic, MCP, Sonnet, Opus, Haiku."
+    # 或从 glossary 衍生
+    voxkit transcribe talk.mp4 --workdir /tmp/wd \
+      --initial-prompt-file ./glossary.prompt.txt
+    ```
 
 ## [0.7.3] — 2026-05-26
 

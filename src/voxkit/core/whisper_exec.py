@@ -215,6 +215,11 @@ class WhisperFlags:
         max_context_zero: 是否传 ``--max-context 0``（plan 默认 True，抑制
             前文 hallucination）。
         threads: ``--threads``，None 表示让 cli 自决。
+        initial_prompt: 透传给 whisper-cli 的 ``--prompt <text>``，作为上下文
+            先验（initial prompt token 序列）抑制专名同音词 typo
+            （e.g. "Claude" 听成 "Cloud"、"Anthropic" 听成 "anthropoid"）。
+            None / 空串均跳过该 flag。whisper-cli 自身有约 224 token 上限；
+            调用方负责做长度截断（pipeline 层已做 ~1000 char 截断）。
         extra: 透传给 cli 的额外 flag，追加在 argv 末尾。
     """
 
@@ -227,6 +232,7 @@ class WhisperFlags:
     word_timestamps: bool = True
     max_context_zero: bool = True
     threads: int | None = None
+    initial_prompt: str | None = None
     extra: list[str] = field(default_factory=list)
 
 
@@ -264,6 +270,7 @@ def build_argv(
       - ``--max-len 1 --split-on-word``：``word_timestamps`` 且语言**不在** CJK。
       - ``--vad --vad-model <path>``：``vad=True`` 且 ``vad_model_path`` 非 None。
       - ``--threads {N}``：仅当 ``threads is not None``。
+      - ``--prompt <text>``：仅当 ``initial_prompt`` 非空（None / 空串都跳过）。
 
     最后追加 ``flags.extra``。
     """
@@ -295,6 +302,9 @@ def build_argv(
 
     if flags.threads is not None:
         argv += ["--threads", str(flags.threads)]
+
+    if flags.initial_prompt:
+        argv += ["--prompt", flags.initial_prompt]
 
     if flags.extra:
         argv += list(flags.extra)

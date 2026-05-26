@@ -52,6 +52,9 @@ def test_default_flag_values():
     assert args.blocklist is None
     assert args.emit_srt is True
     assert args.emit_vtt is True
+    # F2: 新增 initial-prompt 双 flag 默认 None
+    assert args.initial_prompt is None
+    assert args.initial_prompt_file is None
 
 
 def test_no_word_timestamps_flips_false():
@@ -282,3 +285,69 @@ def test_run_explicit_source_id_wins(tmp_path, monkeypatch):
     rc = run(args)
     assert rc == int(ExitCode.OK)
     assert captured[0].source_id == "explicit_one"
+
+
+# ── F2: --initial-prompt[/-file] ─────────────────────────────────────────
+
+
+def test_initial_prompt_string_flag_reaches_request(tmp_path, monkeypatch):
+    """--initial-prompt 'text' → TranscribeRequest.initial_prompt == 'text'."""
+    inp = tmp_path / "x.wav"
+    inp.write_bytes(b"")
+    captured = _patch_run_pipeline(monkeypatch)
+
+    parser = _build_parser()
+    args = parser.parse_args(
+        ["transcribe", str(inp), "--workdir", str(tmp_path / "ws"),
+         "--initial-prompt", "Claude, Anthropic, MCP"]
+    )
+    rc = run(args)
+    assert rc == int(ExitCode.OK)
+    assert captured[0].initial_prompt == "Claude, Anthropic, MCP"
+
+
+def test_initial_prompt_file_flag_reads_file(tmp_path, monkeypatch):
+    """--initial-prompt-file <path> reads UTF-8 file → request.initial_prompt."""
+    inp = tmp_path / "x.wav"
+    inp.write_bytes(b"")
+    prompt_file = tmp_path / "glossary.txt"
+    prompt_file.write_text("Claude. Anthropic. MCP. Sonnet.\n", encoding="utf-8")
+    captured = _patch_run_pipeline(monkeypatch)
+
+    parser = _build_parser()
+    args = parser.parse_args(
+        ["transcribe", str(inp), "--workdir", str(tmp_path / "ws"),
+         "--initial-prompt-file", str(prompt_file)]
+    )
+    rc = run(args)
+    assert rc == int(ExitCode.OK)
+    assert captured[0].initial_prompt == "Claude. Anthropic. MCP. Sonnet.\n"
+
+
+def test_initial_prompt_and_file_are_mutually_exclusive(tmp_path):
+    """argparse should reject both flags together with SystemExit (rc 2)."""
+    parser = _build_parser()
+    with pytest.raises(SystemExit):
+        parser.parse_args(
+            ["transcribe", str(tmp_path / "in.wav"),
+             "--workdir", str(tmp_path / "ws"),
+             "--initial-prompt", "a",
+             "--initial-prompt-file", "/tmp/x.txt"]
+        )
+
+
+def test_initial_prompt_file_missing_returns_generic_fail(tmp_path, monkeypatch, capsys):
+    """Nonexistent --initial-prompt-file → ExitCode.GENERIC_FAIL with helpful msg."""
+    inp = tmp_path / "x.wav"
+    inp.write_bytes(b"")
+    captured = _patch_run_pipeline(monkeypatch)
+
+    parser = _build_parser()
+    args = parser.parse_args(
+        ["transcribe", str(inp), "--workdir", str(tmp_path / "ws"),
+         "--initial-prompt-file", str(tmp_path / "does-not-exist.txt")]
+    )
+    rc = run(args)
+    assert rc == int(ExitCode.GENERIC_FAIL)
+    assert captured == [], "pipeline must not be invoked when prompt-file missing"
+    assert "initial-prompt-file" in capsys.readouterr().err

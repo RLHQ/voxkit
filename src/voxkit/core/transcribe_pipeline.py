@@ -176,6 +176,12 @@ class TranscribeRequest:
     # "always": legacy ≤0.7.1 behaviour — every cue carries a prefix.
     # "never": never render prefix even when diarization found multiple speakers.
     speaker_prefix: str = "auto"
+    # ── F2 — whisper-cli initial prompt (专名先验) ───────────────────
+    # 传给 whisper-cli ``--prompt <text>``，作为 initial-prompt token 序列
+    # 抑制专名同音词 typo（"Claude" → "Cloud"）。空 / None 则跳过 flag。
+    # 长度由 pipeline 在 run_pipeline 入口处做粗略 1000-char 截断（whisper-cli
+    # 本身 ~224 token 上限，超出会被忽略后段），不在这里做。
+    initial_prompt: str | None = None
 
 
 @dataclass(frozen=True)
@@ -205,6 +211,12 @@ class PipelineError(RuntimeError):
 _VIDEO_EXTS: frozenset[str] = frozenset(
     {".mp4", ".mov", ".mkv", ".webm", ".avi"}
 )
+
+
+# F2: whisper-cli --prompt token 上限约 224；按英文经验 ~4 char/token 估，
+# 1000 char 已经远超过有效窗口。再多只会被 whisper-cli 默默截断且影响延迟，
+# 因此 voxkit 在外层先 warn-once 然后硬截断，避免静默丢失末尾词。
+_INITIAL_PROMPT_MAX_CHARS = 1000
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -468,6 +480,11 @@ def _transcribe_chunk(
             logprob_thold=req.logprob_thold,
             word_timestamps=req.word_timestamps,
             max_context_zero=True,
+            # F2: 把上下文先验传给 whisper-cli。chunk-by-chunk 都要传：
+            # whisper-cli 是 stateless 子进程，每个 chunk 重新加载 prompt。
+            # 长度截断在 run_pipeline 入口已做；此处 None / "" 都被
+            # build_argv 自动跳过。
+            initial_prompt=req.initial_prompt,
         )
 
         timeout_secs = _resolve_chunk_timeout_ms(req, spec) / 1000.0
@@ -718,6 +735,26 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
     started_wall = time.monotonic()
     started_iso = datetime.now(timezone.utc).isoformat()
 
+    # F2: 规范化 initial_prompt — 空串归一成 None，超长截断 + warn。
+    # 必须在 acquire_lock 之前，否则 dataclass.replace 会与 frozen 冲突；
+    # 这里 PipelineError 也能干净退出。
+    prompt_text = req.initial_prompt
+    prompt_warning: str | None = None
+    if prompt_text is not None and not prompt_text.strip():
+        prompt_text = None
+    if prompt_text is not None and len(prompt_text) > _INITIAL_PROMPT_MAX_CHARS:
+        prompt_warning = (
+            f"initial_prompt len={len(prompt_text)} chars exceeds "
+            f"{_INITIAL_PROMPT_MAX_CHARS}; truncating "
+            f"(whisper-cli --prompt has ~224 token limit)"
+        )
+        prompt_text = prompt_text[:_INITIAL_PROMPT_MAX_CHARS]
+    if prompt_text != req.initial_prompt:
+        from dataclasses import replace
+        req = replace(req, initial_prompt=prompt_text)
+    initial_prompt_chars = len(prompt_text) if prompt_text else 0
+    initial_prompt_used = bool(prompt_text)
+
     # Pre-flight: raw.json contract (do this *before* taking the lock so the
     # error message arrives early on a cleanly-resumed run).
     _ensure_raw_json_writable(req)
@@ -726,6 +763,8 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
     forward_stderr = req.json_events
 
     warnings: list[str] = []
+    if prompt_warning:
+        warnings.append(prompt_warning)
     success = False
 
     try:
@@ -1394,6 +1433,11 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                     "cueCount": subtitle_cue_count,
                     "metrics": subtitle_metrics_snapshot,
                 },
+                # ── F2: whisper-cli initial prompt audit ─────────────
+                # Body intentionally omitted (privacy + manifest size); only
+                # presence + length recorded for run-audit / reproducibility.
+                "initialPromptUsed": initial_prompt_used,
+                "initialPromptChars": initial_prompt_chars,
             }
             write_manifest(ws, manifest)
             _emit_event(
