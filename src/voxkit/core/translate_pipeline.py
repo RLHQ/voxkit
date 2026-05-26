@@ -29,10 +29,12 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 from pydantic import BaseModel, ValidationError, field_validator
 
 from voxkit.core.lifecycle import ForceLevel, gate_force_overwrite
+from voxkit.core.pricing import estimate_cost, format_cost
 from voxkit.core.proofread_risk import SYSTEM_OVERHEAD_TOKENS, estimate_tokens, is_cjk_char
 from voxkit.core.workspace import (
     EventMirror,
     Workspace,
+    _build_workspace,
     acquire_lock,
     open_workspace,
     read_manifest,
@@ -96,6 +98,9 @@ class TranslateRequest:
     # subtitles.<lang>.json 重渲染 SRT/VTT。专为"只想换 --speaker-prefix"这类
     # 纯格式化重渲染场景，避免被迫 --force 重 LLM 浪费 token。
     render_only: bool = False
+    # dry_run（v0.7.x 反馈 F4）：跑完 batch 切分 + token / cost 估算后退出。
+    # **不调 LLM、不获 lock、不写 workdir**。优先级高于 render_only 与 force。
+    dry_run: bool = False
     force_level: ForceLevel = None
     json_events: bool = False
     timeout_s: float = 60.0
@@ -717,12 +722,77 @@ def _run_render_only(
     }
 
 
+def _estimate_translate(req: TranslateRequest) -> Dict[str, Any]:
+    """``--dry-run`` 路径：不调 LLM、不获 lock、不写盘。
+
+    复用正式入口的 :func:`_load_source`（同样的 proofread → cues fallback）和
+    :func:`_build_batches`，保证估算的 batch 切分与实跑一致。
+
+    completion 估算用 1.0× prompt（保守，对 zh→en 这种压缩翻译会偏高、对
+    en→zh 这种膨胀翻译会偏低；但 dry-run 只要量级对就行）。
+
+    用 :func:`_build_workspace`（纯路径构造，无 mkdir）而非 ``open_workspace``——
+    后者会创 ``work/`` ``chunks/`` 目录，违反 dry-run 的"零副作用"承诺。
+    """
+    ws = _build_workspace(Path(req.workdir))
+    src_cues, _src_lang, _input_artifact, _raw_meta, _source_id = _load_source(ws)
+
+    batches = _build_batches(
+        src_cues,
+        max_tokens=req.max_input_tokens,
+        max_cues=req.max_cues_per_batch,
+        context_prev=req.context_prev,
+        context_next=req.context_next,
+    )
+
+    tok = [estimate_tokens(c.text) for c in src_cues]
+    est_prompt = 0
+    for batch in batches:
+        est_prompt += SYSTEM_OVERHEAD_TOKENS
+        for idx in batch.target_idxs:
+            est_prompt += tok[idx]
+        for idx in batch.prev_idxs:
+            est_prompt += tok[idx]
+        for idx in batch.next_idxs:
+            est_prompt += tok[idx]
+
+    # translate completion ≈ prompt。语向不同会有偏差（CJK→Latin 缩 ~0.6×，
+    # Latin→CJK 涨 ~1.5×），但 dry-run 只是量级估算，1.0× 折中。
+    est_completion = int(est_prompt * 1.0)
+
+    model_for_cost = req.model or "<provider default>"
+    cost_usd = estimate_cost(req.provider, model_for_cost, est_prompt, est_completion)
+
+    return {
+        "dryRun": True,
+        "workdir": str(ws.root),
+        "provider": req.provider,
+        "model": model_for_cost,
+        "targetLanguage": req.target_language,
+        "cueCount": len(src_cues),
+        "batchCount": len(batches),
+        "estPromptTokens": est_prompt,
+        "estCompletionTokens": est_completion,
+        "estCostUsd": cost_usd,
+    }
+
+
 def run_translate(
     req: TranslateRequest,
     *,
     llm_client: Optional[LLMClient] = None,
 ) -> Dict[str, Any]:
-    """主入口。返回 manifest 增量字典。"""
+    """主入口。返回 manifest 增量字典。
+
+    ``req.dry_run`` 时绕过 lock / artifact / LLM，直接返回估算 dict（见
+    :func:`_estimate_translate`）。优先级高于 ``render_only`` / ``force_level``。
+    """
+    # dry-run short-circuit：必须在 acquire_lock 之前。dry-run 是只读操作，
+    # 不该被 stale .lock 文件挡住。也不与 render_only / force_level 冲突
+    # （都让位给 dry-run，由 CLI 层在 argparse 做提示）。
+    if req.dry_run:
+        return _estimate_translate(req)
+
     ws = open_workspace(req.workdir)
     acquire_lock(ws)
     started = time.monotonic()

@@ -17,6 +17,25 @@ changes (with migration notes).
   不写盘 / 不 lock workspace。stderr 写 `N cue(s) flagged out of M total`
   summary，stdout 输出队列。回应下游反馈 U3：之前需要 `jq` 自己挖
   `cues[] | select(.needsReview)`。
+- **U1：proofread / translate summary 行加 token 拆分 + cost 估算**。
+  老格式 `64158 + 74140 tokens` 不分输入输出、也不打 USD。新增格式：
+
+  ```
+  proofread done: cues=9% changed, 3% need review
+    tokens: prompt=64158, completion=74140 (total=138298)
+    est cost: ~$0.10 (deepseek/deepseek-v4-flash @ $0.27 + $1.10 per M)
+  ```
+
+  未知 (provider, model) 组合显示 `est cost: (unknown rate for <p>/<m>)`，
+  不阻塞 pipeline。translate 同形。
+- **F4：`voxkit proofread --dry-run` / `voxkit translate --dry-run`**。
+  跑完 batch 切分 + token / cost 估算后退出，**不调 LLM、不获 workspace lock、
+  不写盘**。专为批量跑视频前先看一眼"这 47 分钟的会议大概要烧多少美刀"。
+  优先级高于 `--render-only` / `--force*`（dry-run 是只读操作，stale `.lock`
+  也不会挡）。
+- 新增 `voxkit.core.pricing` 模块：中心化 `(provider, model) → USD/M-token`
+  价目表（当前只 `deepseek/deepseek-v4-flash`），公开 `estimate_cost()` /
+  `format_cost()` 纯函数。加新 provider 只需在 `PRICING` dict 里追加一行。
 
 ## [0.7.3] — 2026-05-26
 

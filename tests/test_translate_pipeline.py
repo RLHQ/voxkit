@@ -627,3 +627,89 @@ def test_render_only_preserves_artifact_state(tmp_path: Path) -> None:
         llm_client=FakeLLMClient([]),
     )
     assert json_path.read_bytes() == original_bytes, "render-only 不应改 JSON artifact"
+
+
+# ── dry-run (F4) ────────────────────────────────────────────────────────────
+
+
+def test_run_translate_dry_run_skips_llm_and_writes_nothing(tmp_path: Path) -> None:
+    """``dry_run=True`` 不调 LLM、不写 artifact / work dir / SRT / VTT。"""
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues(ws.cues_json_path)
+
+    fake = FakeLLMClient([])
+    req = TranslateRequest(
+        workdir=ws.root, target_language="en", dry_run=True
+    )
+    summary = run_translate(req, llm_client=fake)
+
+    assert summary["dryRun"] is True
+    assert summary["cueCount"] == 3
+    assert summary["batchCount"] >= 1
+    assert summary["estPromptTokens"] > 0
+    assert summary["estCompletionTokens"] > 0
+    assert summary["targetLanguage"] == "en"
+    assert summary["estCostUsd"] is None  # 未指定 model
+    assert len(fake.calls) == 0, "dry-run 严禁调 LLM"
+    # 无 artifact / SRT / VTT / manifest
+    assert not (ws.root / "subtitles.en.json").exists()
+    assert not (ws.root / "subtitles.en.srt").exists()
+    assert not (ws.root / "subtitles.en.vtt").exists()
+    assert not ws.manifest_path.exists()
+
+
+def test_run_translate_dry_run_known_model_returns_cost(tmp_path: Path) -> None:
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues(ws.cues_json_path)
+
+    req = TranslateRequest(
+        workdir=ws.root,
+        target_language="en",
+        dry_run=True,
+        model="deepseek-v4-flash",
+    )
+    summary = run_translate(req, llm_client=FakeLLMClient([]))
+    assert summary["estCostUsd"] is not None
+    assert summary["estCostUsd"] > 0
+    assert summary["model"] == "deepseek-v4-flash"
+
+
+def test_run_translate_dry_run_missing_input_raises(tmp_path: Path) -> None:
+    ws = open_workspace(tmp_path / "ws")
+    req = TranslateRequest(
+        workdir=ws.root, target_language="en", dry_run=True
+    )
+    with pytest.raises(FileNotFoundError):
+        run_translate(req, llm_client=FakeLLMClient([]))
+
+
+def test_run_translate_dry_run_overrides_render_only(tmp_path: Path) -> None:
+    """dry-run 优先级高于 render_only：哪怕没 subtitles.<lang>.json 也能 dry-run。"""
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues(ws.cues_json_path)
+    # 没有 subtitles.en.json → render_only 单独会 FileNotFound；dry_run 拦截后正常
+    req = TranslateRequest(
+        workdir=ws.root,
+        target_language="en",
+        render_only=True,
+        dry_run=True,
+    )
+    summary = run_translate(req, llm_client=FakeLLMClient([]))
+    assert summary["dryRun"] is True
+
+
+def test_run_translate_dry_run_not_blocked_by_stale_lock(tmp_path: Path) -> None:
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues(ws.cues_json_path)
+    ws.root.mkdir(parents=True, exist_ok=True)
+    lock_file = ws.root / ".lock"
+    lock_file.write_text("stale", encoding="utf-8")
+
+    summary = run_translate(
+        TranslateRequest(
+            workdir=ws.root, target_language="en", dry_run=True
+        ),
+        llm_client=FakeLLMClient([]),
+    )
+    assert summary["dryRun"] is True
+    assert lock_file.read_text(encoding="utf-8") == "stale"

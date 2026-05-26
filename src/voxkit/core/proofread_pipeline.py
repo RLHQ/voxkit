@@ -31,6 +31,7 @@ from typing import Any, Dict, List, Optional, Sequence
 from pydantic import BaseModel, ValidationError, field_validator
 
 from voxkit.core.lifecycle import ForceLevel, gate_force_overwrite
+from voxkit.core.pricing import estimate_cost, format_cost
 from voxkit.core.proofread_risk import (
     SYSTEM_OVERHEAD_TOKENS,
     estimate_tokens,
@@ -40,6 +41,7 @@ from voxkit.core.proofread_risk import (
 from voxkit.core.workspace import (
     EventMirror,
     Workspace,
+    _build_workspace,
     acquire_lock,
     open_workspace,
     read_manifest,
@@ -93,6 +95,10 @@ class ProofreadRequest:
     force_level: ForceLevel = None
     json_events: bool = False
     timeout_s: float = 60.0
+    # dry_run（v0.7.x 反馈 F4）：跑完 batch 切分 + token 估算 + cost 估算
+    # 后退出。**不调 LLM、不开 workspace lock、不写 workdir**。专为"花钱前先
+    # 看一眼这个 47 分钟视频要烧多少美刀"。
+    dry_run: bool = False
 
     # 兼容旧调用：旧测试 / 程序化用 ``force=True``，等同于 ``force_level="draft"``。
     # 在 ``__post_init__`` 里映射，避免 ``frozen=True`` 直接赋值。
@@ -567,12 +573,101 @@ def _human_progress(
     )
 
 
+def _estimate_proofread(req: ProofreadRequest) -> Dict[str, Any]:
+    """``--dry-run`` 路径：不调 LLM、不获 lock、不写盘。
+
+    - 读 ``subtitles.cues.json``（schema 校验同正式路径，保证 dry-run 也能 catch
+      "上游 schema 版本不对" / "文件不存在"）
+    - 跑 ``_build_batches`` 看会切多少批
+    - 用 ``estimate_tokens`` 给每条 target 算 prompt token 数，加上 system
+      overhead × batch 数；completion 粗按 prompt × 0.8（proofread 输出 ≈ 输入，
+      系统多半是改标点 + 错字，比输入略短）
+    - 调 ``estimate_cost`` 算钱；未知 (provider, model) → 显示 unknown rate
+
+    返回 dict（同 manifest 段形态，``dryRun=True`` 标记），由 caller 决定打印
+    方式。**不复用** model 默认值解析路径（不实例化 LLMClient），所以这里
+    用 ``req.model or "<provider default>"`` 兜底。
+
+    用 :func:`_build_workspace`（纯路径构造，无 mkdir）而非 ``open_workspace``——
+    后者会创 ``work/`` ``chunks/`` 目录，违反 dry-run 的"零副作用"承诺。
+    """
+    ws = _build_workspace(Path(req.workdir))
+    if not ws.cues_json_path.is_file():
+        raise FileNotFoundError(
+            f"missing input: {ws.cues_json_path}; run `voxkit transcribe "
+            f"--resegment=semantic` first"
+        )
+    cues_doc = SubtitleCuesOutput.model_validate_json(
+        ws.cues_json_path.read_text(encoding="utf-8")
+    )
+    if cues_doc.schema_version != "2":
+        raise ValueError(
+            f"unsupported cues schemaVersion={cues_doc.schema_version}; "
+            "rebuild with current voxkit transcribe"
+        )
+
+    batches = _build_batches(
+        cues_doc.cues,
+        max_tokens=req.max_input_tokens,
+        max_cues=req.max_cues_per_batch,
+        context_prev=req.context_prev,
+        context_next=req.context_next,
+    )
+
+    # prompt token 估算：每 batch 算一遍 (system_overhead + Σ target tokens +
+    # Σ prev/next context tokens)。比正式 pipeline 真发的 user_msg 略保守一些
+    # （没把 JSON 包装的 cueId/speaker 字段算进去），但够用作"会烧多少钱"的
+    # 数量级估算。
+    tok = [estimate_tokens(c.text) for c in cues_doc.cues]
+    est_prompt = 0
+    for batch in batches:
+        est_prompt += SYSTEM_OVERHEAD_TOKENS
+        for idx in batch.target_idxs:
+            est_prompt += tok[idx]
+        for idx in batch.prev_idxs:
+            est_prompt += tok[idx]
+        for idx in batch.next_idxs:
+            est_prompt += tok[idx]
+
+    # proofread 的输出 ≈ 输入（修正标点 / 错字，长度略短）。0.8x 是经验粗估。
+    est_completion = int(est_prompt * 0.8)
+
+    # dry-run 不实例化 LLMClient（避免要求 API key），用 req.model 自身。
+    # 价目表里命中的 key 仍是 (provider, req.model)；req.model=None 时用
+    # placeholder，价目表没注册 → 走 unknown rate 分支（符合预期：用户没指定
+    # 具体 model 时，dry-run 没法假装知道哪个 model）。
+    model_for_cost = req.model or "<provider default>"
+    cost_usd = estimate_cost(req.provider, model_for_cost, est_prompt, est_completion)
+
+    return {
+        "dryRun": True,
+        "workdir": str(ws.root),
+        "provider": req.provider,
+        "model": model_for_cost,
+        "cueCount": len(cues_doc.cues),
+        "batchCount": len(batches),
+        "estPromptTokens": est_prompt,
+        "estCompletionTokens": est_completion,
+        "estCostUsd": cost_usd,
+    }
+
+
 def run_proofread(
     req: ProofreadRequest,
     *,
     llm_client: Optional[LLMClient] = None,
 ) -> Dict[str, Any]:
-    """主入口。返回 manifest 增量字典（同时已写盘）。"""
+    """主入口。返回 manifest 增量字典（同时已写盘）。
+
+    ``req.dry_run`` 时绕过 lock / artifact / LLM，直接返回估算 dict（见
+    :func:`_estimate_proofread`）。
+    """
+
+    # dry-run short-circuit：放在 open_workspace **之前** 之后但 acquire_lock
+    # **之前**。这样既能享受 workspace 路径解析（cues.json 路径推断），又不会
+    # 被 stale .lock 文件挡住——dry-run 是无副作用的只读操作。
+    if req.dry_run:
+        return _estimate_proofread(req)
 
     ws = open_workspace(req.workdir)
     acquire_lock(ws)

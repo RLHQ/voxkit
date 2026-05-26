@@ -11,6 +11,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from voxkit.core.pricing import format_cost, lookup_rates
 from voxkit.core.proofread_pipeline import ProofreadRequest, run_proofread
 from voxkit.llm.errors import LLMError
 
@@ -104,6 +105,16 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
         action="store_true",
         help="stderr 改为 NDJSON 事件协议（机器消费）",
     )
+    p.add_argument(
+        "--dry-run",
+        action="store_true",
+        dest="dry_run",
+        help=(
+            "只做 batch 切分 + token / cost 估算，不调 LLM、不动 workdir。"
+            "用来在花钱前先看一眼这批要烧多少美刀。"
+            "传入时 --force* 一律忽略（dry-run 是只读操作）。"
+        ),
+    )
     p.add_argument("--timeout", type=float, default=60.0, help="单次 LLM 请求超时（秒）")
 
 
@@ -116,6 +127,23 @@ def _resolve_force_level(args: argparse.Namespace) -> str | None:
     if args.force:
         return "draft"
     return None
+
+
+def _print_dry_run(summary: dict[str, Any]) -> None:
+    """``--dry-run`` 路径输出（stderr）。无 next-step 导览（还没真跑）。"""
+    provider = summary.get("provider", "?")
+    model = summary.get("model", "?")
+    pt = int(summary.get("estPromptTokens", 0))
+    ct = int(summary.get("estCompletionTokens", 0))
+    cost = summary.get("estCostUsd")
+    sys.stderr.write(
+        "dry-run estimate:\n"
+        f"  batches: {summary.get('batchCount', 0)}, "
+        f"cues: {summary.get('cueCount', 0)}\n"
+        f"  prompt tokens (est): ~{pt}\n"
+        f"  completion tokens (est): ~{ct}\n"
+        f"  est cost: {format_cost(cost)} ({provider}/{model})\n"
+    )
 
 
 def run(args: argparse.Namespace) -> int:
@@ -133,6 +161,7 @@ def run(args: argparse.Namespace) -> int:
         force_level=_resolve_force_level(args),
         json_events=args.json_events,
         timeout_s=args.timeout,
+        dry_run=args.dry_run,
     )
     try:
         summary: dict[str, Any] = run_proofread(req)
@@ -146,12 +175,37 @@ def run(args: argparse.Namespace) -> int:
         sys.stderr.write(f"LLM error: {e}\n")
         return 4
 
+    # dry-run：单独 summary，没必要打 next steps（还没真跑过）
+    if summary.get("dryRun"):
+        if not args.json_events:
+            _print_dry_run(summary)
+        return 0
+
     if not args.json_events:
+        provider = summary.get("provider", args.provider)
+        model = summary.get("model", "?")
+        pt = int(summary.get("promptTokens", 0))
+        ct = int(summary.get("completionTokens", 0))
+        cost = None
+        # 价格查表用 manifest 实际记录的 model（与正式 LLM 调用一致），
+        # 而非 args.model（args.model 为 None 时是 provider 默认值）。
+        from voxkit.core.pricing import estimate_cost as _ec
+        cost = _ec(provider, model, pt, ct)
+        rates = lookup_rates(provider, model)
         sys.stderr.write(
             f"proofread done: cues={summary.get('changedCueRate', 0):.0%} changed, "
-            f"{summary.get('reviewCueRate', 0):.0%} need review, "
-            f"{summary.get('promptTokens', 0)} + {summary.get('completionTokens', 0)} tokens\n"
+            f"{summary.get('reviewCueRate', 0):.0%} need review\n"
+            f"  tokens: prompt={pt}, completion={ct} (total={pt + ct})\n"
         )
+        if rates is not None:
+            sys.stderr.write(
+                f"  est cost: {format_cost(cost)} ({provider}/{model} "
+                f"@ ${rates[0]:.2f} + ${rates[1]:.2f} per M)\n"
+            )
+        else:
+            sys.stderr.write(
+                f"  est cost: (unknown rate for {provider}/{model})\n"
+            )
         wd = args.workdir
         sys.stderr.write(
             "next steps:\n"

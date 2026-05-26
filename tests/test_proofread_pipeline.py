@@ -506,3 +506,69 @@ def test_run_proofread_transport_failure_writes_pending_marker(tmp_path: Path) -
     assert not pending.exists(), "成功后清理 pending marker"
     artifact = json.loads(ws.proofread_json_path.read_text(encoding="utf-8"))
     assert len(artifact["cues"]) == 2
+
+
+# ── dry-run (F4) ────────────────────────────────────────────────────────────
+
+
+def test_run_proofread_dry_run_skips_llm_and_writes_nothing(tmp_path: Path) -> None:
+    """``dry_run=True`` 不调 LLM、不写 artifact / work dir。"""
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues_v2(ws.cues_json_path)
+
+    fake = FakeLLMClient([])  # 任何调用都会触发 AssertionError
+    req = ProofreadRequest(workdir=ws.root, dry_run=True)
+    summary = run_proofread(req, llm_client=fake)
+
+    assert summary["dryRun"] is True
+    assert summary["cueCount"] == 3
+    assert summary["batchCount"] >= 1
+    assert summary["estPromptTokens"] > 0
+    assert summary["estCompletionTokens"] > 0
+    # provider 默认 deepseek + 未指定 model → 走 unknown rate 分支
+    assert summary["provider"] == "deepseek"
+    assert summary["estCostUsd"] is None
+    assert len(fake.calls) == 0, "dry-run 严禁调 LLM"
+    # 不写 artifact、不写 work/proofread/、不写 manifest
+    assert not ws.proofread_json_path.exists()
+    assert not ws.manifest_path.exists()
+    assert not ws.proofread_work_dir.exists()
+
+
+def test_run_proofread_dry_run_with_known_model_returns_cost(tmp_path: Path) -> None:
+    """显式指定已注册 model → estCostUsd 不为 None。"""
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues_v2(ws.cues_json_path)
+
+    req = ProofreadRequest(
+        workdir=ws.root, dry_run=True, model="deepseek-v4-flash"
+    )
+    summary = run_proofread(req, llm_client=FakeLLMClient([]))
+
+    assert summary["estCostUsd"] is not None
+    assert summary["estCostUsd"] > 0
+    assert summary["model"] == "deepseek-v4-flash"
+
+
+def test_run_proofread_dry_run_missing_input_raises(tmp_path: Path) -> None:
+    """dry-run 也该对缺 cues.json 报 FileNotFoundError。"""
+    ws = open_workspace(tmp_path / "ws")
+    req = ProofreadRequest(workdir=ws.root, dry_run=True)
+    with pytest.raises(FileNotFoundError):
+        run_proofread(req, llm_client=FakeLLMClient([]))
+
+
+def test_run_proofread_dry_run_not_blocked_by_stale_lock(tmp_path: Path) -> None:
+    """dry-run 不该被 stale .lock 文件挡住（只读操作）。"""
+    ws = open_workspace(tmp_path / "ws")
+    _write_cues_v2(ws.cues_json_path)
+    # 模拟"上次跑挂留下的 .lock"
+    ws.root.mkdir(parents=True, exist_ok=True)
+    lock_file = ws.root / ".lock"
+    lock_file.write_text("stale", encoding="utf-8")
+
+    req = ProofreadRequest(workdir=ws.root, dry_run=True)
+    summary = run_proofread(req, llm_client=FakeLLMClient([]))
+    assert summary["dryRun"] is True
+    # lock 文件没被动
+    assert lock_file.read_text(encoding="utf-8") == "stale"
