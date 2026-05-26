@@ -7,6 +7,11 @@ changes (with migration notes).
 
 ## [Unreleased]
 
+## [0.7.5] — 2026-05-26
+
+Round 2 sub-agent 单独消化 v0.7.1 反馈 F3（max-cue-duration + 双 pass 引导）。
+按主人判断保持"语义切分"而非"硬时长强切"路线。无 schema 变更。
+
 ### Added
 
 - **`--max-cue-duration` 暴露到 `transcribe` 与 `reseg`**（F3）：透传到
