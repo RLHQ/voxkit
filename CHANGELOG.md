@@ -7,6 +7,17 @@ changes (with migration notes).
 
 ## [Unreleased]
 
+### Added
+
+- **`voxkit needs-review <workdir>` 子命令** — 列出 proofread / translate
+  artifact 中需要人工复核的 cue。默认过滤 `needsHumanReview=True` 或
+  `risk ∈ {high, blocking}`；支持 `--target <lang>`（读
+  `subtitles.<lang>.json`，缺失回落 `subtitles.proofread.json`）、
+  `--format text|json`、`--include-risk` 覆盖默认 risk 集合。read-only，
+  不写盘 / 不 lock workspace。stderr 写 `N cue(s) flagged out of M total`
+  summary，stdout 输出队列。回应下游反馈 U3：之前需要 `jq` 自己挖
+  `cues[] | select(.needsReview)`。
+
 ## [0.7.3] — 2026-05-26
 
 针对 v0.7.1 下游反馈的 P1 UX 改进（U2 / U4 / U6 / U7），全部是非破坏性
@@ -31,6 +42,8 @@ ergonomic 调整。无 schema 变更。
   env var 名 + default model；以后追加 provider 不用手动同步 help。
 - **U7：`--help` epilog 多了 --force 三档对应表**。让"reviewed 该用哪个 flag"
   这种问题 5 秒能查到，不必翻 CLAUDE.md。
+
+## [0.7.2] — 2026-05-26
 
 针对 v0.7.1 下游反馈（`code-with-claude/voxkit-feedback.md`）的 P0 4 项 bug
 全部修复 + code-review 暴露的 6 个补强一并搞定，无 schema 变更，下游 reader

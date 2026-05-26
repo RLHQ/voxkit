@@ -129,6 +129,10 @@ def _build_parser() -> argparse.ArgumentParser:
     from voxkit.commands import reseg
     reseg.add_subparser(sub)
 
+    # ── needs-review（列 proofread/translate 的 review 队列）─
+    from voxkit.commands import needs_review
+    needs_review.add_subparser(sub)
+
     return parser
 
 
@@ -176,6 +180,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.cmd == "reseg":
         from voxkit.commands.reseg import run as run_reseg
         return run_reseg(args)
+    if args.cmd == "needs-review":
+        from voxkit.commands.needs_review import run as run_needs_review
+        return run_needs_review(args)
 
     parser.error(f"未知子命令: {args.cmd}")
     return 1  # unreachable
