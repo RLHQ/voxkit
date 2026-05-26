@@ -7,6 +7,11 @@ changes (with migration notes).
 
 ## [Unreleased]
 
+## [0.7.4] — 2026-05-26
+
+3 个并行 sub-agent 一次性消化 v0.7.1 反馈剩下的 F2 / U1 / F4 / U3 4 项。每个
+agent 在独立 git worktree 跑，main 上顺序 cherry-pick。无 schema 变更。
+
 ### Added
 
 - **`voxkit needs-review <workdir>` 子命令** — 列出 proofread / translate
