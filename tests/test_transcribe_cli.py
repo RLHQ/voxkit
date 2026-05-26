@@ -271,6 +271,67 @@ def test_run_source_id_default_is_input_stem(tmp_path, monkeypatch):
     assert captured[0].source_id == "my-recording"
 
 
+# ── F3: --max-cue-duration parser + 透传 ───────────────────────────────────
+
+
+def test_max_cue_duration_default_is_none():
+    args = _parse()
+    assert args.max_cue_duration is None
+
+
+def test_max_cue_duration_parses_float():
+    args = _parse("--max-cue-duration", "5")
+    assert args.max_cue_duration == pytest.approx(5.0)
+
+
+def test_run_rejects_zero_max_cue_duration(tmp_path, monkeypatch, capsys):
+    inp = tmp_path / "x.mp4"
+    inp.write_bytes(b"fake")
+    captured = _patch_run_pipeline(monkeypatch)
+
+    parser = _build_parser()
+    args = parser.parse_args(
+        ["transcribe", str(inp), "--workdir", str(tmp_path / "ws"),
+         "--max-cue-duration", "0"]
+    )
+    rc = run(args)
+    assert rc == int(ExitCode.GENERIC_FAIL)
+    assert captured == []
+    assert "max-cue-duration" in capsys.readouterr().err
+
+
+def test_run_rejects_negative_max_cue_duration(tmp_path, monkeypatch, capsys):
+    inp = tmp_path / "x.mp4"
+    inp.write_bytes(b"fake")
+    captured = _patch_run_pipeline(monkeypatch)
+
+    parser = _build_parser()
+    args = parser.parse_args(
+        ["transcribe", str(inp), "--workdir", str(tmp_path / "ws"),
+         "--max-cue-duration", "-2"]
+    )
+    rc = run(args)
+    assert rc == int(ExitCode.GENERIC_FAIL)
+    assert captured == []
+    assert "max-cue-duration" in capsys.readouterr().err
+
+
+def test_run_invokes_pipeline_with_max_cue_duration(tmp_path, monkeypatch):
+    inp = tmp_path / "x.mp4"
+    inp.write_bytes(b"fake")
+    captured = _patch_run_pipeline(monkeypatch)
+
+    parser = _build_parser()
+    args = parser.parse_args(
+        ["transcribe", str(inp), "--workdir", str(tmp_path / "ws"),
+         "--max-cue-duration", "4.5"]
+    )
+    rc = run(args)
+    assert rc == int(ExitCode.OK)
+    req = captured[0]
+    assert req.max_cue_duration == pytest.approx(4.5)
+
+
 def test_run_explicit_source_id_wins(tmp_path, monkeypatch):
     """--source-id overrides the input-stem default."""
     inp = tmp_path / "x.wav"

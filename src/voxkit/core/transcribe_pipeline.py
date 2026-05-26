@@ -182,6 +182,11 @@ class TranscribeRequest:
     # 长度由 pipeline 在 run_pipeline 入口处做粗略 1000-char 截断（whisper-cli
     # 本身 ~224 token 上限，超出会被忽略后段），不在这里做。
     initial_prompt: str | None = None
+    # ── F3 — 字幕 cue 物理上限（秒）─────────────────────────────────
+    # 透传到 ResegmentParams.max_dur_s 作为 trigger 阈值——仍走语义切分，
+    # 仅放紧/放宽触发条件。None = 用 dataclass 默认值（当前 7.0s）。
+    # <=0 由 pipeline 拒绝。
+    max_cue_duration: float | None = None
 
 
 @dataclass(frozen=True)
@@ -1174,6 +1179,12 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
             cues_from_resegment = False
             resegment_params_snapshot: "dict | None" = None
             subtitle_metrics_snapshot: "dict | None" = None
+            # F3: defensive guard — CLI 层已 reject，pipeline 再守一道。
+            if req.max_cue_duration is not None and req.max_cue_duration <= 0:
+                raise PipelineError(
+                    "max_cue_duration must be > 0",
+                    exit_code=int(ExitCode.GENERIC_FAIL),
+                )
             if req.resegment == "semantic" and (req.emit_srt or req.emit_vtt):
                 try:
                     from dataclasses import asdict
@@ -1181,7 +1192,10 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                         ResegmentParams,
                         resegment_for_subtitles,
                     )
-                    rp = ResegmentParams()
+                    if req.max_cue_duration is not None:
+                        rp = ResegmentParams(max_dur_s=req.max_cue_duration)
+                    else:
+                        rp = ResegmentParams()
                     cues = resegment_for_subtitles(
                         remixr_t.segments,
                         language=language_for_output,
@@ -1308,6 +1322,51 @@ def run_pipeline(req: TranscribeRequest) -> TranscribeResult:
                 if subtitle_metrics_snapshot is not None
                 else None
             )
+
+            # F3: 超长 cue 检测 — whisper ASR 缺标点 → pysbd 切不出句子 →
+            # 残留单条 18s+ 挤 3 句话的 cue。检测到 max(cue.dur) > threshold
+            # × 1.5 时主动引导用户走双 pass workflow (proofread + reseg)。
+            # segment 模式没有 cue 概念，跳过。
+            if cues is not None and len(cues) > 0:
+                from voxkit.core.semantic_resegment import ResegmentParams
+                effective_max = (
+                    req.max_cue_duration
+                    if req.max_cue_duration is not None
+                    else ResegmentParams().max_dur_s
+                )
+                threshold = effective_max * 1.5
+                long_cues = [
+                    c for c in cues if (c.end - c.start) > threshold
+                ]
+                if long_cues:
+                    longest = max(c.end - c.start for c in long_cues)
+                    msg = (
+                        f"{len(long_cues)} cue(s) exceed soft duration limit "
+                        f"(longest {longest:.1f}s > max_cue_duration="
+                        f"{effective_max:.1f}s × 1.5)"
+                    )
+                    warnings.append(msg)
+                    voxkit_out.warnings.append(msg)
+                    # event mirror 永远写一份（post-mortem 用）；json_events
+                    # 模式同时转发 stderr。
+                    _emit_event(
+                        em,
+                        {
+                            "event": "long_cues_detected",
+                            "count": len(long_cues),
+                            "longestSecs": round(longest, 3),
+                            "thresholdSecs": round(threshold, 3),
+                        },
+                        forward_to_stderr=forward_stderr,
+                    )
+                    if not forward_stderr:
+                        sys.stderr.write(
+                            f"warning: {msg}.\n"
+                            f"whisper ASR often lacks sentence punctuation; "
+                            f"consider the two-pass workflow:\n"
+                            f"    voxkit proofread {ws.root}\n"
+                            f"    voxkit reseg {ws.root}\n"
+                        )
 
             # 10. Manifest (single source of truth for run audit)
             finished_iso = datetime.now(timezone.utc).isoformat()

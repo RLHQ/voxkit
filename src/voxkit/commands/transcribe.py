@@ -256,6 +256,19 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
             "与 --initial-prompt 互斥。文件必须 UTF-8 可读。"
         ),
     )
+    # F3: 暴露 ResegmentParams.max_dur_s（默认 7.0s）作为 trigger 阈值；
+    # 仍走语义切分，只是更早触发分句/拆 atom。<=0 reject。
+    p.add_argument(
+        "--max-cue-duration",
+        type=float,
+        default=None,
+        dest="max_cue_duration",
+        help=(
+            "字幕单条 cue 物理上限（秒；默认 7.0）。透传到 ResegmentParams.max_dur_s "
+            "作为语义切分的 trigger 阈值——仍语义切分，仅调紧/调松触发条件。"
+            "仅在 --resegment=semantic 时生效。"
+        ),
+    )
 
 
 def run(args: argparse.Namespace) -> int:
@@ -304,6 +317,11 @@ def run(args: argparse.Namespace) -> int:
         if value is not None and value <= 0:
             sys.stderr.write(f"error: --{name.replace('_', '-')} must be > 0\n")
             return int(ExitCode.GENERIC_FAIL)
+
+    # F3: --max-cue-duration 必须 > 0
+    if args.max_cue_duration is not None and args.max_cue_duration <= 0:
+        sys.stderr.write("error: --max-cue-duration must be > 0\n")
+        return int(ExitCode.GENERIC_FAIL)
 
     if (
         args.chunk_secs is not None
@@ -368,6 +386,7 @@ def run(args: argparse.Namespace) -> int:
         resegment=args.resegment,
         speaker_prefix=args.speaker_prefix,
         initial_prompt=initial_prompt,
+        max_cue_duration=args.max_cue_duration,
     )
 
     try:

@@ -804,6 +804,236 @@ def test_resegment_semantic_force_rerun_unlinks_cues_json(
     assert ws.cues_json_path.stat().st_ino != first_inode
 
 
+# ─────────────────────────────────────────────────────────────────────────
+# F3: --max-cue-duration 透传 + 超长 cue warning + 引导文案
+# ─────────────────────────────────────────────────────────────────────────
+
+
+def test_max_cue_duration_passes_through_to_resegment_params(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, patched_pipeline: dict[str, Any]
+) -> None:
+    """req.max_cue_duration → ResegmentParams(max_dur_s=…)，
+    透到 resegment_for_subtitles 的 params。"""
+    pytest.importorskip("pysbd")
+
+    captured: dict[str, Any] = {}
+    import voxkit.core.semantic_resegment as sem_mod
+    real_fn = sem_mod.resegment_for_subtitles
+
+    def fake_reseg(segments, *, language=None, params=None):
+        captured["max_dur_s"] = params.max_dur_s if params is not None else None
+        return real_fn(segments, language=language, params=params)
+
+    monkeypatch.setattr(sem_mod, "resegment_for_subtitles", fake_reseg)
+
+    ws = open_workspace(tmp_path / "ws")
+    req = replace(_make_request(ws), resegment="semantic", max_cue_duration=4.0)
+    run_pipeline(req)
+    assert captured["max_dur_s"] == pytest.approx(4.0)
+
+
+def test_max_cue_duration_default_uses_dataclass_default(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, patched_pipeline: dict[str, Any]
+) -> None:
+    """req.max_cue_duration=None → ResegmentParams() 默认 max_dur_s。"""
+    pytest.importorskip("pysbd")
+    from voxkit.core.semantic_resegment import ResegmentParams
+
+    captured: dict[str, Any] = {}
+    import voxkit.core.semantic_resegment as sem_mod
+    real_fn = sem_mod.resegment_for_subtitles
+
+    def fake_reseg(segments, *, language=None, params=None):
+        captured["max_dur_s"] = params.max_dur_s if params is not None else None
+        return real_fn(segments, language=language, params=params)
+
+    monkeypatch.setattr(sem_mod, "resegment_for_subtitles", fake_reseg)
+
+    ws = open_workspace(tmp_path / "ws")
+    req = replace(_make_request(ws), resegment="semantic")
+    assert req.max_cue_duration is None
+    run_pipeline(req)
+    assert captured["max_dur_s"] == pytest.approx(ResegmentParams().max_dur_s)
+
+
+def test_pipeline_rejects_nonpositive_max_cue_duration(
+    tmp_path: Path, patched_pipeline: dict[str, Any]
+) -> None:
+    """Defense in depth: pipeline 层也 reject <=0。"""
+    ws = open_workspace(tmp_path / "ws")
+    for bad in (0.0, -1.5):
+        sub_ws = open_workspace(tmp_path / f"ws_{bad}")
+        req = replace(
+            _make_request(sub_ws), resegment="semantic", max_cue_duration=bad
+        )
+        with pytest.raises(PipelineError) as exc_info:
+            run_pipeline(req)
+        assert "max_cue_duration" in str(exc_info.value)
+
+
+def test_long_cue_warning_recorded_when_cue_exceeds_threshold(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, patched_pipeline: dict[str, Any]
+) -> None:
+    """合成 cue 含 > max_dur_s × 1.5 的超长 cue → warnings 含
+    'exceed soft duration limit' 文案 + voxkit_out.warnings 同步。"""
+    pytest.importorskip("pysbd")
+
+    from voxkit.core.semantic_resegment import SubtitleCue
+    import voxkit.core.semantic_resegment as sem_mod
+
+    def fake_reseg(segments, *, language=None, params=None):
+        # 制造一条 12s cue（> 7 × 1.5 = 10.5s）
+        return [
+            SubtitleCue(start=0.0, end=12.0, speaker="Speaker A", text="long one"),
+            SubtitleCue(start=12.0, end=14.0, speaker="Speaker A", text="ok"),
+        ]
+
+    monkeypatch.setattr(sem_mod, "resegment_for_subtitles", fake_reseg)
+
+    ws = open_workspace(tmp_path / "ws")
+    req = replace(_make_request(ws), resegment="semantic")
+    result = run_pipeline(req)
+
+    assert any(
+        "exceed soft duration limit" in w for w in result.voxkit_output.warnings
+    ), result.voxkit_output.warnings
+    # manifest warnings 也同步
+    manifest = json.loads(ws.manifest_path.read_text(encoding="utf-8"))
+    assert any(
+        "exceed soft duration limit" in w for w in manifest["warnings"]
+    )
+
+
+def test_long_cue_warning_stderr_guidance_non_json_events(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    patched_pipeline: dict[str, Any],
+) -> None:
+    """普通模式（非 json_events）→ stderr 输出引导文案
+    （proofread + reseg 双 pass workflow）。"""
+    pytest.importorskip("pysbd")
+
+    from voxkit.core.semantic_resegment import SubtitleCue
+    import voxkit.core.semantic_resegment as sem_mod
+
+    def fake_reseg(segments, *, language=None, params=None):
+        return [SubtitleCue(start=0.0, end=12.0, speaker="Speaker A", text="x")]
+
+    monkeypatch.setattr(sem_mod, "resegment_for_subtitles", fake_reseg)
+
+    ws = open_workspace(tmp_path / "ws")
+    req = replace(_make_request(ws, json_events=False), resegment="semantic")
+    run_pipeline(req)
+
+    err = capsys.readouterr().err
+    assert "exceed soft duration limit" in err
+    assert "voxkit proofread" in err
+    assert "voxkit reseg" in err
+
+
+def test_long_cue_json_events_emits_event(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    patched_pipeline: dict[str, Any],
+) -> None:
+    """json_events 模式 → 发 long_cues_detected NDJSON 事件 + events.ndjson 镜像。"""
+    pytest.importorskip("pysbd")
+
+    from voxkit.core.semantic_resegment import SubtitleCue
+    import voxkit.core.semantic_resegment as sem_mod
+
+    def fake_reseg(segments, *, language=None, params=None):
+        return [
+            SubtitleCue(start=0.0, end=12.0, speaker="Speaker A", text="x"),
+            SubtitleCue(start=12.0, end=24.0, speaker="Speaker A", text="y"),
+        ]
+
+    monkeypatch.setattr(sem_mod, "resegment_for_subtitles", fake_reseg)
+
+    ws = open_workspace(tmp_path / "ws")
+    req = replace(_make_request(ws, json_events=True), resegment="semantic")
+    run_pipeline(req)
+
+    # events.ndjson 镜像必须有事件
+    events = [
+        json.loads(line)
+        for line in ws.events_path.read_text(encoding="utf-8").splitlines()
+        if line
+    ]
+    long_events = [e for e in events if e.get("event") == "long_cues_detected"]
+    assert len(long_events) == 1
+    evt = long_events[0]
+    assert evt["count"] == 2
+    assert evt["longestSecs"] == pytest.approx(12.0)
+    # threshold = ResegmentParams().max_dur_s * 1.5 = 7.0 * 1.5 = 10.5
+    assert evt["thresholdSecs"] == pytest.approx(10.5)
+
+    # stderr 也得有同样的 NDJSON 行（json_events 模式 forward）
+    err_lines = [
+        line for line in capsys.readouterr().err.splitlines() if line.strip()
+    ]
+    parsed = []
+    for line in err_lines:
+        try:
+            parsed.append(json.loads(line))
+        except json.JSONDecodeError:
+            pass
+    assert any(p.get("event") == "long_cues_detected" for p in parsed)
+
+
+def test_no_long_cue_warning_when_all_under_threshold(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, patched_pipeline: dict[str, Any]
+) -> None:
+    """所有 cue dur <= threshold → 不产生 warning。"""
+    pytest.importorskip("pysbd")
+
+    from voxkit.core.semantic_resegment import SubtitleCue
+    import voxkit.core.semantic_resegment as sem_mod
+
+    def fake_reseg(segments, *, language=None, params=None):
+        return [
+            SubtitleCue(start=0.0, end=5.0, speaker="Speaker A", text="ok1"),
+            SubtitleCue(start=5.0, end=9.0, speaker="Speaker A", text="ok2"),
+        ]
+
+    monkeypatch.setattr(sem_mod, "resegment_for_subtitles", fake_reseg)
+
+    ws = open_workspace(tmp_path / "ws")
+    req = replace(_make_request(ws), resegment="semantic")
+    result = run_pipeline(req)
+    assert not any(
+        "exceed soft duration limit" in w for w in result.voxkit_output.warnings
+    )
+
+
+def test_long_cue_threshold_scales_with_user_max_cue_duration(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, patched_pipeline: dict[str, Any]
+) -> None:
+    """用户传 --max-cue-duration 5 → threshold = 5 × 1.5 = 7.5s。
+    cue.dur=8s 触发 warning（默认 7×1.5=10.5 不触发）。"""
+    pytest.importorskip("pysbd")
+
+    from voxkit.core.semantic_resegment import SubtitleCue
+    import voxkit.core.semantic_resegment as sem_mod
+
+    def fake_reseg(segments, *, language=None, params=None):
+        return [SubtitleCue(start=0.0, end=8.0, speaker="Speaker A", text="x")]
+
+    monkeypatch.setattr(sem_mod, "resegment_for_subtitles", fake_reseg)
+
+    ws = open_workspace(tmp_path / "ws")
+    req = replace(_make_request(ws), resegment="semantic", max_cue_duration=5.0)
+    result = run_pipeline(req)
+    assert any(
+        "exceed soft duration limit" in w for w in result.voxkit_output.warnings
+    )
+    assert any(
+        "max_cue_duration=5.0" in w for w in result.voxkit_output.warnings
+    )
+
+
 def test_resegment_semantic_emits_write_event(
     tmp_path: Path, patched_pipeline: dict[str, Any]
 ) -> None:

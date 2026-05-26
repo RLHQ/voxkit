@@ -28,6 +28,7 @@ from pathlib import Path
 from typing import Any
 
 from voxkit.core.semantic_resegment import (
+    ResegmentParams,
     SubtitleCue,
     resegment_for_subtitles,
 )
@@ -74,6 +75,17 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
         action="store_true",
         help="覆盖已存在的 subtitles.cues.reseg2.json",
     )
+    # F3: 暴露 ResegmentParams.max_dur_s 作为 trigger 阈值（仍语义切分）。
+    p.add_argument(
+        "--max-cue-duration",
+        type=float,
+        default=None,
+        dest="max_cue_duration",
+        help=(
+            "字幕单条 cue 物理上限（秒；默认 7.0）。透传到 ResegmentParams.max_dur_s "
+            "作为语义切分 trigger 阈值——仍语义切分，仅调紧/调松触发条件。"
+        ),
+    )
     p.set_defaults(func=run)
 
 
@@ -81,6 +93,12 @@ def run(args: argparse.Namespace) -> int:
     workdir = Path(args.workdir)
     if not workdir.is_dir():
         sys.stderr.write(f"error: workdir not a directory: {workdir}\n")
+        return 2
+
+    # F3: --max-cue-duration 必须 > 0
+    max_cue_duration = getattr(args, "max_cue_duration", None)
+    if max_cue_duration is not None and max_cue_duration <= 0:
+        sys.stderr.write("error: --max-cue-duration must be > 0\n")
         return 2
 
     proof_path = workdir / "subtitles.proofread.json"
@@ -114,9 +132,28 @@ def run(args: argparse.Namespace) -> int:
         for i, c in enumerate(doc.get("cues") or [], 1)
     ]
 
+    if max_cue_duration is not None:
+        params = ResegmentParams(max_dur_s=max_cue_duration)
+    else:
+        params = ResegmentParams()
     new_cues: list[SubtitleCue] = resegment_for_subtitles(
-        segments, language=language
+        segments, language=language, params=params
     )
+
+    # F3: reseg 后还残留超长 cue → 提示用户调紧 --max-cue-duration 或检查
+    # proofread 标点质量（不像 transcribe 推荐再跑 proofread，因为
+    # reseg 本来就是双 pass 的第二步）。
+    threshold = params.max_dur_s * 1.5
+    long_cues = [c for c in new_cues if (c.end - c.start) > threshold]
+    if long_cues:
+        longest = max(c.end - c.start for c in long_cues)
+        sys.stderr.write(
+            f"warning: {len(long_cues)} cue(s) exceed soft duration limit "
+            f"(longest {longest:.1f}s > max_cue_duration="
+            f"{params.max_dur_s:.1f}s × 1.5).\n"
+            f"consider --max-cue-duration <smaller value> to tighten the "
+            f"trigger, or re-check the proofread punctuation quality.\n"
+        )
 
     out_doc = {
         "schemaVersion": 2,
@@ -126,6 +163,7 @@ def run(args: argparse.Namespace) -> int:
             "basedOn": "subtitles.proofread.json",
             "inputCueCount": len(segments),
             "outputCueCount": len(new_cues),
+            "maxDurS": params.max_dur_s,
         },
         "cues": [
             {

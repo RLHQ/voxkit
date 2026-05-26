@@ -50,6 +50,7 @@ def _ns(**kwargs: Any) -> argparse.Namespace:
             "language": None,
             "emit_srt": True,
             "force": False,
+            "max_cue_duration": None,
             **kwargs,
         }
     )
@@ -166,6 +167,83 @@ def test_reseg_force_overwrites(tmp_path: Path) -> None:
     assert run_reseg(_ns(workdir=str(tmp_path))) == 0
     # --force 强制覆盖
     assert run_reseg(_ns(workdir=str(tmp_path), force=True)) == 0
+
+
+# ── F3: --max-cue-duration 透传 ──────────────────────────────────────────────
+
+
+def test_reseg_max_cue_duration_passes_through_to_params(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """--max-cue-duration 透传到 ResegmentParams.max_dur_s。"""
+    captured: Dict[str, Any] = {}
+
+    import voxkit.commands.reseg as reseg_mod
+
+    real_reseg = reseg_mod.resegment_for_subtitles
+
+    def fake_reseg(segments, *, language=None, params=None):
+        captured["max_dur_s"] = params.max_dur_s if params is not None else None
+        return real_reseg(segments, language=language, params=params)
+
+    monkeypatch.setattr(reseg_mod, "resegment_for_subtitles", fake_reseg)
+    (tmp_path / "subtitles.proofread.json").write_text(
+        json.dumps(_proof_doc([_proof_cue("c1", 0.0, 2.0, "测试。")])),
+        encoding="utf-8",
+    )
+    rc = run_reseg(_ns(workdir=str(tmp_path), max_cue_duration=4.5))
+    assert rc == 0
+    assert captured["max_dur_s"] == pytest.approx(4.5)
+    # params 也镜像到 out_doc["params"]["maxDurS"]
+    out = json.loads(
+        (tmp_path / "subtitles.cues.reseg2.json").read_text(encoding="utf-8")
+    )
+    assert out["params"]["maxDurS"] == pytest.approx(4.5)
+
+
+def test_reseg_default_max_cue_duration_is_dataclass_default(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """不传 --max-cue-duration → ResegmentParams() 的默认值（7.0s）。"""
+    from voxkit.core.semantic_resegment import ResegmentParams
+    captured: Dict[str, Any] = {}
+
+    import voxkit.commands.reseg as reseg_mod
+
+    real_reseg = reseg_mod.resegment_for_subtitles
+
+    def fake_reseg(segments, *, language=None, params=None):
+        captured["max_dur_s"] = params.max_dur_s if params is not None else None
+        return real_reseg(segments, language=language, params=params)
+
+    monkeypatch.setattr(reseg_mod, "resegment_for_subtitles", fake_reseg)
+    (tmp_path / "subtitles.proofread.json").write_text(
+        json.dumps(_proof_doc([_proof_cue("c1", 0.0, 2.0, "测试。")])),
+        encoding="utf-8",
+    )
+    rc = run_reseg(_ns(workdir=str(tmp_path)))
+    assert rc == 0
+    assert captured["max_dur_s"] == pytest.approx(ResegmentParams().max_dur_s)
+
+
+def test_reseg_rejects_nonpositive_max_cue_duration(tmp_path: Path, capsys) -> None:
+    """--max-cue-duration <= 0 必须 reject，不写出 reseg2.json。"""
+    (tmp_path / "subtitles.proofread.json").write_text(
+        json.dumps(_proof_doc([_proof_cue("c1", 0.0, 2.0, "测试。")])),
+        encoding="utf-8",
+    )
+    for bad in (0.0, -1.0):
+        # 每次创建新 workdir 避免 reseg2.json 残留
+        sub = tmp_path / f"wd_{bad}"
+        sub.mkdir()
+        (sub / "subtitles.proofread.json").write_text(
+            json.dumps(_proof_doc([_proof_cue("c1", 0.0, 2.0, "测试。")])),
+            encoding="utf-8",
+        )
+        rc = run_reseg(_ns(workdir=str(sub), max_cue_duration=bad))
+        assert rc != 0
+        assert "max-cue-duration" in capsys.readouterr().err
+        assert not (sub / "subtitles.cues.reseg2.json").exists()
 
 
 # ── eval_metrics fallback ───────────────────────────────────────────────────

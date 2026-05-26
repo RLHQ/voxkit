@@ -7,6 +7,23 @@ changes (with migration notes).
 
 ## [Unreleased]
 
+### Added
+
+- **`--max-cue-duration` 暴露到 `transcribe` 与 `reseg`**（F3）：透传到
+  `ResegmentParams.max_dur_s` 作为语义切分的 trigger 阈值——仍走语义切分，
+  仅调紧/调松触发条件，不走硬性时长强切。`<=0` 由 CLI + pipeline 双层 reject。
+  默认沿用 `ResegmentParams()` 的 `7.0s`。
+- **超长 cue 双 pass 引导**（F3）：transcribe / reseg 渲染完 cue 后检测
+  `max(cue.dur) > max_cue_duration × 1.5`：
+  - 普通模式 stderr 输出引导文案（`transcribe` 推荐 `voxkit proofread` +
+    `voxkit reseg` 双 pass workflow；`reseg` 推荐调紧 `--max-cue-duration`
+    或检查 proofread 标点质量）。
+  - `--json-events` 模式发 `long_cues_detected` NDJSON 事件（`count` /
+    `longestSecs` / `thresholdSecs`），同时镜像写入 `events.ndjson`。
+  - warning 文案进入 `voxkit_out.warnings` 与 manifest `warnings`。
+  - 阈值 = `max_cue_duration × 1.5`（与切分算法内的 `_HARD_DUR_RATIO=1.2`
+    刻意区分；这里是用户提示阈值，那里是算法硬上限）。
+
 ## [0.7.4] — 2026-05-26
 
 3 个并行 sub-agent 一次性消化 v0.7.1 反馈剩下的 F2 / U1 / F4 / U3 4 项。每个
