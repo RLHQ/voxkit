@@ -26,6 +26,41 @@ voxkit 把音频/视频里的语音处理成结构化、可消费的数据：转
 > v0.3.0 起加入 `transcribe`，定位升格为 toolkit，故改名 voxkit。
 > 旧用户的迁移见 [v0.2.x → v0.3.0 迁移](#v02x--v030-迁移)。
 
+## Quick start — 一份双语字幕完整流水线
+
+直接复制粘贴；4 条命令把 mp4 / mp3 跑成英文校对 + 中文翻译 + 质量报告。
+需要 `DEEPSEEK_API_KEY` 环境变量（或换其它 provider）。
+
+```bash
+voxkit transcribe video.mp4 --workdir vk/ --language en --resegment=semantic
+voxkit proofread vk/ --language en --glossary glossary.json
+voxkit translate vk/ --target-language zh --glossary glossary.json
+voxkit quality vk/                                              # 质量报告
+```
+
+每步产物：
+
+| 文件 | 来自 | 内容 |
+|---|---|---|
+| `vk/subtitles.cues.json` | `transcribe --resegment=semantic` | 语义切分后的 cue 流（id + start/end + text） |
+| `vk/subtitles.srt` / `.vtt` | `transcribe` | 英文字幕 |
+| `vk/subtitles.proofread.json` | `proofread` | LLM 校对后的 cue（含 corrected / risk / needsHumanReview） |
+| `vk/subtitles.zh.json` / `.zh.srt` / `.zh.vtt` | `translate` | 中文翻译产物 |
+| `vk/quality.report.json` | `quality` | 字幕覆盖率 / CPS / 标点 / over-char 等指标聚合 |
+
+**常用增量命令**：
+
+```bash
+voxkit needs-review vk/                                         # 列待人工 review 的 cue
+voxkit reseg vk/                                                # 双 pass：用 corrected 的标点重切
+voxkit translate vk/ --target-language zh --dry-run             # 跑前算 token / cost，不调 LLM
+voxkit translate vk/ --target-language zh --render-only \
+  --speaker-prefix never                                        # 改字幕格式但不重花 LLM token
+voxkit review confirm vk/                                       # 锁 proofread 为 reviewed
+```
+
+完整版本变化和新 flag 见 [CHANGELOG.md](./CHANGELOG.md)。安装与依赖见下面 "安装" 节。
+
 ## 子命令
 
 | 命令 | 用途 |
@@ -35,6 +70,13 @@ voxkit 把音频/视频里的语音处理成结构化、可消费的数据：转
 | `voxkit transcribe` | ★ whisper.cpp 转录 → `transcript.raw.json` + SRT/VTT；可选说话人注入与语义字幕重切 |
 | `voxkit diarize` | pyannote 说话人切分 → `DiarizationOutput` JSON |
 | `voxkit align` | transcript + diarization → 带 Speaker N 的 SRT |
+| `voxkit proofread` | LLM 校对 `subtitles.cues.json` → `subtitles.proofread.json` |
+| `voxkit translate` | LLM 翻译 → `subtitles.<lang>.json` + SRT/VTT |
+| `voxkit reseg` | 用 corrected 标点再切一次（双 pass） |
+| `voxkit quality` | 字幕质量报告（cue 覆盖 / CPS / 标点等） |
+| `voxkit needs-review` | 列出 proofread / translate artifact 中需要人工复核的 cue |
+| `voxkit review` | confirm / lock subtitle artifact 生命周期 |
+| `voxkit eval` | 对照人类金标 SRT 评估 reseg 质量 |
 | `voxkit build-bundle` | 打包模型为 tar.gz（4 个 pyannote HF repo + silero VAD） |
 | `voxkit fetch-bundle` | 从 GitHub Release 拉模型 bundle |
 
