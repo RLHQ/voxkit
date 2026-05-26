@@ -870,6 +870,13 @@ def run_translate(
                             "batchIndex": batch.index,
                             "cached": True,
                         }, to_stderr=req.json_events)
+                        if not req.json_events:
+                            sys.stderr.write(
+                                f"translate {req.target_language}: batch "
+                                f"{batch.index + 1}/{len(batches)} done "
+                                f"({len(all_out)}/{len(src_cues)} cues) [cache hit]\n"
+                            )
+                            sys.stderr.flush()
                         continue
 
                     user_obj = {
@@ -952,6 +959,14 @@ def run_translate(
                         "promptTokens": br.prompt_tokens,
                         "completionTokens": br.completion_tokens,
                     }, to_stderr=req.json_events)
+                    if not req.json_events:
+                        sys.stderr.write(
+                            f"translate {req.target_language}: batch "
+                            f"{batch.index + 1}/{len(batches)} done "
+                            f"({len(all_out)}/{len(src_cues)} cues, "
+                            f"+{br.prompt_tokens + br.completion_tokens} tokens)\n"
+                        )
+                        sys.stderr.flush()
             finally:
                 if owns_client:
                     client.close()

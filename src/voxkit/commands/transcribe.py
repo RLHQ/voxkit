@@ -341,11 +341,26 @@ def run(args: argparse.Namespace) -> int:
         sys.stderr.write(f"error: unexpected pipeline failure: {exc}\n")
         return int(ExitCode.GENERIC_FAIL)
 
-    # 6. Success summary
+    # 6. Success summary + next-step hints（json_events 模式下跳过：NDJSON
+    # consumer 不需要人类可读的导览）
     sys.stderr.write(
         f"transcribe complete: {len(result.voxkit_output.segments)} segments, "
         f"RTF={result.rtf:.3f}, elapsed={result.elapsed_secs:.1f}s\n"
     )
+    if not args.json_events:
+        next_hints = [
+            f"  voxkit quality {ws.root}            # 质量报告 (cue 覆盖/CPS/标点)",
+        ]
+        if args.resegment == "semantic":
+            next_hints.extend([
+                f"  voxkit proofread {ws.root}          # LLM 校对 / 加标点",
+                f"  voxkit translate {ws.root} --target-language zh  # 翻译",
+            ])
+        else:
+            next_hints.append(
+                "  # tip: 想跑 proofread / translate 先加 --resegment=semantic"
+            )
+        sys.stderr.write("next steps:\n" + "\n".join(next_hints) + "\n")
     return int(ExitCode.OK)
 
 

@@ -22,6 +22,7 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
+import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -537,9 +538,33 @@ def _write_pending_marker(
 def _emit(em: EventMirror, payload: Dict[str, Any], *, to_stderr: bool) -> None:
     em.emit(payload)
     if to_stderr:
-        import sys
         sys.stderr.write(json.dumps(payload, ensure_ascii=False) + "\n")
         sys.stderr.flush()
+
+
+def _human_progress(
+    *,
+    kind: str,
+    batch_index: int,
+    batch_total: int,
+    cues_done: int,
+    cues_total: int,
+    changed_count: int,
+    cached: bool,
+) -> str:
+    """单 batch.done 的人类可读进度行；用于非 json_events 模式（v0.7.x 反馈 U2）。
+
+    json_events 模式下下游已经在消费 NDJSON 事件流，这一行会重复且污染管道，
+    所以 caller 必须自己 gate（``if not req.json_events``）。
+    """
+    pct_done = (cues_done / max(1, cues_total)) * 100
+    pct_changed = (changed_count / max(1, cues_done)) * 100
+    suffix = " [cache hit]" if cached else ""
+    return (
+        f"{kind}: batch {batch_index + 1}/{batch_total} done"
+        f" ({cues_done}/{cues_total} cues, {pct_done:.0f}%; "
+        f"{pct_changed:.0f}% changed so far){suffix}"
+    )
 
 
 def run_proofread(
@@ -689,6 +714,20 @@ def run_proofread(
                             "batchIndex": batch.index,
                             "cached": True,
                         }, to_stderr=req.json_events)
+                        if not req.json_events:
+                            sys.stderr.write(_human_progress(
+                                kind="proofread",
+                                batch_index=batch.index,
+                                batch_total=len(batches),
+                                cues_done=len(all_out),
+                                cues_total=len(cues_doc.cues),
+                                changed_count=sum(
+                                    1 for c in all_out
+                                    if c.corrected_text != c.source_text
+                                ),
+                                cached=True,
+                            ) + "\n")
+                            sys.stderr.flush()
                         continue
 
                     # 构造用户消息
@@ -780,6 +819,20 @@ def run_proofread(
                         "promptTokens": br.prompt_tokens,
                         "completionTokens": br.completion_tokens,
                     }, to_stderr=req.json_events)
+                    if not req.json_events:
+                        sys.stderr.write(_human_progress(
+                            kind="proofread",
+                            batch_index=batch.index,
+                            batch_total=len(batches),
+                            cues_done=len(all_out),
+                            cues_total=len(cues_doc.cues),
+                            changed_count=sum(
+                                1 for c in all_out
+                                if c.corrected_text != c.source_text
+                            ),
+                            cached=False,
+                        ) + "\n")
+                        sys.stderr.flush()
             finally:
                 if owns_client:
                     client.close()

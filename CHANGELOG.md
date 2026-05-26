@@ -7,7 +7,30 @@ changes (with migration notes).
 
 ## [Unreleased]
 
-## [0.7.2] — 2026-05-26
+## [0.7.3] — 2026-05-26
+
+针对 v0.7.1 下游反馈的 P1 UX 改进（U2 / U4 / U6 / U7），全部是非破坏性
+ergonomic 调整。无 schema 变更。
+
+### Added
+
+- **U2：proofread / translate 普通模式下输出 per-batch 进度行**。每个
+  batch.done 写一行 "proofread: batch 12/45 done (480/1820 cues, 26%; 9%
+  changed so far) [cache hit]"。json_events 模式下不打（NDJSON 已覆盖）。
+- **U4：4 个核心命令完成后输出 "next steps:" 导览**。
+  - `voxkit transcribe`：提示 `quality`，以及（带 `--resegment=semantic` 时）
+    `proofread` / `translate`。
+  - `voxkit proofread`：提示 `reseg` 双 pass、`translate`、`quality`、
+    `review confirm`。
+  - `voxkit translate`：提示 `quality`、`--render-only --speaker-prefix`、
+    `review confirm --target`。
+  - `voxkit reseg`：提示 `quality`、`translate`、`eval`。
+  - json_events 模式跳过。
+- **U6：proofread / translate `--help` epilog 列出 LLM provider 注册表**。
+  从 `voxkit.llm.providers.PROVIDERS` 自动渲染（当前只 `deepseek`），含
+  env var 名 + default model；以后追加 provider 不用手动同步 help。
+- **U7：`--help` epilog 多了 --force 三档对应表**。让"reviewed 该用哪个 flag"
+  这种问题 5 秒能查到，不必翻 CLAUDE.md。
 
 针对 v0.7.1 下游反馈（`code-with-claude/voxkit-feedback.md`）的 P0 4 项 bug
 全部修复 + code-review 暴露的 6 个补强一并搞定，无 schema 变更，下游 reader

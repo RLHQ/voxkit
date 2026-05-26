@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "voxkit"
-version = "0.7.2"
+version = "0.7.3"
 description = "Speech-to-structured-data CLI for transcripts, subtitles, speaker labels, and Remixr-compatible JSON"
 requires-python = ">=3.10"
 authors = [{ name = "xsharp" }]

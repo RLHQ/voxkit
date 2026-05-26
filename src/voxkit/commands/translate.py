@@ -12,12 +12,31 @@ from voxkit.llm.errors import LLMError
 
 
 def add_subparser(sub: argparse._SubParsersAction) -> None:
+    from voxkit.llm.providers import PROVIDERS as _LLM_PROVIDERS
+
+    provider_lines = "\n".join(
+        f"    {name}: env={spec.api_key_env}, default_model={spec.default_model}"
+        for name, spec in sorted(_LLM_PROVIDERS.items())
+    )
+    epilog = (
+        "支持的 LLM provider（OpenAI-compatible 协议统一调用，credential 走 env）：\n"
+        f"{provider_lines}\n\n"
+        "--force 三档对应表（gate_force_overwrite 拒覆盖逻辑）：\n"
+        "    artifact state    使用的 flag                  说明\n"
+        "    (不存在)          (任意)                       直通\n"
+        "    draft             --force                      覆盖 draft\n"
+        "    reviewed          --force-reviewed             覆盖 reviewed（隐含 --force）\n"
+        "    final             --force-final                覆盖 final（销毁人工 lock）\n\n"
+        "想换 --speaker-prefix 但不重花 LLM token：加 --render-only。\n"
+    )
     p = sub.add_parser(
         "translate",
         help=(
             "把字幕翻译到目标语言。输入优先 subtitles.proofread.json，缺失回落 "
             "subtitles.cues.json。需要 DEEPSEEK_API_KEY 或对应 provider key"
         ),
+        epilog=epilog,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     p.add_argument("workdir", help="voxkit transcribe 的 workdir")
     p.add_argument("--target-language", required=True, help="目标语言代码，例如 en / zh / ja")
@@ -38,7 +57,15 @@ def add_subparser(sub: argparse._SubParsersAction) -> None:
         default="preserve",
         help="长度策略（默认 preserve；subtitle-fit 会要求模型主动压缩长度）",
     )
-    p.add_argument("--provider", default="deepseek", help="LLM provider 名（默认 deepseek）")
+    p.add_argument(
+        "--provider",
+        default="deepseek",
+        help=(
+            "LLM provider 名（默认 deepseek）。"
+            "当前注册：" + ", ".join(sorted(_LLM_PROVIDERS.keys())) +
+            "；具体 env var 见 --help epilog"
+        ),
+    )
     p.add_argument("--model", default=None, help="覆盖 provider 默认 model")
     p.add_argument("--glossary", default=None, help="可选 glossary.json 路径")
     p.add_argument("--max-input-tokens", type=int, default=6000)
@@ -141,10 +168,25 @@ def run(args: argparse.Namespace) -> int:
         return 4
 
     if not args.json_events:
-        sys.stderr.write(
-            f"translate {args.target_language} done: "
-            f"overChar={summary.get('overCharLimitRate', 0):.0%}, "
-            f"glossaryMiss={summary.get('glossaryMissRate', 0):.0%}, "
-            f"{summary.get('promptTokens', 0)} + {summary.get('completionTokens', 0)} tokens\n"
-        )
+        if summary.get("renderOnly"):
+            sys.stderr.write(
+                f"translate {args.target_language} re-render done: "
+                f"{summary.get('cueCount', 0)} cues, "
+                f"speaker-prefix={summary.get('speakerPrefix')!r} (no LLM)\n"
+            )
+        else:
+            sys.stderr.write(
+                f"translate {args.target_language} done: "
+                f"overChar={summary.get('overCharLimitRate', 0):.0%}, "
+                f"glossaryMiss={summary.get('glossaryMissRate', 0):.0%}, "
+                f"{summary.get('promptTokens', 0)} + {summary.get('completionTokens', 0)} tokens\n"
+            )
+            wd = args.workdir
+            tgt = args.target_language
+            sys.stderr.write(
+                "next steps:\n"
+                f"  voxkit quality {wd}                                       # 质量报告\n"
+                f"  voxkit translate {wd} --target-language {tgt} --render-only --speaker-prefix never  # 改前缀不重 LLM\n"
+                f"  voxkit review confirm {wd} --target {tgt}                # 人工 confirm → 锁 reviewed\n"
+            )
     return 0

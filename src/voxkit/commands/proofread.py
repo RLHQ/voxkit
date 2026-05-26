@@ -16,15 +16,43 @@ from voxkit.llm.errors import LLMError
 
 
 def add_subparser(sub: argparse._SubParsersAction) -> None:
+    from voxkit.llm.providers import PROVIDERS as _LLM_PROVIDERS
+
+    provider_lines = "\n".join(
+        f"    {name}: env={spec.api_key_env}, default_model={spec.default_model}"
+        for name, spec in sorted(_LLM_PROVIDERS.items())
+    )
+    epilog = (
+        "支持的 LLM provider（OpenAI-compatible 协议统一调用，credential 走 env）：\n"
+        f"{provider_lines}\n\n"
+        "--force 三档对应表（gate_force_overwrite 拒覆盖逻辑）：\n"
+        "    artifact state    使用的 flag                  说明\n"
+        "    (不存在)          (任意)                       直通\n"
+        "    draft             --force                      覆盖 draft\n"
+        "    reviewed          --force-reviewed             覆盖 reviewed（隐含 --force）\n"
+        "    final             --force-final                覆盖 final（销毁人工 lock）\n"
+        "改 glossary 后 cache 会因 glossaryHash 变化而失效，仍需对应 --force-*\n"
+        "通过 gate（artifact 文件本身存在）。\n"
+    )
     p = sub.add_parser(
         "proofread",
         help=(
             "对 subtitles.cues.json 跑 LLM 校对，产出 subtitles.proofread.json "
             "(state=draft)。需要环境变量 DEEPSEEK_API_KEY 或对应 provider 的 key"
         ),
+        epilog=epilog,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     p.add_argument("workdir", help="voxkit transcribe 的 workdir（含 subtitles.cues.json）")
-    p.add_argument("--provider", default="deepseek", help="LLM provider 名（默认 deepseek）")
+    p.add_argument(
+        "--provider",
+        default="deepseek",
+        help=(
+            "LLM provider 名（默认 deepseek）。"
+            "当前注册：" + ", ".join(sorted(_LLM_PROVIDERS.keys())) +
+            "；具体 env var 见 --help epilog"
+        ),
+    )
     p.add_argument("--model", default=None, help="覆盖 provider 默认 model")
     p.add_argument(
         "--language",
@@ -123,5 +151,13 @@ def run(args: argparse.Namespace) -> int:
             f"proofread done: cues={summary.get('changedCueRate', 0):.0%} changed, "
             f"{summary.get('reviewCueRate', 0):.0%} need review, "
             f"{summary.get('promptTokens', 0)} + {summary.get('completionTokens', 0)} tokens\n"
+        )
+        wd = args.workdir
+        sys.stderr.write(
+            "next steps:\n"
+            f"  voxkit reseg {wd}                          # 双 pass：用 corrected 标点再切（推荐）\n"
+            f"  voxkit translate {wd} --target-language zh # 翻译\n"
+            f"  voxkit quality {wd}                        # 质量报告\n"
+            f"  voxkit review confirm {wd}                 # 人工 confirm → 锁 reviewed\n"
         )
     return 0

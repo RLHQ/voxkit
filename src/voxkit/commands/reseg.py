@@ -157,4 +157,10 @@ def run(args: argparse.Namespace) -> int:
         f"  → {out_path}\n"
         + (f"  → {workdir / 'subtitles.reseg2.srt'}\n" if args.emit_srt else "")
     )
+    sys.stderr.write(
+        "next steps:\n"
+        f"  voxkit quality {workdir}             # 质量报告 (会优先读 reseg2)\n"
+        f"  voxkit translate {workdir} --target-language zh  # 翻译（仍读 proofread，cue 时间不变）\n"
+        f"  voxkit eval {workdir} --reference ref.json  # 对照金标 (有 ref 时)\n"
+    )
     return 0
